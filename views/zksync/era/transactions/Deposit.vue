@@ -128,7 +128,7 @@
 
       <EthereumTransactionFooter>
         <template #after-checks>
-          <CommonButtonTopInfo>Arriving in ~15 minutes</CommonButtonTopInfo>
+          <CommonButtonTopInfo v-if="!isCustomNode">Arriving in ~15 minutes</CommonButtonTopInfo>
           <CommonButton
             type="submit"
             :disabled="continueButtonDisabled"
@@ -155,6 +155,7 @@ import EthereumTransactionFooter from "@/components/transaction/EthereumTransact
 import ConfirmTransactionModal from "@/components/transaction/zksync/era/deposit/ConfirmTransactionModal.vue";
 
 import useAllowance from "@/composables/transaction/useAllowance";
+import useNetworks from "@/composables/useNetworks";
 import useFee from "@/composables/zksync/era/deposit/useFee";
 
 import type { ConfirmationModalTransaction } from "@/components/transaction/zksync/era/deposit/ConfirmTransactionModal.vue";
@@ -193,6 +194,7 @@ const { eraNetwork } = storeToRefs(eraProviderStore);
 const { destinations } = storeToRefs(useDestinationsStore());
 const { tokens, tokensRequestInProgress, tokensRequestError } = storeToRefs(eraTokensStore);
 const { balance, balanceInProgress, allBalancePricesLoaded, balanceError } = storeToRefs(eraEthereumBalance);
+const { isCustomNode } = useNetworks();
 
 const destination = computed(() => destinations.value.era);
 

@@ -83,7 +83,12 @@
 
       <EraTransactionFooter :authorization="false" :account-activation="false">
         <template #after-checks>
-          <CommonButtonTopLink v-if="type === 'withdrawal'" as="a" :href="ERA_WITHDRAWAL_DELAY" target="_blank">
+          <CommonButtonTopLink
+            v-if="type === 'withdrawal' && !isCustomNode"
+            as="a"
+            :href="ERA_WITHDRAWAL_DELAY"
+            target="_blank"
+          >
             Arriving in ~24 hours
             <ArrowUpRightIcon class="ml-1 mt-0.5 h-3.5 w-3.5" />
           </CommonButtonTopLink>
@@ -112,6 +117,7 @@ import { storeToRefs } from "pinia";
 import ConfirmTransactionModal from "@/components/transaction/zksync/era/ConfirmTransactionModal.vue";
 import EraTransactionFooter from "@/components/transaction/zksync/era/EraTransactionFooter.vue";
 
+import useNetworks from "@/composables/useNetworks";
 import useFee from "@/composables/zksync/era/useFee";
 
 import type { ConfirmationModalTransaction } from "@/components/transaction/zksync/era/ConfirmTransactionModal.vue";
@@ -155,6 +161,7 @@ const { account } = storeToRefs(onboardStore);
 const { destinations } = storeToRefs(useDestinationsStore());
 const { tokens, tokensRequestInProgress, tokensRequestError } = storeToRefs(eraTokensStore);
 const { balance, balanceInProgress, allBalancePricesLoaded, balanceError } = storeToRefs(walletEraStore);
+const { isCustomNode } = useNetworks();
 
 const destination = computed(() => (props.type === "transfer" ? destinations.value.era : destinations.value.ethereum));
 
