@@ -1,9 +1,11 @@
 <template>
-  <span class="font-mono">{{ timer }}</span>
+  <slot v-bind="{ timer, isTimerFinished }">
+    <span class="font-mono">{{ timer }}</span>
+  </slot>
 </template>
 
 <script lang="ts" setup>
-import { onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, onBeforeMount, onBeforeUnmount, ref, watch } from "vue";
 
 const props = defineProps({
   futureDate: {
@@ -11,10 +13,23 @@ const props = defineProps({
     required: true,
   },
 });
+const emit = defineEmits<{
+  (eventName: "finish"): void;
+}>();
 
 const timer = ref("");
-let intervalId: ReturnType<typeof setInterval> | undefined = undefined;
+const isTimerFinished = computed(() => timer.value === "00:00:00");
+watch(
+  isTimerFinished,
+  (isFinished) => {
+    if (isFinished) {
+      emit("finish");
+    }
+  },
+  { immediate: true }
+);
 
+let intervalId: ReturnType<typeof setInterval> | undefined = undefined;
 const updateTimer = () => {
   const currentTime = new Date().getTime();
   const targetTime = new Date(props.futureDate).getTime();
@@ -35,7 +50,7 @@ const updateTimer = () => {
     .padStart(2, "0")}`;
 };
 
-onMounted(() => {
+onBeforeMount(() => {
   updateTimer();
   intervalId = setInterval(updateTimer, 1000);
 });
