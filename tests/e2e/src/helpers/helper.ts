@@ -24,7 +24,7 @@ let authorizedTag: boolean;
 let unauthorizedTag: boolean;
 let emptyWalletTag: boolean;
 let incognitoTag: boolean;
-let transactionsTag: boolean;
+export let transactionsTag: boolean;
 let noBlockChain: boolean;
 let wallet_1: string[];
 let wallet_2: string[];
@@ -80,6 +80,19 @@ export class Helper {
     try {
       await this.world.page?.locator(element).waitFor({
         state: "visible",
+        timeout: waitTime,
+      });
+    } catch {
+      result = false;
+    }
+    return result;
+  }
+
+  async checkSelectorHidden(selector: string, waitTime = 10000): Promise<boolean> {
+    result = true;
+    try {
+      await this.world.page?.waitForSelector(selector, {
+        state: "hidden",
         timeout: waitTime,
       });
     } catch {
