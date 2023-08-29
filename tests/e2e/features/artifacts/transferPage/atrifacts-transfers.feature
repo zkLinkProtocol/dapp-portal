@@ -148,6 +148,35 @@ Feature: Artifacts - UI
     Then Element with "text" "0x1ab721...184" should be "visible"
     Then Element with "partial src" "zz.png" should be "visible"
 
+  @id1537 @id1404
+  Scenario: Check artifacts on Transaction submitted pop up/Transaction completed pop up (Transfer)
+    Given I am on the Main page
+    When I go to page "/transaction/zksync/era/send?network=era-goerli&address=0x2CF4F78917A16C9584AeB5d4c5bD2713d724C75d"
+    When I choose "ETH" as token and insert "0.0000000001" as amount
+    When I "confirm" transaction after clicking "Send to zkSync Era Testnet" button
+    #Transaction submitted pop up - id1537
+    Then Message "Transaction submitted" should be visible
+    Then Submitted transaction animation should be visible
+    Then Element with "text" " Track status " should be "visible"
+    #Transaction completed pop up - id1404
+    Then Message "Transaction completed" should be visible
+    Then The Green success mark should be visible
+    Then Element with "text" "Send" should be "visible"
+    #Time of tx
+    Then Element with "class" "button-line-body-info-underline" should be "visible"
+    Then Element with "text" "0.0000000001" should be "visible"
+    Then Modal card element with the "//*[text()='ETH']" xpath should be "visible"
+    #Token icon
+    Then Modal card element with the "//*[contains(@src, 'eth.svg')]" xpath should be "visible"
+    Then Modal card element with the "//*[text()='<$0.01']" xpath should be "visible"
+    Then Arrow element for "Transfer" external link should be "visible"
+    Then Arrow element for "Transfer" external link should be "clickable"
+    Then Element with "text" " Your funds should now be available at the " should be "visible"
+    Then Element with "text" "destination address" should be "visible"
+    Then Element with "text" "destination address" should be "clickable"
+    Then Element with "text" " Make another transaction " should be "visible"
+    Then Element with "text" " Go to Assets page " should be "visible"
+
   @id1364 @Transfer
   Scenario: Check artifacts on the Send to page - Transfer
     Given I am on the Main page
