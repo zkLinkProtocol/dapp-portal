@@ -181,8 +181,7 @@ const availableTokens = computed(() => {
 const availableBalances = computed(() => {
   if (props.type === "withdrawal") {
     if (!tokens.value) return [];
-    // return balance.value.filter((e) => e.l1Address); <-- Uncomment once Era Withdrawal Finalizer is live on mainnet
-    return balance.value.filter((e) => e.l1Address && tokens.value![e.address]);
+    return balance.value.filter((e) => e.l1Address);
   }
   return balance.value;
 });

@@ -19,7 +19,12 @@
         <template v-else-if="!hasBalances">
           <div class="category">
             <CommonCardWithLineButtons>
-              <TokenLine v-for="item in tokens" :key="item.address" v-bind="item" @click="selectedToken = item" />
+              <TokenLine
+                v-for="item in displayedTokens"
+                :key="item.address"
+                v-bind="item"
+                @click="selectedToken = item"
+              />
             </CommonCardWithLineButtons>
           </div>
         </template>
@@ -99,14 +104,16 @@ const emit = defineEmits<{
 
 const search = ref("");
 const hasBalances = computed(() => props.balances.length > 0);
-const displayedBalances = computed(() => {
+const filterTokens = (tokens: Token[]) => {
   const lowercaseSearch = search.value.toLowerCase();
-  return props.balances.filter(({ address, symbol }) =>
+  return tokens.filter(({ address, symbol }) =>
     Object.values({ address, symbol })
       .filter((e) => typeof e === "string")
       .some((value) => value.toLowerCase().includes(lowercaseSearch))
   );
-});
+};
+const displayedTokens = computed(() => filterTokens(props.tokens));
+const displayedBalances = computed(() => filterTokens(props.balances) as TokenAmount[]);
 const balanceGroups = groupBalancesByAmount(displayedBalances);
 
 const selectedTokenAddress = computed({
