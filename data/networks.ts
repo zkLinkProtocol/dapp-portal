@@ -30,8 +30,8 @@ export const l1Networks = {
     ...sepolia,
     name: "Sepolia Testnet",
     rpcUrls: {
-      public: { http: ["https://sepolia.gateway.tenderly.co"] },
-      default: { http: ["https://sepolia.gateway.tenderly.co"] },
+      public: { http: ["https://ethereum-sepolia.publicnode.com"] },
+      default: { http: ["https://ethereum-sepolia.publicnode.com"] },
     },
   },
 } as const;
@@ -141,6 +141,16 @@ export const eraNetworks: EraNetwork[] = [
     blockExplorerApi: "https://block-explorer-api.stage.zksync.dev",
     faucetUrl: "https://stage2-faucet.zksync.dev/ask_money",
     getTokens: () => getTokensByNetworkId(270),
+    l1Network: l1Networks.sepolia,
+    hidden: true,
+  },
+  {
+    id: 300,
+    key: "era-boojnet",
+    name: "zkSync Era Boojnet",
+    shortName: "Era Boojnet",
+    rpcUrl: "https://sepolia.era.zksync.dev",
+    getTokens: () => getTokensByNetworkId(300),
     l1Network: l1Networks.sepolia,
     hidden: true,
   },
