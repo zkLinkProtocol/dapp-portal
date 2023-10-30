@@ -46,7 +46,7 @@ env:
 
 jobs:
   e2e:
-    runs-on: [ self-hosted, ci-runner ]
+    runs-on: [ matterlabs-ci-runner ]
     strategy:
       fail-fast: false
       max-parallel: 20
