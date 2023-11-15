@@ -12,16 +12,17 @@ There are a few different ways to configure the application:
 <details>
 <summary>If you're using ZK Stack, just link your zksync-era repo directory to configure Portal.</summary>
 
-1. Make sure to install the dependencies:
+1. If you haven't already setup your hyperchain yet, follow the [instructions](https://zkstack.io/quickstart)
+2. Make sure to install the dependencies:
     ```bash
     npm install
     ```
-2. 🔄 Pull your hyperchain config files by running:
+3. 🔄 Pull your hyperchain config files by running:
     ```bash
-    npm run hyperchain:configure <path_to_your_zksync-era_repo>
+    npm run hyperchain:configure
     ```
     This will regenerate `/hyperchains/config.json` file. You can edit this file manually if needed.
-3. 🚀 Now you can start or build the application. See [Development](#development-server) or [Production](#production) section below for more details.
+4. 🚀 Now you can start or build the application. See [Development](#development-server) or [Production](#production) section below for more details.
 </details>
 
 ### 🖊️ Configure automatically with form
