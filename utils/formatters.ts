@@ -1,9 +1,9 @@
+import { BigNumber, type BigNumberish } from "ethers";
 import { formatUnits, getAddress, parseUnits } from "ethers/lib/utils";
-
-import type { BigNumberish } from "ethers";
+import { BaseError } from "viem";
 
 export function shortenAddress(address: string, chars = 3): string {
-  return `${address.slice(0, chars + 3)}...${address.slice(-3)}`;
+  return `${address.slice(0, chars + 2)}...${address.slice(-3)}`;
 }
 
 export function parseTokenAmount(amount: BigNumberish, decimals: number): string {
@@ -34,11 +34,12 @@ export function formatTokenPrice(amount: BigNumberish, decimals: number, price: 
   return formatPricePretty(formatRawTokenPrice(amount, decimals, price));
 }
 
+/* Might return value like "0.0000" */
 export function removeSmallAmount(
   amount: BigNumberish,
   decimals: number,
   price: number,
-  minTokenValue = 0.0001,
+  minTokenValue = 0.001,
   maxChars = 6
 ): string {
   const tokenAmount = parseTokenAmount(amount, decimals);
@@ -69,6 +70,24 @@ export function removeSmallAmount(
   return acc;
 }
 
+/* Fixes value like "0.0000" with "<0.0001" */
+export function removeSmallAmountPretty(
+  amount: BigNumberish,
+  decimals: number,
+  price: number,
+  minTokenValue?: number,
+  maxChars?: number
+): string {
+  if (BigNumber.from(amount).isZero()) {
+    return "0";
+  }
+  const withoutSmallAmount = removeSmallAmount(amount, decimals, price, minTokenValue, maxChars);
+  if (isOnlyZeroes(withoutSmallAmount)) {
+    return `<${withoutSmallAmount.slice(0, -1)}1`;
+  }
+  return withoutSmallAmount;
+}
+
 export function checksumAddress(address: string) {
   return getAddress(address);
 }
@@ -94,7 +113,13 @@ export function formatError(error?: Error) {
       return undefined;
     } else if (message.toLowerCase().includes("fee is to low")) {
       return new Error("Transaction fee was to low. Try again.");
-    } else if (message === "Network Error" || message === "Failed to fetch ()" || message.includes("noNetwork")) {
+    } else if (
+      message === "Network Error" ||
+      message === "Failed to fetch ()" ||
+      message.includes("<no response> Failed to fetch") ||
+      message.includes("noNetwork") ||
+      (error instanceof BaseError && error?.details?.startsWith("Failed to fetch"))
+    ) {
       return new Error("Network error. Check your internet connection and try again.");
     }
   }

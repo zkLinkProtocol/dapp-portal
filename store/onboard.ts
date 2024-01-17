@@ -11,17 +11,16 @@ import {
   watchAccount,
   watchNetwork,
 } from "@wagmi/core";
-import { zkSync, zkSyncTestnet } from "@wagmi/core/chains";
+import { zkSync, zkSyncSepoliaTestnet, zkSyncTestnet } from "@wagmi/core/chains";
 import { WalletConnectConnector } from "@wagmi/core/connectors/walletConnect";
 import { publicProvider } from "@wagmi/core/providers/public";
 import { createWeb3Modal } from "@web3modal/wagmi";
-import { defineStore, storeToRefs } from "pinia";
 
 import useColorMode from "@/composables/useColorMode";
 import useNetworks from "@/composables/useNetworks";
 import useObservable from "@/composables/useObservable";
 
-import type { EraNetwork } from "@/data/networks";
+import type { ZkSyncNetwork } from "@/data/networks";
 import type { Chain } from "@wagmi/core";
 
 import { useRuntimeConfig } from "#imports";
@@ -29,12 +28,12 @@ import { confirmedSupportedWallets, disabledWallets } from "@/data/wallets";
 import { useNetworkStore } from "@/store/network";
 
 export const useOnboardStore = defineStore("onboard", () => {
-  const { eraNetworks, zkSyncLiteNetworks } = useNetworks();
-  const useExistingEraChain = (network: EraNetwork) => {
-    const existingNetworks = [zkSync, zkSyncTestnet];
+  const { zkSyncNetworks } = useNetworks();
+  const useExistingEraChain = (network: ZkSyncNetwork) => {
+    const existingNetworks = [zkSync, zkSyncSepoliaTestnet, zkSyncTestnet];
     return existingNetworks.find((existingNetwork) => existingNetwork.id === network.id);
   };
-  const createEraChain = (network: EraNetwork) => {
+  const createEraChain = (network: ZkSyncNetwork) => {
     return {
       id: network.id,
       name: network.name,
@@ -53,12 +52,7 @@ export const useOnboardStore = defineStore("onboard", () => {
         chains.push(chain);
       }
     };
-    for (const network of zkSyncLiteNetworks) {
-      if (network.l1Network) {
-        addUniqueChain(network.l1Network);
-      }
-    }
-    for (const network of eraNetworks) {
+    for (const network of zkSyncNetworks) {
       if (network.l1Network) {
         addUniqueChain(network.l1Network);
       }
@@ -77,8 +71,7 @@ export const useOnboardStore = defineStore("onboard", () => {
   const { publicClient } = configureChains(extendedChains, [publicProvider()]);
   const metadata = {
     name: "zkSync Portal",
-    description:
-      "zkSync Portal provides all the required tools for working with Era and Lite networks such as Wallet, Bridge & Faucet functionality.",
+    description: "zkSync Portal - view balances, transfer and bridge tokens",
     url: "https://portal.zksync.io",
     icons: ["https://portal.zksync.io/icon.png"],
   };
@@ -177,7 +170,7 @@ export const useOnboardStore = defineStore("onboard", () => {
   });
   const switchNetworkById = async (chainId: number, networkName?: string) => {
     try {
-      await switchWalletNetwork({ chainId });
+      return await switchWalletNetwork({ chainId });
     } catch (err) {
       if (err instanceof Error && err.message.includes("does not support programmatic chain switching")) {
         throw new Error(`Please switch network manually to "${networkName}" in your ${walletName.value} wallet`);
@@ -192,12 +185,12 @@ export const useOnboardStore = defineStore("onboard", () => {
   } = usePromise(
     async () => {
       if (!l1Network.value) throw new Error(`L1 network is not available on ${selectedNetwork.value.name}`);
-      await switchNetworkById(l1Network.value.id);
+      return await switchNetworkById(l1Network.value.id);
     },
     { cache: false }
   );
   const setCorrectNetwork = async () => {
-    await switchNetwork().catch(() => undefined);
+    return await switchNetwork().catch(() => undefined);
   };
 
   const { subscribe: subscribeOnAccountChange, notify: notifyOnAccountChange } = useObservable<string | undefined>();
@@ -217,6 +210,7 @@ export const useOnboardStore = defineStore("onboard", () => {
 
   return {
     account: computed(() => account.value),
+    isConnected: computed(() => !!account.value.address),
     network: computed(() => network.value),
     isConnectingWallet: computed(() => account.value.isReconnecting || account.value.isConnecting),
     connectingWalletError,

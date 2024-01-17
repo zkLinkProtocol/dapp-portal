@@ -1,6 +1,6 @@
 export type Hash = `0x${string}`;
 
-export type TokenPrice = number | "loading" | undefined;
+export type TokenPrice = number | undefined;
 export type Token = {
   address: string;
   l1Address?: string;
@@ -8,13 +8,9 @@ export type Token = {
   symbol: string;
   decimals: number;
   iconUrl?: string;
-  enabledForFees?: boolean;
   price?: TokenPrice;
 };
 export type TokenAmount = Token & { amount: BigNumberish };
-
-export type ZkSyncLiteToken = Token & { id: number };
-export type ZkSyncLiteTokenAmount = TokenAmount & ZkSyncLiteToken;
 
 export declare namespace Api {
   namespace Response {

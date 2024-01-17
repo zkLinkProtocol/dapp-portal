@@ -60,7 +60,6 @@ Array<{
     id: number; // L2 Network ID
     rpcUrl: string; // L2 RPC URL
     name: string;
-    shortName: string;
     blockExplorerUrl?: string; // L2 Block Explorer URL
     hidden?: boolean; // Hidden in the network selector
     l1Network?: { // @wagmi `Chain` structure https://wagmi.sh/core/chains#build-your-own
@@ -118,7 +117,3 @@ Build the application for production:
 ```bash
 npm run generate:node:hyperchain
 ```
-
-#### 🌉 Bridge
-
-If your Hyperchain is connected to L1, you can also access Bridge on `/bridge` page.

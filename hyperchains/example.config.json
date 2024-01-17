@@ -4,7 +4,6 @@
       "id": 1234,
       "key": "my-hyperchain",
       "name": "My new hyperchain",
-      "shortName": "My hyperchain",
       "rpcUrl": "http://127.0.0.1:3050",
       "l1Network": {
         "id": 9,
@@ -23,8 +22,7 @@
         "l1Address": "0x0000000000000000000000000000000000000000",
         "symbol": "ETH",
         "decimals": 18,
-        "iconUrl": "/img/eth.svg",
-        "enabledForFees": true
+        "iconUrl": "/img/eth.svg"
       }
     ]
   }

@@ -16,17 +16,14 @@
 
 <style lang="scss" scoped>
 .button-line-body-info {
-  @apply w-max max-w-full leading-tight;
+  @apply w-max max-w-full;
 
   .button-line-body-info-label,
   .button-line-body-info-secondary {
     @apply inline min-h-[1.5rem] overflow-hidden text-ellipsis align-middle;
   }
-  .button-line-body-info-label {
-    @apply font-medium;
-  }
   .button-line-body-info-underline {
-    @apply text-sm text-gray-secondary dark:text-neutral-400;
+    @apply text-neutral-700 dark:text-neutral-400;
   }
 }
 </style>

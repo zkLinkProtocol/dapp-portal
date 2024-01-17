@@ -1,6 +1,6 @@
 <template>
   <div class="alert-container" :class="[`variant-${variant}`, { 'has-icon': !!icon }]">
-    <div v-if="icon">
+    <div v-if="icon" class="alert-icon-container">
       <component :is="icon" class="alert-icon" aria-hidden="true" />
     </div>
     <div class="alert-body">
@@ -24,31 +24,22 @@ defineProps({
 </script>
 
 <style lang="scss">
-.lite.dark {
-  .alert-container {
-    &.variant- {
-      &info {
-        @apply border-primary-300/50 bg-primary-300/10;
-      }
-    }
-  }
-}
 .alert-container {
-  @apply w-full rounded-[1.24rem] p-4 wrap-balance;
+  @apply w-full rounded-[1.24rem] p-4;
   &.has-icon {
-    @apply grid grid-cols-[1.25rem_1fr] gap-3;
+    @apply grid grid-cols-[max-content_1fr] gap-block-padding-1/2;
   }
   &.variant- {
     &info {
-      @apply border bg-primary-100 text-primary-700;
-      @apply dark:border-primary-200/50 dark:bg-primary-200/10 dark:text-white;
+      @apply border bg-primary-300 text-primary-700;
+      @apply dark:border-primary-300/50 dark:bg-primary-300/10 dark:text-white;
 
       .alert-icon {
         @apply dark:text-primary-300;
       }
       .alert-body {
         .alert-link {
-          @apply hover:text-primary-600 dark:hover:text-primary-200;
+          @apply hover:text-primary-400 dark:hover:text-primary-300;
         }
       }
     }
@@ -76,11 +67,15 @@ defineProps({
       }
     }
     &warning {
-      @apply border border-orange-100 bg-orange-100 text-orange-700;
-      @apply dark:border-warning-400/50 dark:bg-warning-600/10 dark:text-white;
+      @apply border p-block-padding-1/2 sm:p-block-padding;
+      @apply border-warning-400/30 bg-warning-400/10;
 
-      .alert-icon {
-        @apply dark:text-warning-400;
+      .alert-icon-container {
+        @apply h-12 w-12 bg-warning-400;
+
+        .alert-icon {
+          @apply text-neutral-950;
+        }
       }
       .alert-body {
         .alert-link {
@@ -103,11 +98,15 @@ defineProps({
     }
   }
 
-  .alert-icon {
-    @apply h-5 w-5;
+  .alert-icon-container {
+    @apply flex items-center justify-center rounded-full;
+
+    .alert-icon {
+      @apply h-6 w-6;
+    }
   }
   .alert-body {
-    @apply flex-1 items-center text-sm xs:flex xs:justify-between;
+    @apply flex-1 items-center xs:flex xs:justify-between;
 
     .alert-link {
       @apply mt-2 flex items-center whitespace-nowrap font-medium underline underline-offset-2 transition-colors xs:ml-6 xs:mt-0;

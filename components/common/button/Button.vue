@@ -1,5 +1,5 @@
 <template>
-  <component :is="as" type="button" class="default-button" :class="`variant-${variant}`">
+  <component :is="as" type="button" class="default-button" :class="[`size-${size}`, `variant-${variant}`]">
     <span v-if="$slots.icon" class="icon-container">
       <slot name="icon" />
     </span>
@@ -16,58 +16,58 @@ defineProps({
     default: "button",
   },
   variant: {
-    type: String as PropType<"primary" | "primary-solid" | "error">,
-    default: "primary",
+    type: String as PropType<"default" | "primary" | "light" | "error">,
+    default: "default",
+  },
+  size: {
+    type: String as PropType<"xs" | "sm" | "md">,
+    default: "md",
   },
 });
 </script>
 
 <style lang="scss">
-.lite.dark {
-  .default-button {
-    &.variant- {
-      &primary {
-        @apply bg-primary-400;
-        &:enabled,
-        &:is(a, label) {
-          &:not([aria-disabled="true"]) {
-            @apply hover:bg-primary-300;
-          }
-        }
-      }
-      &primary-solid {
-        &:enabled,
-        &:is(a, label) {
-          &:not([aria-disabled="true"]) {
-            @apply hover:bg-primary-300;
-          }
-        }
-      }
-    }
-  }
-}
 .default-button {
-  @apply flex h-[3rem] w-max items-center justify-center rounded-3xl px-4 text-center text-sm font-medium backdrop-blur-sm transition-colors wrap-balance;
+  @apply flex items-center justify-center text-center backdrop-blur-sm transition-colors wrap-balance;
   &:is(label) {
     @apply cursor-pointer;
   }
+  &.size- {
+    &xs {
+      @apply rounded-2xl px-4 py-2;
+    }
+    &sm {
+      @apply rounded-[20px] p-3;
+    }
+    &md {
+      @apply rounded-3xl p-4;
+    }
+  }
   &.variant- {
-    &primary {
-      @apply whitespace-nowrap bg-primary-100/50 text-primary-400;
-      @apply dark:bg-primary-300 dark:text-white;
+    &default {
+      @apply bg-neutral-100 dark:bg-neutral-900;
       &:enabled,
       &:is(a, label) {
         &:not([aria-disabled="true"]) {
-          @apply hover:bg-primary-100/75 dark:hover:bg-primary-200;
+          @apply hover:bg-neutral-200 dark:hover:bg-neutral-800 dark:focus-visible:bg-neutral-800;
         }
       }
     }
-    &primary-solid {
-      @apply h-max w-full max-w-sm rounded-3xl bg-primary-400 py-3 text-base text-white;
+    &light {
+      @apply bg-neutral-200 transition disabled:opacity-70 dark:bg-neutral-800;
       &:enabled,
       &:is(a, label) {
         &:not([aria-disabled="true"]) {
-          @apply hover:bg-primary-400 dark:hover:bg-primary-200;
+          @apply hover:bg-neutral-300 dark:hover:bg-neutral-700 dark:focus-visible:bg-neutral-700;
+        }
+      }
+    }
+    &primary {
+      @apply bg-primary-400 px-6 text-white;
+      &:enabled,
+      &:is(a, label) {
+        &:not([aria-disabled="true"]) {
+          @apply hover:bg-primary-300;
         }
       }
       &:disabled,

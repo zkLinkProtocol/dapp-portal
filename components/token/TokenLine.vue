@@ -6,16 +6,22 @@
     <template #default>
       <CommonButtonLineBodyInfo class="text-left">
         <template #label>
-          <div class="flex flex-wrap items-center gap-1.5">
-            <span>{{ symbol }}</span>
-            <div v-if="name" class="truncate text-xs text-gray-secondary dark:text-neutral-400">
-              {{ name }}
-            </div>
-          </div>
+          <div class="truncate">{{ symbol }}</div>
         </template>
-        <template #underline>
-          <span class="hidden xs:block" :title="address">{{ shortenAddress(address, 5) }}</span>
-          <span class="xs:hidden" :title="address">{{ shortenAddress(address, 2) }}</span>
+        <template v-if="name" #underline>
+          <CommonButtonLabel
+            v-if="showNameLink && eraNetwork.blockExplorerUrl"
+            as="a"
+            variant="light"
+            :href="`${eraNetwork.blockExplorerUrl}/address/${address}`"
+            target="_blank"
+            class="flex gap-1"
+            @click.stop=""
+          >
+            <span class="truncate">{{ name }}</span>
+            <ArrowTopRightOnSquareIcon class="h-6 w-6 flex-shrink-0" />
+          </CommonButtonLabel>
+          <div v-else class="truncate">{{ name }}</div>
         </template>
       </CommonButtonLineBodyInfo>
     </template>
@@ -26,10 +32,13 @@
 </template>
 
 <script lang="ts" setup>
+import { ArrowTopRightOnSquareIcon } from "@heroicons/vue/24/outline";
+import { storeToRefs } from "pinia";
+
 import type { TokenPrice } from "@/types";
 import type { Component, PropType } from "vue";
 
-import { shortenAddress } from "@/utils/formatters";
+import { useZkSyncProviderStore } from "@/store/zksync/provider";
 
 defineProps({
   as: {
@@ -41,6 +50,10 @@ defineProps({
   },
   name: {
     type: String,
+  },
+  showNameLink: {
+    type: Boolean,
+    default: false,
   },
   address: {
     type: String,
@@ -57,6 +70,8 @@ defineProps({
     type: [String, Number] as PropType<TokenPrice>,
   },
 });
+
+const { eraNetwork } = storeToRefs(useZkSyncProviderStore());
 </script>
 
 <style lang="scss" scoped></style>

@@ -1,17 +1,11 @@
 <template>
-  <CommonPage title="Assets">
-    <template #era>
-      <AssetsEra />
-    </template>
-    <template #lite>
-      <AssetsLite />
-    </template>
-  </CommonPage>
+  <ModalTransactionDepositUnavailable />
+
+  <DepositView />
 </template>
 
 <script lang="ts" setup>
-import AssetsEra from "@/views/zksync/era/Assets.vue";
-import AssetsLite from "@/views/zksync/lite/Assets.vue";
+import DepositView from "@/views/transactions/Deposit.vue";
 </script>
 
 <style lang="scss" scoped></style>

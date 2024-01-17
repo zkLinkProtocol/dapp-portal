@@ -1,6 +1,6 @@
 <template>
   <div class="fee-details-container">
-    <span>{{ label }}</span>
+    <span>{{ label }}&nbsp;</span>
     <div class="flex flex-col items-end xs:flex-row xs:items-center">
       <div class="flex items-center" data-testid="fee-amount">
         <template v-if="loading">
@@ -24,27 +24,15 @@
             leave-to-class="translate-y-1.5 opacity-0"
             mode="out-in"
           >
-            <span v-if="canDisplayFeeAsFiat && displayFeeAsFiat">
-              <template v-if="feeToken.price === 'loading'">
-                <CommonContentLoader :length="15" />
-              </template>
-              <template v-else>{{ totalPrice }}</template>
-              of
-            </span>
+            <span v-if="canDisplayFeeAsFiat && displayFeeAsFiat">{{ totalPrice }} of</span>
             <span v-else class="break-all">{{ parseTokenAmount(feeAmount, feeToken.decimals) }}</span>
           </transition>
-          <TokenImage class="ml-1 mr-0.5 h-5 w-5" v-bind="feeToken" />
+          &nbsp;
           <span class="font-medium">{{ feeToken.symbol }}</span>
+          &nbsp;
+          <TokenImage class="h-5 w-5" v-bind="feeToken" />
         </component>
         <template v-else>Unknown fee</template>
-        <CommonCircleLoader
-          v-if="updateDuration"
-          v-tooltip="`Updating fee every ${Math.ceil(updateDuration / 1000)} seconds`"
-          :duration="updateDuration"
-          :active="!loading"
-          class="ml-1.5 cursor-help"
-          @finished="emit('update')"
-        />
       </div>
       <slot />
     </div>
@@ -75,14 +63,7 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  updateDuration: {
-    type: Number,
-  },
 });
-
-const emit = defineEmits<{
-  (eventName: "update"): void;
-}>();
 
 const displayFeeAsFiat = ref(true);
 const canDisplayFeeAsFiat = computed(() => (props.feeToken?.price ? true : false));
@@ -97,6 +78,6 @@ const totalPrice = computed(() => {
 
 <style lang="scss" scoped>
 .fee-details-container {
-  @apply flex items-center justify-between rounded-lg px-4 py-1.5 text-sm text-gray-secondary dark:text-neutral-400;
+  @apply flex items-center whitespace-nowrap text-neutral-700 dark:text-neutral-500;
 }
 </style>

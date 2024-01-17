@@ -6,7 +6,6 @@
     :decimals="decimals"
     :icon-url="iconUrl"
     :as="sendRouteName ? 'RouterLink' : as"
-    :icon="sendRouteName ? PaperAirplaneIcon : undefined"
     :to="sendRouteName ? { name: sendRouteName, query: { token: address } } : undefined"
     class="token-balance"
     :class="{ 'is-zero-amount': isZeroAmount }"
@@ -15,15 +14,13 @@
       <CommonButtonLineBodyInfo class="text-right">
         <template #secondary>
           <div class="token-balance-amount" :title="fullAmount">
-            <CommonContentLoader v-if="priceLoading" :length="15" />
-            <template v-else>{{ displayedAmount }}</template>
+            {{ displayedAmount }}
           </div>
         </template>
         <template #underline>
           <div class="token-balance-price">
-            <CommonContentLoader v-if="priceLoading" :length="12" />
-            <template v-else-if="price && !isZeroAmount">
-              {{ formatTokenPrice(amount, decimals, price as number) }}
+            <template v-if="price && !isZeroAmount">
+              {{ formatTokenPrice(amount, decimals, price) }}
             </template>
           </div>
         </template>
@@ -35,15 +32,13 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-import { PaperAirplaneIcon } from "@heroicons/vue/24/outline";
 import { BigNumber } from "ethers";
 
 import type { TokenPrice } from "@/types";
 import type { BigNumberish } from "ethers";
 import type { Component, PropType } from "vue";
 
-import { formatTokenPrice, parseTokenAmount, removeSmallAmount } from "@/utils/formatters";
-import { isOnlyZeroes } from "@/utils/helpers";
+import { formatTokenPrice, parseTokenAmount, removeSmallAmountPretty } from "@/utils/formatters";
 
 const props = defineProps({
   as: {
@@ -83,7 +78,6 @@ const props = defineProps({
   },
 });
 
-const priceLoading = computed(() => props.price === "loading");
 const isZeroAmount = computed(() => BigNumber.from(props.amount).isZero());
 
 const fullAmount = computed(() => parseTokenAmount(props.amount, props.decimals));
@@ -91,14 +85,8 @@ const displayedAmount = computed(() => {
   if (typeof props.price !== "number") {
     return fullAmount.value;
   }
-  const withoutSmallAmount = removeSmallAmount(props.amount, props.decimals, props.price);
   if (props.amountDisplay === "remove-small") {
-    if (isZeroAmount.value) {
-      return "0";
-    } else if (!isOnlyZeroes(withoutSmallAmount)) {
-      return withoutSmallAmount;
-    }
-    return `<${withoutSmallAmount.slice(0, -1)}1`;
+    return removeSmallAmountPretty(props.amount, props.decimals, props.price);
   }
   return fullAmount.value;
 });

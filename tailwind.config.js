@@ -20,11 +20,33 @@ module.exports = {
         sans: [`'Inter'`, ...defaultTheme.fontFamily.sans],
       },
       colors: {
+        primary: {
+          300: "#4075FF",
+          400: "#1755F4",
+          700: "#1347CC",
+        },
+        neutral: {
+          50: "#F7F9FC",
+          100: "#E8ECF2",
+          200: "#DADDE5",
+          300: "#BEC2CC",
+          400: "#A1A7B3",
+          500: "#858C99",
+          600: "#6C7380",
+          700: "#555A66",
+          800: "#3D424D",
+          900: "#262B33",
+          950: "#11141A",
+        },
         gray: {
           DEFAULT: "#f7f7f7",
           secondary: "#75808a",
           input: "#edeff2",
           "input-focus": "#dfe3e7",
+        },
+        error: {
+          300: "#FF6666",
+          500: "#FF0000",
         },
         warning: {
           400: "#FFC81A",
@@ -34,6 +56,14 @@ module.exports = {
           400: "#33FF99",
           600: "#00CC66",
         },
+      },
+      spacing: {
+        "block-padding": "32px",
+        "block-padding-1/2": "16px",
+        "block-padding-1/4": "8px",
+        "block-gap": "24px",
+        "block-gap-2/3": "16px",
+        "block-gap-1/2": "12px",
       },
     },
     screens: {
@@ -50,18 +80,23 @@ module.exports = {
     plugin(function ({ addBase, addUtilities, theme }) {
       addBase({
         ".h1": {
-          fontSize: "32px",
-          fontWeight: theme("fontWeight.bold"),
-          lineHeight: theme("lineHeight.tight"),
-          paddingTop: theme("padding.5"),
-          paddingBottom: theme("padding.4"),
+          fontSize: "36px",
+          fontWeight: "400",
+          lineHeight: "1.15",
+          marginBottom: theme("spacing.block-gap-2/3"),
+        },
+        "@screen sm": {
+          ".h1": {
+            fontSize: "40px",
+            lineHeight: "1.4",
+            marginBottom: theme("spacing.block-gap"),
+          },
         },
         ".h2": {
           fontSize: "26px",
           fontWeight: theme("fontWeight.bold"),
           lineHeight: theme("lineHeight.tight"),
           paddingTop: theme("padding.5"),
-          paddingBottom: theme("padding.4"),
         },
       });
       addUtilities({
@@ -69,60 +104,6 @@ module.exports = {
           textWrap: "balance",
         },
       });
-    }),
-    require("tailwindcss-themer")({
-      defaultTheme: {
-        extend: {
-          colors: {
-            primary: {
-              50: "#D9E3FF",
-              100: "#D9E3FF",
-              200: "#4075FF",
-              300: "#1755F4",
-              400: "#1650E5",
-              500: "#2663FF",
-              600: "#1347CC",
-              700: "#113EB2",
-              800: "#0C2C80",
-              900: "#071B4D",
-            },
-            neutral: {
-              50: "#F7F9FC",
-              100: "#E8ECF2",
-              200: "#DADDE5",
-              300: "#BEC2CC",
-              400: "#A1A7B3",
-              500: "#858C99",
-              600: "#6C7380",
-              700: "#555A66",
-              800: "#3D424D",
-              900: "#262B33",
-              950: "#11141A",
-            },
-          },
-        },
-      },
-      themes: [
-        {
-          name: "lite",
-          extend: {
-            colors: {
-              primary: {
-                50: "#F3F5FF",
-                100: "#D9D9F9",
-                200: "#CBCBFF",
-                300: "#8C8DFC",
-                400: "#5D65B9",
-                500: "#53579f",
-                600: "#4E529A",
-                700: "#32325D",
-                800: "#27274E",
-                900: "#11142B",
-              },
-            },
-          },
-        },
-      ],
     }),
   ],
 };

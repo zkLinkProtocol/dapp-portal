@@ -1,17 +1,10 @@
 <template>
-  <CommonButtonLineWithImg
-    class="transaction-line-item"
-    :as="transactionUrl ? 'a' : 'button'"
-    :href="transactionUrl"
-    :icon="transactionUrl ? ArrowUpRightIcon : DocumentDuplicateIcon"
-    target="_blank"
-    @click="!transactionUrl && copy()"
-  >
+  <CommonButtonLineWithImg v-bind="buttonProps" class="transaction-line-item" @click="handleClick()">
     <template #image>
-      <div class="transaction-line-item-icon-container">
-        <XMarkIcon v-if="failed" class="transaction-line-item-icon failed-badge-icon" aria-hidden="true" />
-        <component v-else-if="icon" :is="icon" class="transaction-line-item-icon" aria-hidden="true" />
-      </div>
+      <DestinationIconContainer>
+        <XMarkIcon v-if="failed" class="failed-badge-icon" aria-hidden="true" />
+        <component v-else-if="icon" :is="icon" aria-hidden="true" />
+      </DestinationIconContainer>
     </template>
     <template #default>
       <CommonButtonLineBodyInfo class="text-left">
@@ -23,9 +16,15 @@
           <slot v-else name="bottom-left" />
         </template>
       </CommonButtonLineBodyInfo>
+      <div class="flex flex-wrap items-center gap-x-2 sm:hidden">
+        <slot name="top-right" />
+        <div v-if="$slots['bottom-right']" class="text-gray-secondary opacity-70 dark:text-white">
+          <slot name="bottom-right" />
+        </div>
+      </div>
     </template>
     <template #right>
-      <CommonButtonLineBodyInfo ref="el" class="text-right">
+      <CommonButtonLineBodyInfo ref="el" class="hidden text-right sm:block">
         <template #secondary v-if="$slots['top-right']">
           <slot name="top-right" />
         </template>
@@ -41,10 +40,16 @@
 import { computed, ref, watch } from "vue";
 import { useTippy } from "vue-tippy";
 
-import { ArrowUpRightIcon, DocumentDuplicateIcon, XMarkIcon } from "@heroicons/vue/24/outline";
+import {
+  ArrowTopRightOnSquareIcon,
+  DocumentDuplicateIcon,
+  InformationCircleIcon,
+  XMarkIcon,
+} from "@heroicons/vue/24/outline";
 
 import useCopy from "@/composables/useCopy";
 
+import type { RouteLocation } from "#vue-router";
 import type { Component, PropType } from "vue";
 
 const props = defineProps({
@@ -53,10 +58,12 @@ const props = defineProps({
   },
   transactionHash: {
     type: String,
-    required: true,
   },
   explorerUrl: {
     type: String,
+  },
+  to: {
+    type: Object as PropType<RouteLocation>,
   },
   failed: {
     type: Boolean,
@@ -64,8 +71,8 @@ const props = defineProps({
   },
 });
 
+const { copy, copied } = useCopy(computed(() => props.transactionHash || ""));
 const el = ref<{ $el?: HTMLButtonElement } | undefined>();
-const { copy, copied } = useCopy(computed(() => props.transactionHash));
 const a = useTippy(
   computed(() => el.value?.$el?.parentElement?.parentElement || undefined),
   {
@@ -92,19 +99,39 @@ const transactionUrl = computed(() => {
   }
   return `${props.explorerUrl}/tx/${props.transactionHash}`;
 });
+
+const buttonProps = computed(() => {
+  if (props.to) {
+    return {
+      as: "RouterLink",
+      to: props.to,
+      icon: InformationCircleIcon,
+    };
+  } else if (transactionUrl.value) {
+    return {
+      as: "a",
+      href: transactionUrl.value,
+      target: "_blank",
+      icon: ArrowTopRightOnSquareIcon,
+    };
+  } else {
+    return {
+      icon: DocumentDuplicateIcon,
+    };
+  }
+});
+
+const handleClick = () => {
+  if (!props.to && !transactionUrl.value && props.transactionHash) {
+    copy();
+  }
+};
 </script>
 
 <style lang="scss">
 .transaction-line-item {
-  .transaction-line-item-icon-container {
-    @apply relative flex aspect-square h-auto w-full items-center justify-center rounded-full border border-primary-100 bg-primary-100/10 dark:border-none;
-
-    .transaction-line-item-icon {
-      @apply h-4 w-4 text-primary-500 dark:text-white;
-      &.failed-badge-icon {
-        @apply h-5 w-5 text-red-500;
-      }
-    }
+  .failed-badge-icon {
+    @apply text-red-500;
   }
   .failed-underline {
     @apply text-red-500;

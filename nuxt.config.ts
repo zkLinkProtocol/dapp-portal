@@ -3,6 +3,7 @@ import { portal as portalMeta } from "./data/meta";
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   app: {
+    baseURL: "/bridge",
     head: {
       htmlAttrs: {
         lang: "en",
@@ -68,9 +69,24 @@ export default defineNuxtConfig({
       turnstileKey: process.env.TURNSTILE_KEY,
       nodeType: process.env.NODE_TYPE as undefined | "memory" | "dockerized" | "hyperchain",
       ankrToken: process.env.ANKR_TOKEN,
+      screeningApiUrl: process.env.SCREENING_API_URL,
     },
   },
+  pinia: {
+    autoImports: [
+      // automatically imports `defineStore` and `storeToRefs` typings
+      "defineStore",
+      "storeToRefs",
+    ],
+  },
   vite: {
+    css: {
+      preprocessorOptions: {
+        scss: {
+          additionalData: '@use "@/assets/css/_mixins.scss" as *;',
+        },
+      },
+    },
     build: {
       target: "es2020",
     },
