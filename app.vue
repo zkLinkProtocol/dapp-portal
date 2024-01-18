@@ -4,6 +4,18 @@
   </NuxtLayout>
 </template>
 
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import { watch } from "vue";
+import { useRoute } from "vue-router";
 
-<style lang="scss"></style>
+import { trackPage } from "@/utils/analytics";
+
+const route = useRoute();
+watch(
+  () => route.path,
+  () => {
+    trackPage();
+  },
+  { immediate: true }
+);
+</script>

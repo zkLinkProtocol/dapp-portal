@@ -40,6 +40,11 @@ export default defineNuxtConfig({
         {
           src: "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit",
         },
+        {
+          hid: "Rudder-JS",
+          src: "https://cdn.rudderlabs.com/v1.1/rudder-analytics.min.js",
+          defer: true,
+        },
       ],
     },
   },
@@ -70,6 +75,8 @@ export default defineNuxtConfig({
       nodeType: process.env.NODE_TYPE as undefined | "memory" | "dockerized" | "hyperchain",
       ankrToken: process.env.ANKR_TOKEN,
       screeningApiUrl: process.env.SCREENING_API_URL,
+      dataplaneUrl: process.env.DATAPLANE_URL,
+      rudderKey: process.env.RUDDER_KEY,
     },
   },
   pinia: {
