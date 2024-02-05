@@ -32,7 +32,7 @@ import DepositView from "@/views/transactions/Deposit.vue";
 
 const { destinations } = storeToRefs(useDestinationsStore());
 const { eraNetwork } = storeToRefs(useZkSyncProviderStore());
-const depositDisabled = computed(() => eraNetwork.value.key === "sepolia");
+const depositDisabled = computed(() => eraNetwork.value.key === "mainnet");
 </script>
 
 <style lang="scss" scoped></style>
