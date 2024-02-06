@@ -1,7 +1,7 @@
 import { useStorage } from "@vueuse/core";
 import { decodeEventLog } from "viem";
 
-import ZkSyncContractInterface from "zksync-web3/abi/IZkSync.json";
+import ZkSyncContractInterface from "@/zksync-web3-nova/abi/IZkSync.json";
 
 import type { FeeEstimationParams } from "@/composables/zksync/useFee";
 import type { TransactionDestination } from "@/store/destinations";
@@ -12,12 +12,12 @@ import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncWalletStore } from "@/store/zksync/wallet";
 import { useNetworkStore } from "@/store/network";
-import {abi as secondaryAbi} from "@/views/transactions/ZkLink.json";
-import {abi as primaryGetterAbi} from "@/views/transactions/GettersFacet.json";
+import { abi as secondaryAbi } from "@/views/transactions/ZkLink.json";
+import { abi as primaryGetterAbi } from "@/views/transactions/GettersFacet.json";
 import type { PublicClient } from "@wagmi/core";
 import { ethers, type BigNumberish, type BytesLike } from "ethers";
-import type {TransactionRequest} from "@ethersproject/abstract-provider";
-import { createPublicClient,http } from "viem";
+import type { TransactionRequest } from "@ethersproject/abstract-provider";
+import { createPublicClient, http } from "viem";
 import { Interface } from "ethers/lib/utils";
 import { zkSyncSepoliaTestnet } from "viem/chains";
 export type TransactionInfo = {
@@ -61,16 +61,16 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
   const storageSavedTransactions = useStorage<{ [networkKey: string]: TransactionInfo[] }>(
     "zksync-bridge-transactions",
     {}
-    );
-    const savedTransactions = computed<TransactionInfo[]>({
-      get: () => {
-        return storageSavedTransactions.value[eraNetwork.value.key] || [];
-      },
-      set: (transactions: TransactionInfo[]) => {
-        storageSavedTransactions.value[eraNetwork.value.key] = transactions;
-      },
-    });
-    const userTransactions = computed(() =>
+  );
+  const savedTransactions = computed<TransactionInfo[]>({
+    get: () => {
+      return storageSavedTransactions.value[eraNetwork.value.key] || [];
+    },
+    set: (transactions: TransactionInfo[]) => {
+      storageSavedTransactions.value[eraNetwork.value.key] = transactions;
+    },
+  });
+  const userTransactions = computed(() =>
     savedTransactions.value.filter(
       (tx) =>
         tx.from.address === account.value.address ||
@@ -100,8 +100,10 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
     throw new Error("No L2 transaction hash found");
   };
 
-  const getDepositL2TransactionHashForSecondary = async (l1TransactionHash:string, secondaryClient: PublicClient) : Promise<Hash> =>{
-    
+  const getDepositL2TransactionHashForSecondary = async (
+    l1TransactionHash: string,
+    secondaryClient: PublicClient
+  ): Promise<Hash> => {
     const transaction = await secondaryClient.waitForTransactionReceipt({
       hash: l1TransactionHash as Hash,
     });
@@ -109,7 +111,7 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
     for (const log of transaction.logs) {
       try {
         const { args, eventName } = decodeEventLog({
-          abi: secondaryAbi,//TODO
+          abi: secondaryAbi,
           data: log.data,
           topics: log.topics,
         });
@@ -121,15 +123,13 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
       }
     }
 
-    if (!forwardL2Request){
+    if (!forwardL2Request) {
       throw new Error("No L2 transaction hash found");
     }
 
     let abicoder = new ethers.utils.AbiCoder();
     let encodedata = abicoder.encode(
-      [
-        "(address,bool,address,uint256,address,uint256,bytes,uint256,uint256,bytes[],address)",
-      ],
+      ["(address,bool,address,uint256,address,uint256,bytes,uint256,uint256,bytes[],address)"],
       [
         [
           forwardL2Request.gateway,
@@ -148,16 +148,16 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
     );
     const forwardHash = ethers.utils.keccak256(encodedata);
 
-    while(true){
+    while (true) {
       const canonicalTxHash = await getCanonicalTxHash(forwardHash);
       if (canonicalTxHash) return canonicalTxHash;
       await sleep(5000);
     }
-  }
+  };
   function sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms))
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
-  const getCanonicalTxHash = async (forwardHash:string ) : Promise<Hash>=> {
+  const getCanonicalTxHash = async (forwardHash: string): Promise<Hash> => {
     const publicClient = onboardStore.getPublicClient();
     const mainContractAddress = await providerStore.requestProvider().getMainContractAddress();
 
@@ -165,34 +165,42 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
     const mainContract = await wallet?.getMainContract();
     //TODO planA
     // const canonicalTxHash = await mainContract?.populateTransaction.getCanonicalTxHash(forwardHash);
-  
+
     //TODO plan C
     const iface = new Interface(primaryGetterAbi);
-    let tx : TransactionRequest = {
+    let tx: TransactionRequest = {
       to: mainContractAddress,
-      data: iface.encodeFunctionData("getCanonicalTxHash",[forwardHash])
+      data: iface.encodeFunctionData("getCanonicalTxHash", [forwardHash]),
     };
     // const canonicalTxHash = await providerStore.requestProvider().call(tx)
-    
+
     //TODO plan B
-    const canonicalTxHash = await publicClient.readContract({ address: mainContractAddress as Address, abi: primaryGetterAbi, functionName:"getCanonicalTxHash",args:[forwardHash]});
+    const canonicalTxHash = await publicClient.readContract({
+      address: mainContractAddress as Address,
+      abi: primaryGetterAbi,
+      functionName: "getCanonicalTxHash",
+      args: [forwardHash],
+    });
 
     return canonicalTxHash as Hash;
-  }
+  };
   const updateDepositStatus = async (transaction: TransactionInfo) => {
     const { selectedNetwork } = storeToRefs(useNetworkStore());
-    console.log(selectedNetwork.value)
+    console.log(selectedNetwork.value);
     let transactionHash;
 
-    if(selectedNetwork.value.key != "primary"){
-        // if secondary chain
+    if (selectedNetwork.value.key != "primary") {
+      // if secondary chain
       const secondaryPublicClient = createPublicClient({
         chain: selectedNetwork.value.l1Network!,
         transport: http(),
       });
-   
-      transactionHash = await getDepositL2TransactionHashForSecondary(transaction.transactionHash, secondaryPublicClient)
-    }else{
+
+      transactionHash = await getDepositL2TransactionHashForSecondary(
+        transaction.transactionHash,
+        secondaryPublicClient
+      );
+    } else {
       transactionHash = await getDepositL2TransactionHash(transaction.transactionHash);
     }
     const transactionReceipt = await providerStore.requestProvider().getTransactionReceipt(transactionHash);

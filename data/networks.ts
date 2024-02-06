@@ -18,18 +18,18 @@ export const l1Networks = {
     name: "Ethereum Sepolia Testnet",
   },
 
-  arbitrumSepolia:{
+  arbitrumSepolia: {
     ...arbitrumSepolia,
-    name: "Arbitrum Sepolia Testnet"
+    name: "Arbitrum Sepolia Testnet",
   },
-  scrollSepolia:{
+  scrollSepolia: {
     ...scrollSepolia,
-    name:"Scroll Sepolia Testnet"
+    name: "Scroll Sepolia Testnet",
   },
-  zkSyncSepoliaTestnet:{
+  zkSyncSepoliaTestnet: {
     ...zkSyncSepoliaTestnet,
-    name: "zkSync Sepolia Testnet"
-  }
+    name: "zkSync Sepolia Testnet",
+  },
 } as const;
 export type L1Network = Chain;
 
@@ -89,8 +89,8 @@ export const nexusNode: ZkSyncNetwork[] = [
     logoUrl: "/img/arbitrum-arb-logo.svg",
     blockExplorerUrl: "http://3.85.245.224:3010",
     blockExplorerApi: "http://3.85.245.224:3020",
-    withdrawalFinalizerApi: "",
-    mainContract:"",
+    withdrawalFinalizerApi: "http://3.85.245.224:3000",
+    mainContract: "",
     //TODO
     // l1Network: l1Networks.arbitrumSepolia,
     l1Network: {
@@ -113,7 +113,7 @@ export const nexusNode: ZkSyncNetwork[] = [
     blockExplorerUrl: "http://3.85.245.224:3010",
     blockExplorerApi: "http://3.85.245.224:3020",
     withdrawalFinalizerApi: "",
-    mainContract:"",
+    mainContract: "",
     // TODO
     // l1Network: l1Networks.zkSyncSepoliaTestnet,
     l1Network: {
@@ -137,7 +137,7 @@ export const nexusNode: ZkSyncNetwork[] = [
     blockExplorerUrl: "http://3.85.245.224:3010",
     blockExplorerApi: "http://3.85.245.224:3020",
     withdrawalFinalizerApi: "",
-    mainContract:"",
+    mainContract: "",
     //TODO
     // l1Network: l1Networks.scrollSepolia,
     l1Network: {
@@ -150,7 +150,7 @@ export const nexusNode: ZkSyncNetwork[] = [
         public: { http: ["http://3.85.245.224:8545"] },
       },
     },
-  }
+  },
 ];
 
 export const zkSyncNetworks: ZkSyncNetwork[] = [
