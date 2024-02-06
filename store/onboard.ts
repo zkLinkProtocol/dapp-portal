@@ -70,10 +70,10 @@ export const useOnboardStore = defineStore("onboard", () => {
 
   const { publicClient } = configureChains(extendedChains, [publicProvider()]);
   const metadata = {
-    name: "zkSync Portal",
-    description: "zkSync Portal - view balances, transfer and bridge tokens",
+    name: "zkLink Nova Portal",
+    description: "zkLink Nova Portal - view balances, transfer and bridge tokens",
     url: "https://portal.zksync.io",
-    icons: ["https://portal.zksync.io/icon.png"],
+    icons: ["../public/img/cion.png"],
   };
   const wagmiConfig = createConfig({
     autoConnect: true,

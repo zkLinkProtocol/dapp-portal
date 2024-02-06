@@ -5,7 +5,7 @@
     variant="primary"
   >
     <DestinationItem
-      :icon-url="destinations.ethereum.iconUrl"
+      :icon-url="destinations.arbitrum.iconUrl"
       as="RouterLink"
       :to="{ name: 'index' }"
       variant="primary"

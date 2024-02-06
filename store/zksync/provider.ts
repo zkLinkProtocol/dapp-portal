@@ -1,4 +1,4 @@
-import { Provider } from "zksync-web3";
+import { Provider } from "@/zksync-web3-nova/src";
 
 import { useNetworkStore } from "@/store/network";
 

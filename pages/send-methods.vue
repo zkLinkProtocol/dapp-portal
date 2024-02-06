@@ -14,8 +14,8 @@
       <CommonCardWithLineButtons>
         <DestinationItem
           v-if="eraNetwork.l1Network"
-          v-bind="destinations.ethereum"
-          :label="`Bridge to ${destinations.ethereum.label}`"
+          v-bind="destinations.arbitrum"
+          :label="`Bridge to ${destinations.arbitrum.label}`"
           as="RouterLink"
           :to="{ name: 'withdraw', query: $route.query }"
         />

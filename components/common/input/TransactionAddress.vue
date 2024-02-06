@@ -54,7 +54,7 @@
     <CommonInputErrorMessage>
       <transition v-bind="TransitionOpacity()">
         <span v-if="addressError">
-          <template v-if="addressError === 'invalid_address'">Invalid Ethereum 0x address</template>
+          <template v-if="addressError === 'invalid_address'">Invalid arbitrum 0x address</template>
           <template v-else-if="addressError === 'ens_not_found'">Nothing found for this name</template>
         </span>
       </transition>

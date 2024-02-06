@@ -1,6 +1,6 @@
 import { BigNumber } from "ethers";
 
-import IERC20 from "zksync-web3/abi/IERC20.json";
+import IERC20 from "@/zksync-web3-nova/abi/IERC20.json";
 
 import type { Hash } from "@/types";
 import type { PublicClient, WalletClient } from "@wagmi/core";

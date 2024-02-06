@@ -362,13 +362,13 @@ const toNetworkSelected = (networkKey?: string) => {
 };
 const fromNetworkModalOpened = ref(false);
 const fromNetworkSelected = (networkKey?: string) => {
-  if (destinations.value.ethereum.key === networkKey) {
+  if (destinations.value.arbitrum.key === networkKey) {
     router.replace({ name: "index", query: route.query });
   }
 };
 
 const step = ref<"form" | "withdrawal-finalization-warning" | "confirm" | "submitted">("form");
-const destination = computed(() => (props.type === "transfer" ? destinations.value.era : destinations.value.ethereum));
+const destination = computed(() => (props.type === "transfer" ? destinations.value.nova : destinations.value.arbitrum));
 
 const availableTokens = computed(() => {
   if (!tokens.value) return [];

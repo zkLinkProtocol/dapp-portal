@@ -1,9 +1,9 @@
 import { useMemoize } from "@vueuse/core";
 import { BigNumber, type BigNumberish } from "ethers";
-import { Wallet } from "zksync-web3";
+import { Wallet } from "@/zksync-web3-nova";
 
-import ZkSyncL1BridgeInterface from "zksync-web3/abi/IL1Bridge.json";
-import ZkSyncContractInterface from "zksync-web3/abi/IZkSync.json";
+import ZkSyncL1BridgeInterface from "@/zksync-web3-nova/abi/IL1Bridge.json";
+import ZkSyncContractInterface from "@/zksync-web3-nova/abi/IZkSync.json";
 
 import type { TransactionInfo } from "@/store/zksync/transactionStatus";
 import type { Hash } from "@/types";

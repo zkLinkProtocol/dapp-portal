@@ -42,7 +42,7 @@ const onQrCodeDecoded = (data: string) => {
   if (isAddress(data)) {
     emit("decoded-address", checksumAddress(data));
   } else {
-    onQrDecodeError("QR code doesn't contain a valid ethereum address");
+    onQrDecodeError("QR code doesn't contain a valid arbitrum address");
   }
 };
 </script>

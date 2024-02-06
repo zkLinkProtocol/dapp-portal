@@ -3,9 +3,10 @@
     <MenuButton as="template">
       <CommonButtonDropdown :toggled="open">
         <template #left-icon>
-          <IconsEra />
+          <!-- <IconsEra /> -->
+          <img class="image-loader-image loaded" src="/img/cion.png">
         </template>
-        <span>{{ selectedNetwork.name }}</span>
+        <span>{{ selectedNetwork.l1Network?.name }}</span>
       </CommonButtonDropdown>
     </MenuButton>
 
@@ -25,9 +26,10 @@
             @click="buttonClicked(item)"
           >
             <template #left-icon>
-              <IconsEra />
+              <!-- <IconsEra /> -->
+            <img class="image-loader-image loaded" :src="item.logoUrl">
             </template>
-            <span>{{ item.name }}</span>
+            <span>{{ item.l1Network?.name }}</span>
             <template #right-icon>
               <CheckIcon v-if="isNetworkSelected(item)" aria-hidden="true" />
             </template>

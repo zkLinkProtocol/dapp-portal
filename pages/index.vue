@@ -13,7 +13,7 @@
     <div class="mt-5 flex flex-wrap items-center justify-center gap-block-gap">
       <CommonButton as="RouterLink" :to="{ name: 'assets' }" size="xs">Go to Assets page</CommonButton>
       <CommonButton size="xs" as="RouterLink" :to="{ name: 'withdraw' }">
-        Bridge to {{ destinations.ethereum.label }}
+        Bridge to {{ destinations.arbitrum.label }}
       </CommonButton>
     </div>
   </div>
@@ -32,7 +32,7 @@ import DepositView from "@/views/transactions/Deposit.vue";
 
 const { destinations } = storeToRefs(useDestinationsStore());
 const { eraNetwork } = storeToRefs(useZkSyncProviderStore());
-const depositDisabled = computed(() => eraNetwork.value.key === "mainnet");
+const depositDisabled = computed(() => eraNetwork.value.key === "sepolia");
 </script>
 
 <style lang="scss" scoped></style>

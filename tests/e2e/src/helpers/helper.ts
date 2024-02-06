@@ -4,7 +4,7 @@ import crypto from "crypto";
 import * as dotenv from "dotenv";
 import { ethers } from "ethers";
 import https from "https";
-import { Provider } from "zksync-web3";
+import { Provider } from "@/zksync-web3-nova";
 
 import { MainPage } from "../pages/main.page";
 import { config, wallet } from "../support/config";

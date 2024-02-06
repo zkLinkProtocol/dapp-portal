@@ -1,4 +1,4 @@
-import { goerli, mainnet, sepolia } from "@wagmi/core/chains";
+import { goerli, mainnet, sepolia, arbitrumSepolia, scrollSepolia, zkSyncSepoliaTestnet } from "@wagmi/core/chains";
 
 import type { Token } from "@/types";
 import type { Chain } from "@wagmi/core/chains";
@@ -17,6 +17,19 @@ export const l1Networks = {
     ...sepolia,
     name: "Ethereum Sepolia Testnet",
   },
+
+  arbitrumSepolia:{
+    ...arbitrumSepolia,
+    name: "Arbitrum Sepolia Testnet"
+  },
+  scrollSepolia:{
+    ...scrollSepolia,
+    name:"Scroll Sepolia Testnet"
+  },
+  zkSyncSepoliaTestnet:{
+    ...zkSyncSepoliaTestnet,
+    name: "zkSync Sepolia Testnet"
+  }
 } as const;
 export type L1Network = Chain;
 
@@ -30,9 +43,11 @@ export type ZkSyncNetwork = {
   blockExplorerUrl?: string;
   blockExplorerApi?: string;
   withdrawalFinalizerApi?: string;
+  logoUrl?: string;
   displaySettings?: {
     showPartnerLinks?: boolean;
   };
+  mainContract?: string;
   getTokens?: () => Token[] | Promise<Token[]>; // If blockExplorerApi is specified, tokens will be fetched from there. Otherwise, this function will be used.
 };
 
@@ -51,19 +66,83 @@ export const inMemoryNode: ZkSyncNetwork = {
 export const dockerizedNode: ZkSyncNetwork = {
   id: 270,
   key: "dockerized-node",
-  name: "Dockerized local node",
-  rpcUrl: "http://localhost:3050",
+  name: "zkLink Nova Testnet",
+  rpcUrl: "http://3.85.245.224:3050",
   l1Network: {
     id: 9,
-    name: "Ethereum Local Node",
+    name: "Arbitrum Sepolia",
     network: "ethereum-node",
     nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
     rpcUrls: {
-      default: { http: ["http://localhost:8545"] },
-      public: { http: ["http://localhost:8545"] },
+      default: { http: ["http://3.85.245.224:8545"] },
+      public: { http: ["http://3.85.245.224:8545"] },
     },
   },
 };
+
+export const nexusNode: ZkSyncNetwork[] = [
+  {
+    id: 12345,
+    key: "primary",
+    name: "zkLink Nova Testnet",
+    rpcUrl: "http://3.85.245.224:3050",
+    logoUrl: "/img/cion.png",
+    mainContract:"",
+    //TODO
+    // l1Network: l1Networks.arbitrumSepolia,
+    l1Network: {
+      id: 9,
+      name: "Arbitrum Sepolia1",
+      network: "ethereum-node",
+      nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+      rpcUrls: {
+        default: { http: ["http://3.85.245.224:8545"] },
+        public: { http: ["http://3.85.245.224:8545"] },
+      },
+    },
+  },
+  {
+    id: 12345,
+    key: "testnet2",
+    name: "zkLink Nova Testnet",
+    rpcUrl: "http://3.85.245.224:3050",
+    logoUrl: "/img/era.svg",
+    mainContract:"",
+    // TODO
+    // l1Network: l1Networks.zkSyncSepoliaTestnet,
+    l1Network: {
+      id: 300,
+
+      name: "zkSync Sepolia Testnet",
+      network: "ethereum-node",
+      nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+      rpcUrls: {
+        default: { http: ["http://3.85.245.224:8545"] },
+        public: { http: ["http://3.85.245.224:8545"] },
+      },
+    },
+  },
+  {
+    id: 12345,
+    key: "testnet3",
+    name: "zkLink Nova Testne",
+    rpcUrl: "http://3.85.245.224:3050",
+    logoUrl: "/img/sepolia.jpg",
+    mainContract:"",
+    //TODO
+    // l1Network: l1Networks.scrollSepolia,
+    l1Network: {
+      id: 534351,
+      name: "Scroll Sepolia Testnet",
+      network: "ethereum-node",
+      nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+      rpcUrls: {
+        default: { http: ["http://3.85.245.224:8545"] },
+        public: { http: ["http://3.85.245.224:8545"] },
+      },
+    },
+  }
+];
 
 export const zkSyncNetworks: ZkSyncNetwork[] = [
   {

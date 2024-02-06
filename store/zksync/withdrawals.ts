@@ -63,11 +63,11 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
         },
         from: {
           address: withdrawalTransfer.from,
-          destination: destinations.value.era,
+          destination: destinations.value.nova,
         },
         to: {
           address: withdrawalTransfer.to,
-          destination: destinations.value.ethereum,
+          destination: destinations.value.arbitrum,
         },
         info: {
           expectedCompleteTimestamp: new Date(

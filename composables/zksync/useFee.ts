@@ -5,7 +5,7 @@ import useTimedCache from "@/composables/useTimedCache";
 import type { Token, TokenAmount } from "@/types";
 import type { BigNumberish } from "ethers";
 import type { Ref } from "vue";
-import type { Provider } from "zksync-web3";
+import type { Provider } from "@/zksync-web3-nova";
 
 import { retry } from "@/utils/helpers";
 import { calculateFee } from "@/utils/helpers";

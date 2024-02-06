@@ -2,7 +2,7 @@ import { computed, ref } from "vue";
 
 import { BigNumber } from "ethers";
 import { parseEther } from "ethers/lib/utils";
-import { L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT } from "zksync-web3/build/src/utils";
+import { L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT } from "@/zksync-web3-nova/src/utils";
 
 import useTimedCache from "@/composables/useTimedCache";
 
@@ -10,7 +10,7 @@ import type { Token, TokenAmount } from "@/types";
 import type { PublicClient } from "@wagmi/core";
 import type { BigNumberish } from "ethers";
 import type { Ref } from "vue";
-import type { L1Signer } from "zksync-web3";
+import type { L1Signer } from "@/zksync-web3-nova";
 
 import { retry } from "@/utils/helpers";
 import { calculateFee } from "@/utils/helpers";

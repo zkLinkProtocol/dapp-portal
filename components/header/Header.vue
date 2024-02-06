@@ -2,10 +2,11 @@
   <header class="header">
     <HeaderMobileMainNavigation v-model:opened="mobileMainNavigationOpened" />
     <HeaderMobileAccountNavigation v-model:opened="mobileAccountNavigationOpened" />
-
     <div class="logo-container">
       <NuxtLink :to="{ name: 'index' }">
-        <IconsZkSync class="logo-icon" />
+        <img v-if="selectedColorMode === 'dark'" src="/img/logo.png" alt="" class="logo-icon">
+        <img v-else src="/img/logoWhite.png" alt="" class="logo-icon">
+        <!-- <IconsZkSync class="logo-icon" /> -->
       </NuxtLink>
       <span class="beta-label">Beta</span>
     </div>
@@ -85,7 +86,6 @@ import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncWithdrawalsStore } from "@/store/zksync/withdrawals";
 
 const route = useRoute();
-
 const routes = {
   bridge: ["index", "withdraw"],
   assets: ["assets", "balances", "receive-methods", "receive", "send-methods", "send"],

@@ -15,7 +15,7 @@
     <NetworkSelectModal
       v-model:opened="fromNetworkModalOpened"
       title="From"
-      :network-key="destinations.ethereum.key"
+      :network-key="destinations.arbitrum.key"
       @update:network-key="fromNetworkSelected($event)"
     />
     <NetworkSelectModal
@@ -59,9 +59,9 @@
               @click="fromNetworkModalOpened = true"
             >
               <template #left-icon>
-                <img :src="destinations.ethereum.iconUrl" class="h-full w-full" />
+                <img :src="destinations.arbitrum.iconUrl" class="h-full w-full" />
               </template>
-              <span>{{ destinations.ethereum.label }}</span>
+              <span>{{ destinations.arbitrum.label }}</span>
             </CommonButtonDropdown>
           </template>
         </CommonInputTransactionAmount>
@@ -150,7 +150,7 @@
           <CommonAlert v-if="!enoughBalanceToCoverFee" class="mt-4" variant="error" :icon="ExclamationTriangleIcon">
             <p>
               Insufficient <span class="font-medium">{{ feeToken?.symbol }}</span> balance on
-              <span class="font-medium">{{ destinations.ethereum.label }}</span> to cover the fee
+              <span class="font-medium">{{ destinations.arbitrum.label }}</span> to cover the fee
             </p>
             <NuxtLink :to="{ name: 'receive-methods' }" class="alert-link">Receive funds</NuxtLink>
           </CommonAlert>
@@ -164,7 +164,7 @@
           >
             <p>
               Insufficient <span class="font-medium">{{ feeToken?.symbol }}</span> balance on
-              {{ destinations.ethereum.label }} to cover the fee. We recommend having at least
+              {{ destinations.arbitrum.label }} to cover the fee. We recommend having at least
               <span class="font-medium"
                 >{{
                   feeToken?.price
@@ -376,6 +376,8 @@ import { checksumAddress, decimalToBigNumber, formatRawTokenPrice, parseTokenAmo
 import { silentRouterChange } from "@/utils/helpers";
 import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/transitions";
 import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
+import bridgeAbi from './ZKSyncBridgeAbi.json'
+import * as ethers from "ethers";
 
 const route = useRoute();
 const router = useRouter();
@@ -395,19 +397,19 @@ const { isCustomNode } = useNetworks();
 
 const toNetworkModalOpened = ref(false);
 const toNetworkSelected = (networkKey?: string) => {
-  if (destinations.value.ethereum.key === networkKey) {
+  if (destinations.value.arbitrum.key === networkKey) {
     router.replace({ name: "withdraw", query: route.query });
   }
 };
 const fromNetworkModalOpened = ref(false);
 const fromNetworkSelected = (networkKey?: string) => {
-  if (destinations.value.era.key === networkKey) {
+  if (destinations.value.nova.key === networkKey) {
     router.replace({ name: "withdraw", query: route.query });
   }
 };
 
 const step = ref<"form" | "confirm" | "submitted">("form");
-const destination = computed(() => destinations.value.era);
+const destination = computed(() => destinations.value.nova);
 
 const availableTokens = computed<Token[]>(() => {
   if (balance.value) return balance.value;
@@ -566,7 +568,7 @@ const enoughBalanceForTransaction = computed(() => !amountError.value);
 const transaction = computed<
   | {
       token: TokenAmount;
-      from: { address: string; destination: TransactionDestination };
+      from: { address: string; destination: TransactionDestinfonboardStoreation };
       to: { address: string; destination: TransactionDestination };
     }
   | undefined
@@ -582,7 +584,7 @@ const transaction = computed<
     },
     from: {
       address: account.value.address!,
-      destination: destinations.value.ethereum,
+      destination: destinations.value.arbitrum,
     },
     to: {
       address: toAddress,
@@ -670,15 +672,24 @@ watch(step, (newStep) => {
 const transactionInfo = ref<TransactionInfo | undefined>();
 const makeTransaction = async () => {
   if (continueButtonDisabled.value) return;
+  const { selectedNetwork } = storeToRefs(useNetworkStore());
+  let secondaryContractAddress = undefined;
 
-  const tx = await commitTransaction(
-    {
-      to: transaction.value!.to.address,
-      tokenAddress: transaction.value!.token.address,
-      amount: transaction.value!.token.amount,
-    },
-    feeValues.value!
-  );
+    if(selectedNetwork.value.key != "primary"){
+      //if secondary chain
+      //TODO
+      secondaryContractAddress = "0x90D50C4b3DE4118Cd37C9E63c3EFd95418C4fdF4";
+    }
+    const tx = await commitTransaction(
+      {
+        to: transaction.value!.to.address,
+        tokenAddress: transaction.value!.token.address,
+        amount: transaction.value!.token.amount,
+        secondaryContractAddress
+      },
+      feeValues.value!
+    );
+  
 
   if (transactionStatus.value === "done") {
     step.value = "submitted";

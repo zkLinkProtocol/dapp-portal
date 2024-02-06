@@ -2,7 +2,7 @@ import useScreening from "@/composables/useScreening";
 
 import type { DepositFeeValues } from "@/composables/zksync/deposit/useFee";
 import type { BigNumberish } from "ethers";
-import type { L1Signer } from "zksync-web3";
+import type { L1Signer } from "@/zksync-web3-nova/src";
 
 import { useZkSyncWalletStore } from "@/store/zksync/wallet";
 import { formatError } from "@/utils/formatters";
@@ -20,6 +20,7 @@ export default (getL1Signer: () => Promise<L1Signer | undefined>) => {
       to: string;
       tokenAddress: string;
       amount: BigNumberish;
+      secondaryContractAddress?:string;
     },
     fee: DepositFeeValues
   ) => {
@@ -50,6 +51,7 @@ export default (getL1Signer: () => Promise<L1Signer | undefined>) => {
         amount: transaction.amount,
         l2GasLimit: fee.l2GasLimit,
         overrides,
+        secondaryContractAddress: transaction.secondaryContractAddress
       });
 
       ethTransactionHash.value = depositResponse.hash;

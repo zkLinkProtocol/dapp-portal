@@ -19,6 +19,16 @@ export const useDestinationsStore = defineStore("destinations", () => {
       label: eraNetwork.value.name,
       iconUrl: "/img/era.svg",
     },
+    nova: {
+      key: "nova",
+      label: eraNetwork.value.name,
+      iconUrl: "/img/cion.png",
+    },
+    arbitrum: {
+      key: "arbitrum",
+      label: l1Network.value ? l1Network.value.name : "",
+      iconUrl: "/img/arbitrum-arb-logo.svg",
+    },
     ethereum: {
       key: "ethereum",
       label: l1Network.value ? l1Network.value.name : "",
