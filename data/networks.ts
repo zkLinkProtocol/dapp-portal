@@ -86,7 +86,7 @@ export const nexusNode: ZkSyncNetwork[] = [
     key: "primary",
     name: "zkLink Nova Testnet",
     rpcUrl: "http://3.85.245.224:3050",
-    logoUrl: "/img/cion.png",
+    logoUrl: "/img/arbitrum-arb-logo.svg",
     mainContract:"",
     //TODO
     // l1Network: l1Networks.arbitrumSepolia,

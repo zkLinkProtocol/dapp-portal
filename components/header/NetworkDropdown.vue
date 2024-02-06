@@ -4,7 +4,7 @@
       <CommonButtonDropdown :toggled="open">
         <template #left-icon>
           <!-- <IconsEra /> -->
-          <img class="image-loader-image loaded" src="/img/cion.png">
+          <img class="image-loader-image loaded" :src="selectedNetwork.logoUrl">
         </template>
         <span>{{ selectedNetwork.l1Network?.name }}</span>
       </CommonButtonDropdown>
