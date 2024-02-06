@@ -10,7 +10,7 @@ import type { Token, TokenAmount } from "@/types";
 import type { PublicClient } from "@wagmi/core";
 import type { BigNumberish } from "ethers";
 import type { Ref } from "vue";
-import type { L1Signer } from "@/zksync-web3-nova";
+import type { L1Signer } from "@/zksync-web3-nova/src";
 
 import { retry } from "@/utils/helpers";
 import { calculateFee } from "@/utils/helpers";

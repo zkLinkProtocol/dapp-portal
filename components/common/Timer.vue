@@ -38,13 +38,14 @@ watch(
 let intervalId: ReturnType<typeof setInterval> | undefined = undefined;
 
 const formatTimeDiff = (diff: number): string => {
-  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const day = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor(diff % (1000 * 60 * 60 * 24) / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
   const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
   if (props.format === "human-readable") {
     let formattedString = "";
-    if (hours > 0) formattedString += `${hours} hour${hours > 1 ? "s" : ""} `;
+    if (hours > 0) formattedString += `${day} day ${hours} hour${hours > 1 ? "s" : ""} `;
     if (minutes > 0) formattedString += `${minutes} minute${minutes > 1 ? "s" : ""} `;
     if (!formattedString.length) formattedString += `${seconds} second${seconds !== 1 ? "s" : ""}`;
     return formattedString;

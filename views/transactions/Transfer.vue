@@ -68,9 +68,9 @@
               @click="fromNetworkModalOpened = true"
             >
               <template #left-icon>
-                <img :src="destinations.era.iconUrl" class="h-full w-full" />
+                <img :src="destinations.nova.iconUrl" class="h-full w-full" />
               </template>
-              <span class="truncate">{{ destinations.era.label }}</span>
+              <span class="truncate">{{ destinations.nova.label }}</span>
             </CommonButtonDropdown>
           </template>
         </CommonInputTransactionAmount>
@@ -164,11 +164,11 @@
           class="mb-block-padding-1/2 sm:mb-block-gap"
         >
           <p v-if="withdrawalManualFinalizationRequired">
-            You will be able to claim your withdrawal only after a 24-hour withdrawal delay.
+            You will be able to claim your withdrawal only after a 7-day withdrawal delay.
             <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">Learn more</a>
           </p>
           <p v-else>
-            You will receive funds only after a 24-hour withdrawal delay.
+            You will receive funds only after a 7-day withdrawal delay.
             <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">Learn more</a>
           </p>
         </CommonAlert>

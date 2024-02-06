@@ -36,7 +36,7 @@ export type TransactionInfo = {
 };
 
 export const ESTIMATED_DEPOSIT_DELAY = 15 * 60 * 1000; // 15 minutes
-export const WITHDRAWAL_DELAY = 24 * 60 * 60 * 1000; // 24 hours
+export const WITHDRAWAL_DELAY = 7 * 24 * 60 * 60 * 1000; // 24 hours
 export type Address = Hash;
 export type ForwardL2Request = {
   gateway: Address;

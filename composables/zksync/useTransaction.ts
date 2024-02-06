@@ -5,7 +5,7 @@ import { parseEther } from "ethers/lib/utils";
 import useScreening from "@/composables/useScreening";
 
 import type { TokenAmount } from "@/types";
-import type { Provider, Signer } from "@/zksync-web3-nova";
+import type { Provider, Signer } from "@/zksync-web3-nova/src";
 
 import { useZkSyncWalletStore } from "@/store/zksync/wallet";
 import { formatError } from "@/utils/formatters";

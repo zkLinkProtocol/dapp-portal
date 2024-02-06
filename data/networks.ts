@@ -87,6 +87,9 @@ export const nexusNode: ZkSyncNetwork[] = [
     name: "zkLink Nova Testnet",
     rpcUrl: "http://3.85.245.224:3050",
     logoUrl: "/img/arbitrum-arb-logo.svg",
+    blockExplorerUrl: "http://3.85.245.224:3010",
+    blockExplorerApi: "http://3.85.245.224:3020",
+    withdrawalFinalizerApi: "",
     mainContract:"",
     //TODO
     // l1Network: l1Networks.arbitrumSepolia,
@@ -107,6 +110,9 @@ export const nexusNode: ZkSyncNetwork[] = [
     name: "zkLink Nova Testnet",
     rpcUrl: "http://3.85.245.224:3050",
     logoUrl: "/img/era.svg",
+    blockExplorerUrl: "http://3.85.245.224:3010",
+    blockExplorerApi: "http://3.85.245.224:3020",
+    withdrawalFinalizerApi: "",
     mainContract:"",
     // TODO
     // l1Network: l1Networks.zkSyncSepoliaTestnet,
@@ -128,6 +134,9 @@ export const nexusNode: ZkSyncNetwork[] = [
     name: "zkLink Nova Testne",
     rpcUrl: "http://3.85.245.224:3050",
     logoUrl: "/img/sepolia.jpg",
+    blockExplorerUrl: "http://3.85.245.224:3010",
+    blockExplorerApi: "http://3.85.245.224:3020",
+    withdrawalFinalizerApi: "",
     mainContract:"",
     //TODO
     // l1Network: l1Networks.scrollSepolia,
