@@ -82,75 +82,58 @@ export const dockerizedNode: ZkSyncNetwork = {
 
 export const nexusNode: ZkSyncNetwork[] = [
   {
-    id: 12345,
+    id: 810181,
+    key: "sepolia",
+    name: "zkLink Nova Testnet",
+    rpcUrl: "https://sepolia.rpc.zklink.network",
+    logoUrl: "/img/ethereum.svg",
+    blockExplorerUrl: "https://sepolia.explorer.zklink.network",
+    blockExplorerApi: "https://sepolia.explorer-api.zklink.network",
+    withdrawalFinalizerApi: "http://3.85.245.224:3000",
+    mainContract: "0x53438eddeB3d3fD39c99150acA2575f73cE14198",
+    //TODO
+    l1Network: l1Networks.sepolia,
+  },
+  {
+    id: 810181,
     key: "primary",
     name: "zkLink Nova Testnet",
-    rpcUrl: "http://3.85.245.224:3050",
+    rpcUrl: "https://sepolia.rpc.zklink.network",
     logoUrl: "/img/arbitrum-arb-logo.svg",
-    blockExplorerUrl: "http://3.85.245.224:3010",
-    blockExplorerApi: "http://3.85.245.224:3020",
+    blockExplorerUrl: "https://sepolia.explorer.zklink.network",
+    blockExplorerApi: "https://sepolia.explorer-api.zklink.network",
     withdrawalFinalizerApi: "http://3.85.245.224:3000",
-    mainContract: "",
+    mainContract: "0x788269f9353D7cbfE33c0889B7Dd1CAe833636E6",
     //TODO
-    // l1Network: l1Networks.arbitrumSepolia,
-    l1Network: {
-      id: 9,
-      name: "Arbitrum Sepolia1",
-      network: "ethereum-node",
-      nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
-      rpcUrls: {
-        default: { http: ["http://3.85.245.224:8545"] },
-        public: { http: ["http://3.85.245.224:8545"] },
-      },
-    },
+    l1Network: l1Networks.arbitrumSepolia,
   },
+  /*
   {
-    id: 12345,
-    key: "testnet2",
+    id: 810181,
+    key: "zksyncsepolia",
     name: "zkLink Nova Testnet",
-    rpcUrl: "http://3.85.245.224:3050",
+    rpcUrl: "https://sepolia.rpc.zklink.network",
     logoUrl: "/img/era.svg",
-    blockExplorerUrl: "http://3.85.245.224:3010",
-    blockExplorerApi: "http://3.85.245.224:3020",
+    blockExplorerUrl: "https://sepolia.explorer.zklink.network",
+    blockExplorerApi: "https://sepolia.explorer-api.zklink.network",
     withdrawalFinalizerApi: "",
-    mainContract: "",
+    mainContract: "0x916aa29B23DBC0f143e1cEaE0460C874FCEc0f58",
     // TODO
-    // l1Network: l1Networks.zkSyncSepoliaTestnet,
-    l1Network: {
-      id: 300,
-
-      name: "zkSync Sepolia Testnet",
-      network: "ethereum-node",
-      nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
-      rpcUrls: {
-        default: { http: ["http://3.85.245.224:8545"] },
-        public: { http: ["http://3.85.245.224:8545"] },
-      },
-    },
+    l1Network: l1Networks.zkSyncSepoliaTestnet,
   },
   {
-    id: 12345,
-    key: "testnet3",
+    id: 810181,
+    key: "scrollsepolia",
     name: "zkLink Nova Testne",
-    rpcUrl: "http://3.85.245.224:3050",
+    rpcUrl: "https://sepolia.rpc.zklink.network",
     logoUrl: "/img/sepolia.jpg",
-    blockExplorerUrl: "http://3.85.245.224:3010",
-    blockExplorerApi: "http://3.85.245.224:3020",
+    blockExplorerUrl: "https://sepolia.explorer.zklink.network",
+    blockExplorerApi: "https://sepolia.explorer-api.zklink.network",
     withdrawalFinalizerApi: "",
-    mainContract: "",
+    mainContract: "0x939016af6140141d89C4252b0c0013F4e5F1f4D7",
     //TODO
-    // l1Network: l1Networks.scrollSepolia,
-    l1Network: {
-      id: 534351,
-      name: "Scroll Sepolia Testnet",
-      network: "ethereum-node",
-      nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
-      rpcUrls: {
-        default: { http: ["http://3.85.245.224:8545"] },
-        public: { http: ["http://3.85.245.224:8545"] },
-      },
-    },
-  },
+    l1Network: l1Networks.scrollSepolia,
+  },*/
 ];
 
 export const zkSyncNetworks: ZkSyncNetwork[] = [

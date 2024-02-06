@@ -19,7 +19,7 @@ import { ethers, type BigNumberish, type BytesLike } from "ethers";
 import type { TransactionRequest } from "@ethersproject/abstract-provider";
 import { createPublicClient, http } from "viem";
 import { Interface } from "ethers/lib/utils";
-import { zkSyncSepoliaTestnet } from "viem/chains";
+
 export type TransactionInfo = {
   type: FeeEstimationParams["type"] | "deposit";
   token: TokenAmount;

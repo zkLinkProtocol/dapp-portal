@@ -376,7 +376,7 @@ import { checksumAddress, decimalToBigNumber, formatRawTokenPrice, parseTokenAmo
 import { silentRouterChange } from "@/utils/helpers";
 import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/transitions";
 import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
-import bridgeAbi from './ZKSyncBridgeAbi.json'
+import bridgeAbi from "./ZKSyncBridgeAbi.json";
 import * as ethers from "ethers";
 
 const route = useRoute();
@@ -675,21 +675,20 @@ const makeTransaction = async () => {
   const { selectedNetwork } = storeToRefs(useNetworkStore());
   let secondaryContractAddress = undefined;
 
-    if(selectedNetwork.value.key != "primary"){
-      //if secondary chain
-      //TODO
-      secondaryContractAddress = "0x90D50C4b3DE4118Cd37C9E63c3EFd95418C4fdF4";
-    }
-    const tx = await commitTransaction(
-      {
-        to: transaction.value!.to.address,
-        tokenAddress: transaction.value!.token.address,
-        amount: transaction.value!.token.amount,
-        secondaryContractAddress
-      },
-      feeValues.value!
-    );
-  
+  if (selectedNetwork.value.key != "primary") {
+    //if secondary chain
+    //TODO
+    secondaryContractAddress = selectedNetwork.value.mainContract;
+  }
+  const tx = await commitTransaction(
+    {
+      to: transaction.value!.to.address,
+      tokenAddress: transaction.value!.token.address,
+      amount: transaction.value!.token.amount,
+      secondaryContractAddress,
+    },
+    feeValues.value!
+  );
 
   if (transactionStatus.value === "done") {
     step.value = "submitted";
