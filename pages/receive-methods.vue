@@ -26,7 +26,8 @@
         />
       </CommonCardWithLineButtons>
       <CommonCardWithLineButtons v-if="isTestnet">
-        <DestinationItem
+        <!-- //TODO Faucet-->
+        <!-- <DestinationItem
           label="Faucet"
           description="Receive testnet funds"
           icon-url="/img/faucet.svg"
@@ -34,7 +35,7 @@
           href="https://docs.zksync.io/build/tooling/network-faucets.html"
           target="_blank"
           :icon="ArrowTopRightOnSquareIcon"
-        />
+        /> -->
       </CommonCardWithLineButtons>
       <CommonCardWithLineButtons v-if="isMainnet && eraNetwork.displaySettings?.showPartnerLinks">
         <DestinationItem
@@ -84,8 +85,10 @@ import { useZkSyncProviderStore } from "@/store/zksync/provider";
 
 const { destinations } = storeToRefs(useDestinationsStore());
 const { eraNetwork } = storeToRefs(useZkSyncProviderStore());
-const isMainnet = computed(() => eraNetwork.value.l1Network?.id === mainnet.id);
-const isTestnet = computed(() => eraNetwork.value.l1Network && eraNetwork.value.l1Network.id !== mainnet.id);
+// const isMainnet = computed(() => eraNetwork.value.l1Network?.id === mainnet.id);
+const isMainnet = computed(() => eraNetwork.value.id === mainnet.id); //TODO change to nova mainnet chainid
+// const isTestnet = computed(() => eraNetwork.value.l1Network && eraNetwork.value.l1Network.id !== mainnet.id);
+const isTestnet = computed(() => eraNetwork.value.id === 810181);
 </script>
 
 <style lang="scss" scoped></style>

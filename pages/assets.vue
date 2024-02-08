@@ -185,8 +185,10 @@ const depositMethods = computed(() => {
     });
   }
 
-  const isMainnet = eraNetwork.value.l1Network?.id === mainnet.id;
-  const isTestnet = eraNetwork.value.l1Network && eraNetwork.value.l1Network.id !== mainnet.id;
+  // const isMainnet = eraNetwork.value.l1Network?.id === mainnet.id;
+  const isMainnet = eraNetwork.value.id === mainnet.id; //TODO change to nova chain id
+  // const isTestnet = eraNetwork.value.l1Network && eraNetwork.value.l1Network.id !== mainnet.id;
+  const isTestnet = eraNetwork.value.id === 810181;
   if (isTestnet && eraNetwork.value.displaySettings?.showPartnerLinks) {
     methods.push({
       props: {
