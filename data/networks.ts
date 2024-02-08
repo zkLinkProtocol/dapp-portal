@@ -107,7 +107,6 @@ export const nexusNode: ZkSyncNetwork[] = [
     //TODO
     l1Network: l1Networks.arbitrumSepolia,
   },
-  /*
   {
     id: 810181,
     key: "zksyncsepolia",
@@ -121,19 +120,19 @@ export const nexusNode: ZkSyncNetwork[] = [
     // TODO
     l1Network: l1Networks.zkSyncSepoliaTestnet,
   },
-  {
-    id: 810181,
-    key: "scrollsepolia",
-    name: "zkLink Nova Testne",
-    rpcUrl: "https://sepolia.rpc.zklink.network",
-    logoUrl: "/img/sepolia.jpg",
-    blockExplorerUrl: "https://sepolia.explorer.zklink.network",
-    blockExplorerApi: "https://sepolia.explorer-api.zklink.network",
-    withdrawalFinalizerApi: "",
-    mainContract: "0x939016af6140141d89C4252b0c0013F4e5F1f4D7",
-    //TODO
-    l1Network: l1Networks.scrollSepolia,
-  },*/
+  // {
+  //   id: 810181,
+  //   key: "scrollsepolia",
+  //   name: "zkLink Nova Testne",
+  //   rpcUrl: "https://sepolia.rpc.zklink.network",
+  //   logoUrl: "/img/sepolia.jpg",
+  //   blockExplorerUrl: "https://sepolia.explorer.zklink.network",
+  //   blockExplorerApi: "https://sepolia.explorer-api.zklink.network",
+  //   withdrawalFinalizerApi: "",
+  //   mainContract: "0x939016af6140141d89C4252b0c0013F4e5F1f4D7",
+  //   //TODO
+  //   l1Network: l1Networks.scrollSepolia,
+  // },
 ];
 
 export const zkSyncNetworks: ZkSyncNetwork[] = [
