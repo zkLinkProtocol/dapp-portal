@@ -4,11 +4,11 @@
     <HeaderMobileAccountNavigation v-model:opened="mobileAccountNavigationOpened" />
     <div class="logo-container">
       <NuxtLink :to="{ name: 'index' }">
-        <img v-if="selectedColorMode === 'dark'" src="/img/logo.png" alt="" class="logo-icon">
-        <img v-else src="/img/logoWhite.png" alt="" class="logo-icon">
+        <img v-if="selectedColorMode === 'dark'" src="/img/logo.png" alt="" class="logo-icon" />
+        <img v-else src="/img/logoWhite.png" alt="" class="logo-icon" />
         <!-- <IconsZkSync class="logo-icon" /> -->
       </NuxtLink>
-      <span class="beta-label">Beta</span>
+      <span class="beta-label">Testnet</span>
     </div>
     <div class="links-container">
       <NuxtLink
