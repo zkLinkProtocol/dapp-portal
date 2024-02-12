@@ -19,7 +19,9 @@ type TransactionParams = {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const isWithdrawalManualFinalizationRequired = (token: TokenAmount, l1NetworkId: number) => {
-  return token.address === ETH_TOKEN.address && BigNumber.from(token.amount).lt(parseEther("0.01"));
+  return true;
+  //TODO force manual finalization
+  // return token.address === ETH_TOKEN.address && BigNumber.from(token.amount).lt(parseEther("0.01"));
 };
 
 export default (getSigner: () => Promise<Signer | undefined>, getProvider: () => Provider) => {

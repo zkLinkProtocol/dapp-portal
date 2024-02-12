@@ -124,6 +124,14 @@
       <template v-else-if="step === 'withdrawal-finalization-warning'">
         <CommonAlert variant="warning" :icon="ExclamationTriangleIcon" class="mb-block-padding-1/2 sm:mb-block-gap">
           <p>
+            Once your withdrawal is processed and available on
+            {{ eraNetwork.l1Network?.name }}, you will need to manually claim your funds which requires paying another
+            transaction fee on {{ eraNetwork.l1Network?.name }}.
+          </p>
+        </CommonAlert>
+        <!--         //TODO forced manual withdraw
+        <CommonAlert variant="warning" :icon="ExclamationTriangleIcon" class="mb-block-padding-1/2 sm:mb-block-gap">
+          <p>
             You are withdrawing less than 0.01 ETH. Once your withdrawal is processed and available on
             {{ eraNetwork.l1Network?.name }}, you will need to manually claim your funds which requires paying another
             transaction fee on {{ eraNetwork.l1Network?.name }}. Transactions of 0.01 ETH or more are finalized
@@ -151,7 +159,8 @@
         >
           See third-party bridges
           <ArrowTopRightOnSquareIcon class="h-6 w-6" aria-hidden="true" />
-        </CommonButton>
+        </CommonButton> -->
+
         <CommonButton size="sm" class="mx-auto mt-block-gap w-max" @click="buttonContinue()">
           I understand, proceed to withdrawal
         </CommonButton>
