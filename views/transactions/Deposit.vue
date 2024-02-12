@@ -376,8 +376,6 @@ import { checksumAddress, decimalToBigNumber, formatRawTokenPrice, parseTokenAmo
 import { silentRouterChange } from "@/utils/helpers";
 import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/transitions";
 import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
-import bridgeAbi from "./ZKSyncBridgeAbi.json";
-import * as ethers from "ethers";
 
 const route = useRoute();
 const router = useRouter();
