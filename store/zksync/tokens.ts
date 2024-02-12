@@ -3,7 +3,6 @@ import { $fetch } from "ofetch";
 import type { Api } from "@/types";
 import type { Token } from "@/types";
 
-import { useNetworkStore } from "@/store/network";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { mapApiToken } from "@/utils/mappers";
 
@@ -19,7 +18,7 @@ export const useZkSyncTokensStore = defineStore("zkSyncTokens", () => {
   } = usePromise<Token[]>(async () => {
     if (eraNetwork.value.blockExplorerApi) {
       const response: Api.Response.Collection<Api.Response.Token> = await $fetch(
-        `${eraNetwork.value.blockExplorerApi}/tokens?limit=100&key=`+eraNetwork.value.key
+        `${eraNetwork.value.blockExplorerApi}/tokens?limit=100&key=` + eraNetwork.value.key
       );
       const explorerTokens = response.items.map(mapApiToken);
       const etherExplorerToken = explorerTokens.find((token) => token.address === ETH_TOKEN.address);
