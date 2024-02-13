@@ -20,7 +20,6 @@ export default (getL1Signer: () => Promise<L1Signer | undefined>) => {
       to: string;
       tokenAddress: string;
       amount: BigNumberish;
-      secondaryContractAddress?:string;
     },
     fee: DepositFeeValues
   ) => {
@@ -51,7 +50,6 @@ export default (getL1Signer: () => Promise<L1Signer | undefined>) => {
         amount: transaction.amount,
         l2GasLimit: fee.l2GasLimit,
         overrides,
-        secondaryContractAddress: transaction.secondaryContractAddress
       });
 
       ethTransactionHash.value = depositResponse.hash;
