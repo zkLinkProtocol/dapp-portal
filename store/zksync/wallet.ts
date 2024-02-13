@@ -10,7 +10,8 @@ import type { BigNumberish } from "ethers";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncTokensStore } from "@/store/zksync/tokens";
-
+import useNetworks from "@/composables/useNetworks";
+import { getPublicClient } from "@wagmi/core";
 export const useZkSyncWalletStore = defineStore("zkSyncWallet", () => {
   const onboardStore = useOnboardStore();
   const providerStore = useZkSyncProviderStore();
@@ -19,6 +20,7 @@ export const useZkSyncWalletStore = defineStore("zkSyncWallet", () => {
   const { tokens } = storeToRefs(tokensStore);
   const { account, network } = storeToRefs(onboardStore);
   const { validateAddress } = useScreening();
+  const { primaryNetwork } = useNetworks();
 
   const { execute: getSigner, reset: resetSigner } = usePromise(async () => {
     const walletNetworkId = network.value.chain?.id;
@@ -57,6 +59,14 @@ export const useZkSyncWalletStore = defineStore("zkSyncWallet", () => {
     return L1VoidSigner.from(voidSigner, providerStore.requestProvider()) as unknown as L1Signer;
   };
 
+  const getPrimaryL1VoidSigner = () => {
+    const web3Provider = new ethers.providers.Web3Provider(
+      getPublicClient({ chainId: primaryNetwork.l1Network?.id }) as any,
+      "any"
+    );
+    const voidSigner = new VoidSigner(account.value.address || ETH_TOKEN.address, web3Provider);
+    return L1VoidSigner.from(voidSigner, providerStore.requestPrimaryProvider()) as unknown as L1Signer;
+  };
   const {
     result: accountState,
     execute: requestAccountState,
@@ -182,6 +192,7 @@ export const useZkSyncWalletStore = defineStore("zkSyncWallet", () => {
     getSigner,
     getL1Signer,
     getL1VoidSigner,
+    getPrimaryL1VoidSigner,
 
     balance,
     balanceInProgress: computed(() => balanceInProgress.value),
