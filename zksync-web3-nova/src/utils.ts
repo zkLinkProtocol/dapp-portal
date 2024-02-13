@@ -61,6 +61,8 @@ export const DEFAULT_GAS_PER_PUBDATA_LIMIT = 50000;
 // the cost per gas will be adjusted respectively. We will use 800 as an relatively optimal value for now.
 export const REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT = 800;
 
+export const PRIMARY_CHAIN_KEY = "primary";
+
 export function isETH(token: Address) {
   return token.toLowerCase() == ETH_ADDRESS || token.toLowerCase() == L2_ETH_TOKEN_ADDRESS;
 }

@@ -4,6 +4,7 @@ import type { ZkSyncNetwork } from "@/data/networks";
 import type { Token } from "@/types";
 
 import { zkSyncNetworks as defaultEraNetworks, dockerizedNode, inMemoryNode, nexusNode } from "@/data/networks";
+import { PRIMARY_CHAIN_KEY } from "~/zksync-web3-nova/src/utils";
 
 export default () => {
   const runtimeConfig = useRuntimeConfig();
@@ -28,11 +29,15 @@ export default () => {
   }
 
   const defaultNetwork = zkSyncNetworks[0];
-
+  const primaryNetwork = zkSyncNetworks.find((e) => e.key === PRIMARY_CHAIN_KEY);
+  if (!primaryNetwork) {
+    throw new Error("can not find primary chain. nodeType: " + runtimeConfig.public.nodeType);
+  }
   return {
     isCustomNode,
 
     zkSyncNetworks,
     defaultNetwork,
+    primaryNetwork,
   };
 };
