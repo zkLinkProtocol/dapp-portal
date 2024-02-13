@@ -11,14 +11,9 @@ import type { Hash } from "@/types";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncWalletStore } from "@/store/zksync/wallet";
-import { useNetworkStore } from "@/store/network";
 import { abi as secondaryAbi } from "@/views/transactions/ZkLink.json";
-import { abi as primaryGetterAbi } from "@/views/transactions/GettersFacet.json";
-import type { PublicClient } from "@wagmi/core";
 import { ethers, type BigNumberish, type BytesLike } from "ethers";
-import type { TransactionRequest } from "@ethersproject/abstract-provider";
-import { createPublicClient, http } from "viem";
-import { Interface } from "ethers/lib/utils";
+import { PRIMARY_CHAIN_KEY } from "~/zksync-web3-nova/src/utils";
 
 export type TransactionInfo = {
   type: FeeEstimationParams["type"] | "deposit";
@@ -27,6 +22,7 @@ export type TransactionInfo = {
   to: { address: string; destination: TransactionDestination };
   transactionHash: string;
   timestamp: string;
+  fromChainKey: string;
   info: {
     toTransactionHash?: string;
     expectedCompleteTimestamp?: string;
@@ -35,8 +31,8 @@ export type TransactionInfo = {
   };
 };
 
-export const ESTIMATED_DEPOSIT_DELAY = 15 * 60 * 1000; // 15 minutes
-export const WITHDRAWAL_DELAY = 7 * 24 * 60 * 60 * 1000; // 24 hours
+export const ESTIMATED_DEPOSIT_DELAY = 1 * 60 * 1000; // 1 minutes
+export const WITHDRAWAL_DELAY = 7 * 24 * 60 * 60 * 1000; // 7 * 24 hours
 export type Address = Hash;
 export type ForwardL2Request = {
   gateway: Address;
@@ -58,10 +54,12 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
   const { account } = storeToRefs(onboardStore);
   const { eraNetwork } = storeToRefs(providerStore);
   const eraWalletStore = useZkSyncWalletStore();
+
   const storageSavedTransactions = useStorage<{ [networkKey: string]: TransactionInfo[] }>(
     "zksync-bridge-transactions",
     {}
   );
+
   const savedTransactions = computed<TransactionInfo[]>({
     get: () => {
       return storageSavedTransactions.value[eraNetwork.value.key] || [];
@@ -100,13 +98,12 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
     throw new Error("No L2 transaction hash found");
   };
 
-  const getDepositL2TransactionHashForSecondary = async (
-    l1TransactionHash: string,
-    secondaryClient: PublicClient
-  ): Promise<Hash> => {
-    const transaction = await secondaryClient.waitForTransactionReceipt({
+  const getDepositL2TransactionHashForSecondary = async (l1TransactionHash: string): Promise<Hash> => {
+    const publicClient = onboardStore.getPublicClient();
+    const transaction = await publicClient.waitForTransactionReceipt({
       hash: l1TransactionHash as Hash,
     });
+    console.log("getDepositL2TransactionHashForSecondary", l1TransactionHash);
     let forwardL2Request: ForwardL2Request | undefined;
     for (const log of transaction.logs) {
       try {
@@ -146,10 +143,10 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
         ],
       ]
     );
-    const forwardHash = ethers.utils.keccak256(encodedata);
-
+    const forwardHash = ethers.utils.keccak256(encodedata) as Hash;
+    console.log(forwardHash);
     while (true) {
-      const canonicalTxHash = await getCanonicalTxHash(forwardHash);
+      const canonicalTxHash = await eraWalletStore.getPrimaryL1VoidSigner().getCanonicalTxHash(forwardHash);
       if (canonicalTxHash) return canonicalTxHash;
       await sleep(5000);
     }
@@ -157,52 +154,17 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
   function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
-  const getCanonicalTxHash = async (forwardHash: string): Promise<Hash> => {
-    const publicClient = onboardStore.getPublicClient();
-    const mainContractAddress = await providerStore.requestProvider().getMainContractAddress();
 
-    const wallet = await eraWalletStore.getL1Signer();
-    const mainContract = await wallet?.getMainContract();
-    //TODO planA
-    // const canonicalTxHash = await mainContract?.populateTransaction.getCanonicalTxHash(forwardHash);
-
-    //TODO plan C
-    const iface = new Interface(primaryGetterAbi);
-    let tx: TransactionRequest = {
-      to: mainContractAddress,
-      data: iface.encodeFunctionData("getCanonicalTxHash", [forwardHash]),
-    };
-    // const canonicalTxHash = await providerStore.requestProvider().call(tx)
-
-    //TODO plan B
-    const canonicalTxHash = await publicClient.readContract({
-      address: mainContractAddress as Address,
-      abi: primaryGetterAbi,
-      functionName: "getCanonicalTxHash",
-      args: [forwardHash],
-    });
-
-    return canonicalTxHash as Hash;
-  };
   const updateDepositStatus = async (transaction: TransactionInfo) => {
-    const { selectedNetwork } = storeToRefs(useNetworkStore());
-    console.log(selectedNetwork.value);
     let transactionHash;
-
-    if (selectedNetwork.value.key != "primary") {
+    console.log("from chainkey", transaction.fromChainKey);
+    if (transaction.fromChainKey !== PRIMARY_CHAIN_KEY) {
       // if secondary chain
-      const secondaryPublicClient = createPublicClient({
-        chain: selectedNetwork.value.l1Network!,
-        transport: http(),
-      });
-
-      transactionHash = await getDepositL2TransactionHashForSecondary(
-        transaction.transactionHash,
-        secondaryPublicClient
-      );
+      transactionHash = await getDepositL2TransactionHashForSecondary(transaction.transactionHash);
     } else {
       transactionHash = await getDepositL2TransactionHash(transaction.transactionHash);
     }
+
     const transactionReceipt = await providerStore.requestProvider().getTransactionReceipt(transactionHash);
     if (!transactionReceipt) return transaction;
     transaction.info.toTransactionHash = transactionHash;
