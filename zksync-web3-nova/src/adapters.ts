@@ -1,4 +1,4 @@
-import { BigNumber, BigNumberish, BytesLike, ethers } from "ethers";
+import { BigNumber, BigNumberish, BytesLike, ethers, utils } from "ethers";
 import { IERC20MetadataFactory, IL1BridgeFactory, IL2BridgeFactory, IZkSyncFactory } from "../typechain";
 import { Provider } from "./provider";
 import {
@@ -8,6 +8,7 @@ import {
   Eip712Meta,
   FullDepositFee,
   PriorityOpResponse,
+  TransactionRequest,
   TransactionResponse,
 } from "./types";
 import {
@@ -25,6 +26,9 @@ import {
   L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT,
   L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT,
 } from "./utils";
+import { Hash } from "~/types";
+import { Interface } from "ethers/lib/utils";
+import { abi as primaryGetterAbi } from "../abi/GettersFacet.json";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -45,9 +49,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       throw new Error("Must be implemented by the derived class!");
     }
 
-    async getMainContract(contractAddress?: Address) {
-      //TODO zklink Multi-chain
-      contractAddress = contractAddress || (await this._providerL2().getMainContractAddress());
+    async getMainContract() {
+      const contractAddress = await this._providerL2().getMainContractAddress();
       return IZkSyncFactory.connect(contractAddress, this._signerL1());
     }
 
@@ -56,6 +59,32 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       return {
         erc20: IL1BridgeFactory.connect(addresses.erc20L1!, this._signerL1()),
       };
+    }
+
+    //only support secondary chain
+    async getTxGasPrice(): Promise<BigNumberish> {
+      const contractAddress = await this._providerL2().getMainContractAddress();
+      const result = await this._providerL1().call({
+        to: contractAddress,
+        data: "0x534ca054", //call txGasPrice returns uint256
+      });
+      return BigNumber.from(utils.hexValue(result));
+    }
+
+    //only support primary chain
+    async getCanonicalTxHash(forwardHash: Hash): Promise<Hash | undefined> {
+      const contractAddress = await this._providerL2().getMainContractAddress();
+      const iface = new Interface(primaryGetterAbi);
+      let tx: TransactionRequest = {
+        to: contractAddress,
+        data: iface.encodeFunctionData("getCanonicalTxHash", [forwardHash]),
+      };
+      const ctx = (await this._providerL1().call(tx)) as Hash;
+
+      if (ctx == "0x0000000000000000000000000000000000000000000000000000000000000000") {
+        return undefined;
+      }
+      return ctx;
     }
 
     async getBalanceL1(token?: Address, blockTag?: ethers.providers.BlockTag): Promise<BigNumber> {
@@ -120,12 +149,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       parameters.gasPrice ??= await this._providerL1().getGasPrice();
       parameters.gasPerPubdataByte ??= REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
 
+      const gasPrice = this._providerL2().isPrimaryChain() ? parameters.gasPrice : await this.getTxGasPrice();
+
       return BigNumber.from(
-        await zksyncContract.l2TransactionBaseCost(
-          parameters.gasPrice,
-          parameters.gasLimit,
-          parameters.gasPerPubdataByte
-        )
+        await zksyncContract.l2TransactionBaseCost(gasPrice, parameters.gasLimit, parameters.gasPerPubdataByte)
       );
     }
 
@@ -140,10 +167,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       gasPerPubdataByte?: BigNumberish;
       overrides?: ethers.PayableOverrides;
       approveOverrides?: ethers.Overrides;
-      secondaryContractAddress?: Address;
     }): Promise<PriorityOpResponse> {
       const depositTx = await this.getDepositTx(transaction);
-      console.log(transaction);
       if (transaction.token == ETH_ADDRESS) {
         const baseGasLimit = await this.estimateGasRequestExecute(depositTx);
         const gasLimit = scaleGasLimit(baseGasLimit);
@@ -233,12 +258,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const gasPriceForEstimation = overrides.maxFeePerGas || overrides.gasPrice;
 
       const zksyncContract = await this.getMainContract();
-
-      const baseCost = await zksyncContract.l2TransactionBaseCost(
-        await gasPriceForEstimation!,
-        tx.l2GasLimit,
-        tx.gasPerPubdataByte
-      );
+      const gasPrice = this._providerL2().isPrimaryChain() ? await gasPriceForEstimation! : await this.getTxGasPrice();
+      const baseCost = await zksyncContract.l2TransactionBaseCost(gasPrice, tx.l2GasLimit, tx.gasPerPubdataByte);
 
       if (token == ETH_ADDRESS) {
         overrides.value ??= baseCost.add(operatorTip).add(amount);
@@ -299,12 +320,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         await this.getAddress(),
         tx.gasPerPubdataByte
       );
-
-      const baseCost = await zksyncContract.l2TransactionBaseCost(
-        gasPriceForMessages!,
-        l2GasLimit,
-        tx.gasPerPubdataByte
-      );
+      const gasPrice = this._providerL2().isPrimaryChain() ? gasPriceForMessages! : await this.getTxGasPrice();
+      const baseCost = await zksyncContract.l2TransactionBaseCost(gasPrice, l2GasLimit, tx.gasPerPubdataByte);
 
       const selfBalanceETH = await this.getBalanceL1();
 
@@ -543,10 +560,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       gasPerPubdataByte?: BigNumberish;
       refundRecipient?: Address;
       overrides?: ethers.PayableOverrides;
-      secondaryContractAddress?: Address;
     }): Promise<ethers.PopulatedTransaction> {
-      console.log(transaction);
-      const zksyncContract = await this.getMainContract(transaction.secondaryContractAddress);
+      const zksyncContract = await this.getMainContract();
 
       const { ...tx } = transaction;
       tx.l2Value ??= BigNumber.from(0);

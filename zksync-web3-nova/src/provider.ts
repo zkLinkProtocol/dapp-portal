@@ -33,17 +33,25 @@ import {
   sleep,
   L2_ETH_TOKEN_ADDRESS,
   REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
+  PRIMARY_CHAIN_KEY,
 } from "./utils";
 import { Signer } from "./signer";
 
 let defaultFormatter: Formatter = null;
-
+export type ContractAddresses = {
+  mainContract?: Address;
+  erc20BridgeL1?: Address;
+  erc20BridgeL2?: Address;
+};
 export class Provider extends ethers.providers.JsonRpcProvider {
-  protected contractAddresses: {
-    mainContract?: Address;
-    erc20BridgeL1?: Address;
-    erc20BridgeL2?: Address;
-  };
+  //   protected contractAddresses: {
+  //     mainContract?: Address;
+  //     erc20BridgeL1?: Address;
+  //     erc20BridgeL2?: Address;
+  //   };
+  protected contractAddressesMap: Map<string, ContractAddresses>;
+
+  protected networkKey: string;
 
   override async getTransactionReceipt(transactionHash: string | Promise<string>): Promise<TransactionReceipt> {
     await this.getNetwork();
@@ -175,7 +183,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       return ETH_ADDRESS;
     } else {
       const erc20BridgeAddress = (await this.getDefaultBridgeAddresses()).erc20L2;
-      const erc20Bridge = IL2BridgeFactory.connect(erc20BridgeAddress, this);
+      const erc20Bridge = IL2BridgeFactory.connect(erc20BridgeAddress!, this);
       return await erc20Bridge.l2TokenAddress(token);
     }
   }
@@ -185,7 +193,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       return ETH_ADDRESS;
     } else {
       const erc20BridgeAddress = (await this.getDefaultBridgeAddresses()).erc20L2;
-      const erc20Bridge = IL2BridgeFactory.connect(erc20BridgeAddress, this);
+      const erc20Bridge = IL2BridgeFactory.connect(erc20BridgeAddress!, this);
       return await erc20Bridge.l1TokenAddress(token);
     }
   }
@@ -270,7 +278,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     return BigNumber.from(price);
   }
 
-  constructor(url?: ConnectionInfo | string, network?: ethers.providers.Networkish) {
+  constructor(url?: ConnectionInfo | string, network?: ethers.providers.Networkish, networkKey?: string) {
     super(url, network);
     this.pollingInterval = 500;
 
@@ -281,8 +289,28 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       }
       return blockTag(tag);
     };
-    this.contractAddresses = {};
+    // this.contractAddresses = {};
+    this.contractAddressesMap = new Map<string, ContractAddresses>();
+    networkKey = networkKey || PRIMARY_CHAIN_KEY;
+    this.networkKey = networkKey;
+    this.contractAddressesMap.set(networkKey, {});
     this.formatter.transaction = parseTransaction;
+  }
+
+  isPrimaryChain(): boolean {
+    return this.networkKey === PRIMARY_CHAIN_KEY;
+  }
+
+  setNetworkKey(networkKey: string) {
+    this.networkKey = networkKey;
+    if (!this.contractAddressesMap.get(networkKey)) {
+      this.contractAddressesMap.set(networkKey, {});
+    }
+  }
+
+  setContractAddresses(networkKey: string, contractAddresses: ContractAddresses) {
+    this.networkKey = networkKey;
+    this.contractAddressesMap.set(networkKey, contractAddresses);
   }
 
   async getMessageProof(
@@ -312,10 +340,14 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   }
 
   async getMainContractAddress(): Promise<Address> {
-    if (!this.contractAddresses.mainContract) {
-      this.contractAddresses.mainContract = await this.send("zks_getMainContract", []);
+    let contractAddresses = this.contractAddressesMap.get(this.networkKey);
+    if (!contractAddresses) {
+      throw new Error("networkKey: " + this.networkKey + " is undefined");
     }
-    return this.contractAddresses.mainContract;
+    // if (!contractAddresses.mainContract) {
+    // contractAddresses.mainContract = await this.send("zks_getMainContract", []);
+    // }
+    return contractAddresses.mainContract!;
   }
 
   async getTestnetPaymasterAddress(): Promise<Address | null> {
@@ -325,14 +357,23 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   }
 
   async getDefaultBridgeAddresses() {
-    if (!this.contractAddresses.erc20BridgeL1) {
-      let addresses = await this.send("zks_getBridgeContracts", []);
-      this.contractAddresses.erc20BridgeL1 = addresses.l1Erc20DefaultBridge;
-      this.contractAddresses.erc20BridgeL2 = addresses.l2Erc20DefaultBridge;
+    let contractAddresses = this.contractAddressesMap.get(this.networkKey);
+    if (!contractAddresses) {
+      throw new Error("networkKey: " + this.networkKey + " is undefined");
     }
+    // if (!this.contractAddresses.erc20BridgeL1) {
+    // let addresses = await this.send("zks_getBridgeContracts", []);
+    //   this.contractAddresses.erc20BridgeL1 = addresses.l1Erc20DefaultBridge;
+    //   this.contractAddresses.erc20BridgeL2 = addresses.l2Erc20DefaultBridge;
+    // }
+    /**
+     * 
+     * "l1Erc20DefaultBridge": "0x72de6d167ded1ee5fba17334bdcce686f3204d38",
+        "l2Erc20DefaultBridge": "0x1895de0bea0eb8d8c7e6997c9be7649bb402d9e6",
+     */
     return {
-      erc20L1: this.contractAddresses.erc20BridgeL1,
-      erc20L2: this.contractAddresses.erc20BridgeL2,
+      erc20L1: contractAddresses.erc20BridgeL1,
+      erc20L2: contractAddresses.erc20BridgeL2,
     };
   }
 
