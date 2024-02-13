@@ -671,19 +671,12 @@ const transactionInfo = ref<TransactionInfo | undefined>();
 const makeTransaction = async () => {
   if (continueButtonDisabled.value) return;
   const { selectedNetwork } = storeToRefs(useNetworkStore());
-  let secondaryContractAddress = undefined;
 
-  if (selectedNetwork.value.key != "primary") {
-    //if secondary chain
-    //TODO
-    secondaryContractAddress = selectedNetwork.value.mainContract;
-  }
   const tx = await commitTransaction(
     {
       to: transaction.value!.to.address,
       tokenAddress: transaction.value!.token.address,
       amount: transaction.value!.token.amount,
-      secondaryContractAddress,
     },
     feeValues.value!
   );
@@ -694,6 +687,7 @@ const makeTransaction = async () => {
     recentlyBridged.value = true;
   }
 
+  console.log("commitTransaction", tx);
   if (tx) {
     zkSyncEthereumBalance.deductBalance(feeToken.value!.address!, fee.value!);
     zkSyncEthereumBalance.deductBalance(transaction.value!.token.address!, transaction.value!.token.amount);
@@ -704,6 +698,7 @@ const makeTransaction = async () => {
       token: transaction.value!.token,
       from: transaction.value!.from,
       to: transaction.value!.to,
+      fromChainKey: selectedNetwork.value.key,
       info: {
         expectedCompleteTimestamp: new Date(new Date().getTime() + ESTIMATED_DEPOSIT_DELAY).toISOString(),
         completed: false,
