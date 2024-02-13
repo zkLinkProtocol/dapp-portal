@@ -687,7 +687,6 @@ const makeTransaction = async () => {
     recentlyBridged.value = true;
   }
 
-  console.log("commitTransaction", tx);
   if (tx) {
     zkSyncEthereumBalance.deductBalance(feeToken.value!.address!, fee.value!);
     zkSyncEthereumBalance.deductBalance(transaction.value!.token.address!, transaction.value!.token.amount);
