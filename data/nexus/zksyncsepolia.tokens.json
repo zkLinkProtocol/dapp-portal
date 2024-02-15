@@ -1,0 +1,10 @@
+[
+    {
+        "address": "",
+        "l1Address": "0xF4e599DDce0f3a18d0174E47296EE7C3EA618f94",
+        "name": "TestErc20-1",
+        "symbol": "NTE1",
+        "decimals": 18,
+        "price":0
+    }
+]

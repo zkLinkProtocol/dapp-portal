@@ -6,7 +6,7 @@ import type { Token } from "@/types";
 import { zkSyncNetworks as defaultEraNetworks, dockerizedNode, inMemoryNode, nexusNode } from "@/data/networks";
 import { PRIMARY_CHAIN_KEY } from "~/zksync-web3-nova/src/utils";
 
-export default () => {
+export default async () => {
   const runtimeConfig = useRuntimeConfig();
 
   const isCustomNode = !!runtimeConfig.public.nodeType;
@@ -16,7 +16,11 @@ export default () => {
   } else if (runtimeConfig.public.nodeType === "dockerized") {
     zkSyncNetworks.push(dockerizedNode);
   } else if (runtimeConfig.public.nodeType === "nexus") {
-    zkSyncNetworks.push(...nexusNode);
+    let newConfig= await Promise.all(nexusNode.map(async (e)=>({
+        ...e,
+       getTokens: async ()=> await import(`../data/nexus/${e.key}.tokens.json`, { with: { type: 'json' } })
+      })));
+    zkSyncNetworks.push(...newConfig);     
   } else if (runtimeConfig.public.nodeType === "hyperchain") {
     zkSyncNetworks.push(
       ...(Hyperchains as unknown as Array<{ network: ZkSyncNetwork; tokens: Token[] }>).map((e) => ({
