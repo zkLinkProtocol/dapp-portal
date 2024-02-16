@@ -18,10 +18,12 @@ export const useZkSyncTokensStore = defineStore("zkSyncTokens", () => {
     reset: resetTokens,
   } = usePromise<Token[]>(async () => {
     if (eraNetwork.value.blockExplorerApi) {
-      const response: Api.Response.Collection<Api.Response.Token> = await $fetch(
-        `${eraNetwork.value.blockExplorerApi}/tokens?limit=100`
-      );
-      const explorerTokens = response.items.map(mapApiToken);
+      const responses: Api.Response.Collection<Api.Response.Token>[] = await Promise.all([
+        $fetch(`${eraNetwork.value.blockExplorerApi}/tokens?minLiquidity=0&limit=100&page=1`),
+        $fetch(`${eraNetwork.value.blockExplorerApi}/tokens?minLiquidity=0&limit=100&page=2`),
+        $fetch(`${eraNetwork.value.blockExplorerApi}/tokens?minLiquidity=0&limit=100&page=3`),
+      ]);
+      const explorerTokens = responses.map((response) => response.items.map(mapApiToken)).flat();
       const etherExplorerToken = explorerTokens.find((token) => token.address === ETH_TOKEN.address);
       const tokensWithoutEther = explorerTokens.filter((token) => token.address !== ETH_TOKEN.address);
       return [etherExplorerToken || ETH_TOKEN, ...tokensWithoutEther] as Token[];

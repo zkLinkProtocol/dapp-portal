@@ -23,7 +23,7 @@
             {{ error.message }}
           </CommonErrorBlock>
         </template>
-        <template v-else-if="!hasBalances">
+        <template v-else-if="isConnected && !hasBalances">
           <div class="category -mx-block-padding-1/4 sm:-mx-block-padding-1/2">
             <TokenLine
               v-for="item in displayedTokens"
@@ -52,9 +52,12 @@
           </div>
         </template>
         <p v-else class="mt-block-padding-1/2 text-center">
-          No tokens was found for "{{ search }}"
-          <br />
-          <span class="mt-1.5 inline-block">Make sure you are using correct zkSync network</span>
+          <template v-if="isConnected">
+            No tokens for "{{ search }}" were found on connected account
+            <br />
+            <span class="mt-1.5 inline-block">Make sure you are using correct zkSync network</span>
+          </template>
+          <template v-else>Connect wallet to see all tokens available for you</template>
         </p>
         <slot name="body-bottom" />
       </div>
@@ -67,10 +70,12 @@ import { computed, ref } from "vue";
 
 import { Combobox } from "@headlessui/vue";
 import { MagnifyingGlassIcon } from "@heroicons/vue/24/outline";
+import { storeToRefs } from "pinia";
 
 import type { Token, TokenAmount } from "@/types";
 import type { PropType } from "vue";
 
+import { useOnboardStore } from "@/store/onboard";
 import { groupBalancesByAmount } from "@/utils/mappers";
 
 const props = defineProps({
@@ -107,6 +112,8 @@ const emit = defineEmits<{
   (eventName: "update:tokenAddress", tokenAddress?: string): void;
   (eventName: "try-again"): void;
 }>();
+
+const { isConnected } = storeToRefs(useOnboardStore());
 
 const search = ref("");
 const hasBalances = computed(() => props.balances.length > 0);
