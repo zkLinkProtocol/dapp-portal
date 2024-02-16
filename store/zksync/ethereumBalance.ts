@@ -1,4 +1,4 @@
-import { fetchBalance } from "@wagmi/core";
+import { Address, fetchBalance } from "@wagmi/core";
 
 import type { Hash, TokenAmount } from "@/types";
 
@@ -7,7 +7,7 @@ import { useEthereumBalanceStore } from "@/store/ethereumBalance";
 import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncTokensStore } from "@/store/zksync/tokens";
-
+import { useSearchtokenStore } from "@/store/searchToken";
 export const useZkSyncEthereumBalanceStore = defineStore("zkSyncEthereumBalances", () => {
   const runtimeConfig = useRuntimeConfig();
   const onboardStore = useOnboardStore();
@@ -17,7 +17,8 @@ export const useZkSyncEthereumBalanceStore = defineStore("zkSyncEthereumBalances
   const { account } = storeToRefs(onboardStore);
   const { balance: ethereumBalance } = storeToRefs(ethereumBalancesStore);
   const { l1Tokens } = storeToRefs(tokensStore);
-
+  const searchToken = useSearchtokenStore();
+  const { balance: searchTokenBalance } = storeToRefs(searchToken);
   const getBalancesFromApi = async (): Promise<TokenAmount[]> => {
     await Promise.all([ethereumBalancesStore.requestBalance(), tokensStore.requestTokens()]);
 
@@ -44,12 +45,12 @@ export const useZkSyncEthereumBalanceStore = defineStore("zkSyncEthereumBalances
     ];
   };
   const getBalancesFromRPC = async (): Promise<TokenAmount[]> => {
-    await tokensStore.requestTokens();
+    await Promise.all([tokensStore.requestTokens(), searchToken.requestBalance()]);
     if (!l1Tokens.value) throw new Error("Tokens are not available");
     if (!account.value.address) throw new Error("Account is not available");
 
-    return await Promise.all(
-      Object.values(l1Tokens.value ?? []).map(async (token) => {
+    return await Promise.all([
+      ...Object.values(l1Tokens.value ?? []).map(async (token) => {
         const amount = await fetchBalance({
           address: account.value.address!,
           chainId: l1Network.value!.id,
@@ -59,9 +60,33 @@ export const useZkSyncEthereumBalanceStore = defineStore("zkSyncEthereumBalances
           ...token,
           amount: amount.value.toString(),
         };
-      })
-    );
+      }),
+      ...(searchTokenBalance.value ?? [])
+        .filter((token) => !Object.values(l1Tokens.value ?? []).find((e) => e.address === token.address))
+        .map(async (e) => {
+          const amount = await fetchBalance({
+            address: account.value.address!,
+            chainId: l1Network.value!.id,
+            token: e.address === ETH_TOKEN.l1Address ? undefined : (e.address! as Hash),
+          });
+          return {
+            ...e,
+            amount: amount.value.toString(),
+          };
+        }),
+    ]);
   };
+  let isSaveToken = false,
+    oldBalance: TokenAmount[];
+  const saveTokenRequest = async () => {
+    isSaveToken = true;
+    oldBalance = balance.value ?? [];
+    try {
+      await requestBalance({ force: true });
+    } catch {}
+    isSaveToken = false;
+  };
+
   const {
     result: balance,
     inProgress: balanceInProgress,
@@ -71,7 +96,14 @@ export const useZkSyncEthereumBalanceStore = defineStore("zkSyncEthereumBalances
   } = usePromise<TokenAmount[]>(
     async () => {
       if (!l1Network.value) throw new Error(`L1 network is not available on ${selectedNetwork.value.name}`);
-
+      if (isSaveToken) {
+        const nt = await searchToken.requestBalance();
+        const map = new Map<Address, TokenAmount>();
+        const exp = (item: TokenAmount) => map.set(item.address as Address, item);
+        nt?.forEach(exp);
+        oldBalance.forEach(exp);
+        return Array.from(map.values());
+      }
       if (
         ([l1Networks.mainnet.id, l1Networks.goerli.id] as number[]).includes(l1Network.value?.id) &&
         runtimeConfig.public.ankrToken
@@ -93,7 +125,7 @@ export const useZkSyncEthereumBalanceStore = defineStore("zkSyncEthereumBalances
     balanceInProgress,
     balanceError,
     requestBalance,
-
+    saveTokenRequest,
     deductBalance: ethereumBalancesStore.deductBalance,
   };
 });

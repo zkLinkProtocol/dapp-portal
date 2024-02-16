@@ -10,10 +10,8 @@ export type TransactionDestination = {
 };
 
 export const useDestinationsStore = defineStore("destinations", () => {
-  const { selectedNetwork,l1Network } = storeToRefs(useNetworkStore());
+  const { selectedNetwork, l1Network } = storeToRefs(useNetworkStore());
   const { eraNetwork } = storeToRefs(useZkSyncProviderStore());
-  console.log(selectedNetwork)
-  console.log(l1Network)
   const destinations = computed(() => ({
     era: {
       key: "era",

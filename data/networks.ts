@@ -71,8 +71,8 @@ export const nexusNode: ZkSyncNetwork[] = [
     blockExplorerApi: "http://localhost:3020",
     withdrawalFinalizerApi: "https://sepolia.withdrawal-api.zklink.network",
     mainContract: "0x53438eddeB3d3fD39c99150acA2575f73cE14198",
-    erc20BridgeL1: "0x",
-    erc20BridgeL2: "0x",
+    erc20BridgeL1: "0x9FF541E9de225157d245Ca46cFF6868e5c289C8F",
+    erc20BridgeL2: "0x3247575b4336C79956C5Df667A19C0AcBA9C62D6",
     //TODO
     l1Network: l1Networks.sepolia,
   },

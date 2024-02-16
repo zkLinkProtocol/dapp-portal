@@ -1,4 +1,4 @@
-import { utils, ethers, BigNumber, BigNumberish, BytesLike } from "ethers";
+import { utils, ethers, BigNumber, BigNumberish, BytesLike, Contract } from "ethers";
 import { SignatureLike } from "@ethersproject/bytes";
 import {
   Address,
@@ -19,6 +19,8 @@ export * from "./paymaster-utils";
 
 export const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
 import { abi as IZkSync_abi } from "../abi/IZkSync.json";
+import { TokenAmount } from "~/types";
+import { erc20ABI, getPublicClient } from "@wagmi/core";
 
 export const ZKSYNC_MAIN_ABI = new utils.Interface(IZkSync_abi);
 export const CONTRACT_DEPLOYER = new utils.Interface((await import("../abi/ContractDeployer.json")).abi);
@@ -539,8 +541,8 @@ export async function estimateDefaultBridgeDepositL2Gas(
     const calldata = await getERC20BridgeCalldata(token, from, to, amount, providerL1);
 
     return await providerL2.estimateL1ToL2Execute({
-      caller: applyL1ToL2Alias(l1ERC20BridgeAddresses),
-      contractAddress: erc20BridgeAddress,
+      caller: applyL1ToL2Alias(l1ERC20BridgeAddresses!),
+      contractAddress: erc20BridgeAddress!,
       gasPerPubdataByte: gasPerPubdataByte,
       calldata: calldata,
     });
@@ -549,4 +551,29 @@ export async function estimateDefaultBridgeDepositL2Gas(
 
 export function scaleGasLimit(gasLimit: BigNumber): BigNumber {
   return gasLimit.mul(L1_FEE_ESTIMATION_COEF_NUMERATOR).div(L1_FEE_ESTIMATION_COEF_DENOMINATOR);
+}
+
+export async function fetchErc20(
+  contractAddress: Address,
+  chainId: number,
+  userAddress: Address | undefined
+): Promise<TokenAmount | undefined> {
+  const web3Provider = new ethers.providers.Web3Provider(getPublicClient({ chainId: chainId }) as any, "any");
+  const erc20Contract = new Contract(contractAddress, erc20ABI, web3Provider);
+  let name, symbol, balance, decimals;
+  try {
+    name = await erc20Contract.name();
+    symbol = await erc20Contract.symbol();
+    decimals = await erc20Contract.decimals();
+    balance = await erc20Contract.balanceOf(userAddress);
+  } catch {
+    return undefined;
+  }
+  return {
+    address: contractAddress,
+    name: name,
+    symbol: symbol,
+    amount: balance.toString(),
+    decimals: decimals,
+  } as TokenAmount;
 }
