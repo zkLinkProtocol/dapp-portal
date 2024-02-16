@@ -82,6 +82,7 @@ export const useZkSyncWalletStore = defineStore("zkSyncWallet", () => {
           name: token!.name || undefined,
           symbol: token!.symbol!,
           decimals: token!.decimals,
+          iconUrl: token!.iconURL || undefined,
           amount: balance,
         };
       });
