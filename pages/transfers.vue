@@ -97,7 +97,7 @@ import type { Transfer } from "@/utils/mappers";
 import { useDestinationsStore } from "@/store/destinations";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
-import { ESTIMATED_DEPOSIT_DELAY, WITHDRAWAL_DELAY } from "@/store/zksync/transactionStatus";
+import { WITHDRAWAL_DELAY, getEstmatdDepositDelay } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransfersHistoryStore } from "@/store/zksync/transfersHistory";
 
@@ -126,7 +126,8 @@ const recentBridgeOperations = computed<RecentBridgeOperation[]>(() => {
     (tx) =>
       (tx.type === "withdrawal" &&
         (!tx.info.completed || new Date(tx.timestamp).getTime() + WITHDRAWAL_DELAY * 2 > new Date().getTime())) ||
-      (tx.type === "deposit" && new Date(tx.timestamp).getTime() + ESTIMATED_DEPOSIT_DELAY * 2 > new Date().getTime())
+      (tx.type === "deposit" &&
+        new Date(tx.timestamp).getTime() + getEstmatdDepositDelay(eraNetwork.value.key) * 2 > new Date().getTime())
   );
 
   return [

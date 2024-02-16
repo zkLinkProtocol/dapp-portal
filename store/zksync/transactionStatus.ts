@@ -32,6 +32,14 @@ export type TransactionInfo = {
 };
 //TODO Setting the secondary chain and primary chain separately.
 export const ESTIMATED_DEPOSIT_DELAY = 1 * 60 * 1000; // 1 minutes
+export const ESTIMATED_DEPOSIT_DELAY_SECONDARY = 3 * 60 * 1000; // 1 minutes
+export const getEstmatdDepositDelay = (networkKey: string): number => {
+  if (networkKey === PRIMARY_CHAIN_KEY) {
+    return ESTIMATED_DEPOSIT_DELAY;
+  } else {
+    return ESTIMATED_DEPOSIT_DELAY_SECONDARY;
+  }
+};
 export const WITHDRAWAL_DELAY = 7 * 24 * 60 * 60 * 1000; // 7 * 24 hours
 export type Address = Hash;
 export type ForwardL2Request = {

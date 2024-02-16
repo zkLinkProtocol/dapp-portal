@@ -368,7 +368,7 @@ import { usePreferencesStore } from "@/store/preferences";
 import { useZkSyncEthereumBalanceStore } from "@/store/zksync/ethereumBalance";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncTokensStore } from "@/store/zksync/tokens";
-import { ESTIMATED_DEPOSIT_DELAY, useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
+import { getEstmatdDepositDelay, useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransfersHistoryStore } from "@/store/zksync/transfersHistory";
 import { useZkSyncWalletStore } from "@/store/zksync/wallet";
 import { TOKEN_ALLOWANCE } from "@/utils/doc-links";
@@ -699,7 +699,9 @@ const makeTransaction = async () => {
       to: transaction.value!.to,
       fromChainKey: selectedNetwork.value.key,
       info: {
-        expectedCompleteTimestamp: new Date(new Date().getTime() + ESTIMATED_DEPOSIT_DELAY).toISOString(),
+        expectedCompleteTimestamp: new Date(
+          new Date().getTime() + getEstmatdDepositDelay(eraNetwork.value.key)
+        ).toISOString(),
         completed: false,
       },
     };
