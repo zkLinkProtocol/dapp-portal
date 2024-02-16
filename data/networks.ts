@@ -3,6 +3,7 @@ import { goerli, mainnet, sepolia, arbitrumSepolia, scrollSepolia, zkSyncSepolia
 import type { Token } from "@/types";
 import type { Chain } from "@wagmi/core/chains";
 import { PRIMARY_CHAIN_KEY } from "@/zksync-web3-nova/src/utils";
+import { Address } from "@wagmi/core";
 
 export const l1Networks = {
   mainnet: {
@@ -39,7 +40,6 @@ export const l1Networks = {
   },
 } as const;
 export type L1Network = Chain;
-type Address = string;
 export type ZkSyncNetwork = {
   id: number;
   key: string;
@@ -60,35 +60,6 @@ export type ZkSyncNetwork = {
   getTokens?: () => Token[] | Promise<Token[]>; // If blockExplorerApi is specified, tokens will be fetched from there. Otherwise, this function will be used.
 };
 
-// See the official documentation on running a local zkSync node: https://era.zksync.io/docs/tools/testing/
-// Also see the guide in the README.md file in the root of the repository.
-
-// In-memory node default config. Docs: https://era.zksync.io/docs/tools/testing/era-test-node.html
-export const inMemoryNode: ZkSyncNetwork = {
-  id: 260,
-  key: "in-memory-node",
-  name: "In-memory node",
-  rpcUrl: "http://localhost:8011",
-};
-
-// Dockerized local setup default config. Docs: https://era.zksync.io/docs/tools/testing/dockerized-testing.html
-export const dockerizedNode: ZkSyncNetwork = {
-  id: 270,
-  key: "dockerized-node",
-  name: "zkLink Nova Testnet",
-  rpcUrl: "http://3.85.245.224:3050",
-  l1Network: {
-    id: 9,
-    name: "Arbitrum Sepolia",
-    network: "ethereum-node",
-    nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
-    rpcUrls: {
-      default: { http: ["http://3.85.245.224:8545"] },
-      public: { http: ["http://3.85.245.224:8545"] },
-    },
-  },
-};
-
 export const nexusNode: ZkSyncNetwork[] = [
   {
     id: 810181,
@@ -97,11 +68,11 @@ export const nexusNode: ZkSyncNetwork[] = [
     rpcUrl: "https://sepolia.rpc.zklink.network",
     logoUrl: "/img/ethereum.svg",
     blockExplorerUrl: "https://sepolia.explorer.zklink.network",
-    blockExplorerApi: "https://sepolia.explorer-api.zklink.network",
+    blockExplorerApi: "http://localhost:3020",
     withdrawalFinalizerApi: "https://sepolia.withdrawal-api.zklink.network",
     mainContract: "0x53438eddeB3d3fD39c99150acA2575f73cE14198",
-    erc20BridgeL1: "",
-    erc20BridgeL2: "",
+    erc20BridgeL1: "0x",
+    erc20BridgeL2: "0x",
     //TODO
     l1Network: l1Networks.sepolia,
   },
@@ -130,26 +101,26 @@ export const nexusNode: ZkSyncNetwork[] = [
     blockExplorerApi: "http://localhost:3020",
     withdrawalFinalizerApi: "https://sepolia.withdrawal-api.zklink.network",
     mainContract: "0x916aa29B23DBC0f143e1cEaE0460C874FCEc0f58",
-    erc20BridgeL1: "",
-    erc20BridgeL2: "",
+    erc20BridgeL1: "0x",
+    erc20BridgeL2: "0x",
     // TODO
     l1Network: l1Networks.zkSyncSepoliaTestnet,
   },
-  /*{
+  {
     id: 810181,
     key: "scrollsepolia",
     name: "zkLink Nova Testne",
     rpcUrl: "https://sepolia.rpc.zklink.network",
     logoUrl: "/img/sepolia.jpg",
     blockExplorerUrl: "https://sepolia.explorer.zklink.network",
-    blockExplorerApi: "https://sepolia.explorer-api.zklink.network",
-    withdrawalFinalizerApi: "",
+    blockExplorerApi: "http://localhost:3020",
+    withdrawalFinalizerApi: "https://sepolia.withdrawal-api.zklink.network",
     mainContract: "0x939016af6140141d89C4252b0c0013F4e5F1f4D7",
-    erc20BridgeL1: "",
-    erc20BridgeL2: "",
+    erc20BridgeL1: "0x",
+    erc20BridgeL2: "0x",
     //TODO
     l1Network: l1Networks.scrollSepolia,
-  },*/
+  },
 ];
 
 export const zkSyncNetworks: ZkSyncNetwork[] = [
