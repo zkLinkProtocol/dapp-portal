@@ -30,7 +30,7 @@ export type TransactionInfo = {
     completed: boolean;
   };
 };
-
+//TODO Setting the secondary chain and primary chain separately.
 export const ESTIMATED_DEPOSIT_DELAY = 1 * 60 * 1000; // 1 minutes
 export const WITHDRAWAL_DELAY = 7 * 24 * 60 * 60 * 1000; // 7 * 24 hours
 export type Address = Hash;
