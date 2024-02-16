@@ -23,7 +23,7 @@
             {{ error.message }}
           </CommonErrorBlock>
         </template>
-        <template v-else-if="isConnected && !hasBalances">
+        <template v-else-if="!hasBalances && (!search || displayedTokens.length)">
           <div class="category -mx-block-padding-1/4 sm:-mx-block-padding-1/2">
             <TokenLine
               v-for="item in displayedTokens"
