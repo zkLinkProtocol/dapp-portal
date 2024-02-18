@@ -37,7 +37,6 @@ import {
 } from "./utils";
 import { Signer } from "./signer";
 import { AbiCoder } from "ethers/lib/utils";
-
 let defaultFormatter: Formatter = null;
 export type ContractAddresses = {
   mainContract?: Address;
@@ -442,7 +441,6 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       if (!l1Gateway) {
         throw new Error("l1Gateway is undefined, current network key is : " + this.networkKey);
       }
-      console.log(" secondary chain ", l1Gateway);
       return ethL2Token.populateTransaction.withdrawWithMessage(
         l1Gateway,
         new AbiCoder().encode(["address"], [tx.to!]),
@@ -673,7 +671,12 @@ export class Provider extends ethers.providers.JsonRpcProvider {
 export class Web3Provider extends Provider {
   readonly provider: ExternalProvider;
 
-  constructor(provider: ExternalProvider, network?: ethers.providers.Networkish) {
+  constructor(
+    provider: ExternalProvider,
+    network?: ethers.providers.Networkish,
+    networkKey?: string,
+    contractAddresses?: ContractAddresses
+  ) {
     if (provider == null) {
       throw new Error("missing provider");
     }
@@ -682,7 +685,8 @@ export class Web3Provider extends Provider {
     }
 
     let path = provider.host || provider.path || (provider.isMetaMask ? "metamask" : "eip-1193:");
-    super(path, network);
+    super(path, network, networkKey);
+    super.setContractAddresses(networkKey!, contractAddresses!);
     this.provider = provider;
   }
 

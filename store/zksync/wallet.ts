@@ -12,6 +12,7 @@ import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncTokensStore } from "@/store/zksync/tokens";
 import useNetworks from "@/composables/useNetworks";
 import { getPublicClient } from "@wagmi/core";
+import { ContractAddresses } from "~/zksync-web3-nova/src/provider";
 export const useZkSyncWalletStore = defineStore("zkSyncWallet", () => {
   const onboardStore = useOnboardStore();
   const providerStore = useZkSyncProviderStore();
@@ -31,7 +32,12 @@ export const useZkSyncWalletStore = defineStore("zkSyncWallet", () => {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const web3Provider = new Web3Provider((await onboardStore.getWallet(eraNetwork.value.id)) as any, "any");
+    const web3Provider = new Web3Provider(
+      (await onboardStore.getWallet(eraNetwork.value.id)) as any,
+      "any",
+      eraNetwork.value.key,
+      eraNetwork.value as ContractAddresses
+    );
     const eraL2Signer = web3Provider.getSigner();
     return eraL2Signer;
   });
