@@ -36,19 +36,16 @@ import {
   PRIMARY_CHAIN_KEY,
 } from "./utils";
 import { Signer } from "./signer";
+import { AbiCoder } from "ethers/lib/utils";
 
 let defaultFormatter: Formatter = null;
 export type ContractAddresses = {
   mainContract?: Address;
   erc20BridgeL1?: Address;
   erc20BridgeL2?: Address;
+  l1Gateway?: Address;
 };
 export class Provider extends ethers.providers.JsonRpcProvider {
-  //   protected contractAddresses: {
-  //     mainContract?: Address;
-  //     erc20BridgeL1?: Address;
-  //     erc20BridgeL2?: Address;
-  //   };
   protected contractAddressesMap: Map<string, ContractAddresses>;
 
   protected networkKey: string;
@@ -300,7 +297,9 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   isPrimaryChain(): boolean {
     return this.networkKey === PRIMARY_CHAIN_KEY;
   }
-
+  getL1Gateway(): Address | undefined {
+    return this.contractAddressesMap.get(this.networkKey)?.l1Gateway;
+  }
   setNetworkKey(networkKey: string) {
     this.networkKey = networkKey;
     if (!this.contractAddressesMap.get(networkKey)) {
@@ -361,16 +360,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     if (!contractAddresses) {
       throw new Error("networkKey: " + this.networkKey + " is undefined");
     }
-    // if (!this.contractAddresses.erc20BridgeL1) {
-    // let addresses = await this.send("zks_getBridgeContracts", []);
-    //   this.contractAddresses.erc20BridgeL1 = addresses.l1Erc20DefaultBridge;
-    //   this.contractAddresses.erc20BridgeL2 = addresses.l2Erc20DefaultBridge;
-    // }
-    /**
-     * 
-     * "l1Erc20DefaultBridge": "0x72de6d167ded1ee5fba17334bdcce686f3204d38",
-        "l2Erc20DefaultBridge": "0x1895de0bea0eb8d8c7e6997c9be7649bb402d9e6",
-     */
+
     return {
       erc20L1: contractAddresses.erc20BridgeL1,
       erc20L2: contractAddresses.erc20BridgeL2,
@@ -444,7 +434,20 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       }
 
       const ethL2Token = IEthTokenFactory.connect(L2_ETH_TOKEN_ADDRESS, this);
-      return ethL2Token.populateTransaction.withdraw(tx.to, tx.overrides);
+      if (this.isPrimaryChain()) {
+        return ethL2Token.populateTransaction.withdraw(tx.to!, tx.overrides);
+      }
+      //if secondary
+      const l1Gateway = this.getL1Gateway();
+      if (!l1Gateway) {
+        throw new Error("l1Gateway is undefined, current network key is : " + this.networkKey);
+      }
+      console.log(" secondary chain ", l1Gateway);
+      return ethL2Token.populateTransaction.withdrawWithMessage(
+        l1Gateway,
+        new AbiCoder().encode(["address"], [tx.to!]),
+        tx.overrides
+      );
     }
 
     if (tx.bridgeAddress == null) {
@@ -453,7 +456,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     }
 
     const bridge = IL2BridgeFactory.connect(tx.bridgeAddress!, this);
-    return bridge.populateTransaction.withdraw(tx.to, tx.token, tx.amount, tx.overrides);
+    return bridge.populateTransaction.withdraw(tx.to!, tx.token, tx.amount, tx.overrides);
   }
 
   async estimateGasWithdraw(transaction: {
