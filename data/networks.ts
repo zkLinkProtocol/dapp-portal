@@ -57,6 +57,7 @@ export type ZkSyncNetwork = {
   mainContract?: Address;
   erc20BridgeL1?: Address;
   erc20BridgeL2?: Address;
+  l1Gateway?: Address;
   getTokens?: () => Token[] | Promise<Token[]>; // If blockExplorerApi is specified, tokens will be fetched from there. Otherwise, this function will be used.
 };
 
@@ -68,11 +69,12 @@ export const nexusNode: ZkSyncNetwork[] = [
     rpcUrl: "https://sepolia.rpc.zklink.network",
     logoUrl: "/img/ethereum.svg",
     blockExplorerUrl: "https://sepolia.explorer.zklink.network",
-    blockExplorerApi: "http://localhost:3020",
+    blockExplorerApi: "https://sepolia.explorer-api.zklink.network",
     withdrawalFinalizerApi: "https://sepolia.withdrawal-api.zklink.network",
     mainContract: "0x53438eddeB3d3fD39c99150acA2575f73cE14198",
     erc20BridgeL1: "0x9FF541E9de225157d245Ca46cFF6868e5c289C8F",
     erc20BridgeL2: "0x3247575b4336C79956C5Df667A19C0AcBA9C62D6",
+    l1Gateway: "0xABE785340e1C1ed3228BC7ec460d2fEdD82260a0",
     //TODO
     l1Network: l1Networks.sepolia,
   },
@@ -83,7 +85,7 @@ export const nexusNode: ZkSyncNetwork[] = [
     rpcUrl: "https://sepolia.rpc.zklink.network",
     logoUrl: "/img/arbitrum-arb-logo.svg",
     blockExplorerUrl: "https://sepolia.explorer.zklink.network",
-    blockExplorerApi: "http://localhost:3020",
+    blockExplorerApi: "https://sepolia.explorer-api.zklink.network",
     withdrawalFinalizerApi: "https://sepolia.withdrawal-api.zklink.network",
     mainContract: "0x788269f9353D7cbfE33c0889B7Dd1CAe833636E6",
     erc20BridgeL1: "0x72de6d167ded1ee5fba17334bdcce686f3204d38",

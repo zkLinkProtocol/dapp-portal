@@ -19,6 +19,7 @@ export const useZkSyncProviderStore = defineStore("zkSyncProvider", () => {
       mainContract: eraNetwork.mainContract,
       erc20BridgeL1: eraNetwork.erc20BridgeL1,
       erc20BridgeL2: eraNetwork.erc20BridgeL2,
+      l1Gateway: eraNetwork.l1Gateway,
     });
     return provider;
   };
@@ -31,6 +32,7 @@ export const useZkSyncProviderStore = defineStore("zkSyncProvider", () => {
       mainContract: primaryNetwork.mainContract,
       erc20BridgeL1: primaryNetwork.erc20BridgeL1,
       erc20BridgeL2: primaryNetwork.erc20BridgeL2,
+      l1Gateway: primaryNetwork.l1Gateway,
     });
     return primaryProvider;
   };
