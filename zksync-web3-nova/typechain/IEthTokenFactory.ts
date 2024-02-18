@@ -8,10 +8,7 @@ import { Provider } from "@ethersproject/providers";
 import type { IEthToken } from "./IEthToken";
 
 export class IEthTokenFactory {
-  static connect(
-    address: string,
-    signerOrProvider: Signer | Provider
-  ): IEthToken {
+  static connect(address: string, signerOrProvider: Signer | Provider): IEthToken {
     return new Contract(address, _abi, signerOrProvider) as IEthToken;
   }
 }
@@ -67,6 +64,12 @@ const _abi = [
       {
         indexed: true,
         internalType: "address",
+        name: "_l2Sender",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
         name: "_l1Receiver",
         type: "address",
       },
@@ -81,11 +84,42 @@ const _abi = [
     type: "event",
   },
   {
+    anonymous: false,
     inputs: [
       {
+        indexed: true,
         internalType: "address",
-        name: "",
+        name: "_l2Sender",
         type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "_l1Receiver",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "_amount",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "bytes",
+        name: "_additionalData",
+        type: "bytes",
+      },
+    ],
+    name: "WithdrawalWithMessage",
+    type: "event",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_account",
+        type: "uint256",
       },
     ],
     name: "balanceOf",
@@ -201,6 +235,24 @@ const _abi = [
       },
     ],
     name: "withdraw",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_l1Receiver",
+        type: "address",
+      },
+      {
+        internalType: "bytes",
+        name: "_additionalData",
+        type: "bytes",
+      },
+    ],
+    name: "withdrawWithMessage",
     outputs: [],
     stateMutability: "payable",
     type: "function",
