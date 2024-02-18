@@ -341,6 +341,7 @@ import { silentRouterChange } from "@/utils/helpers";
 import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/transitions";
 import TransferSubmitted from "@/views/transactions/TransferSubmitted.vue";
 import WithdrawalSubmitted from "@/views/transactions/WithdrawalSubmitted.vue";
+import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 
 const props = defineProps({
   type: {
@@ -382,14 +383,36 @@ const destination = computed(() => (props.type === "transfer" ? destinations.val
 const availableTokens = computed(() => {
   if (!tokens.value) return [];
   if (props.type === "withdrawal") {
-    return Object.values(tokens.value).filter((e) => e.l1Address);
+    return Object.values(tokens.value).filter((e) => {
+      if (!e.l1Address) {
+        return false;
+      }
+      if (e.l1Address === ETH_ADDRESS) {
+        return true;
+      }
+      if (e.networkKey === eraNetwork.value.key) {
+        return true;
+      }
+      return false;
+    });
   }
   return Object.values(tokens.value);
 });
 const availableBalances = computed(() => {
   if (props.type === "withdrawal") {
     if (!tokens.value) return [];
-    return balance.value.filter((e) => e.l1Address);
+    return balance.value.filter((e) => {
+      if (!e.l1Address) {
+        return false;
+      }
+      if (e.l1Address === ETH_ADDRESS) {
+        return true;
+      }
+      if (e.networkKey === eraNetwork.value.key) {
+        return true;
+      }
+      return false;
+    });
   }
   return balance.value;
 });

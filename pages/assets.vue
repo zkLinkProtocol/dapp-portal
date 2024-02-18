@@ -168,7 +168,6 @@ const displayedBalances = computed(() => {
   });
 });
 const noBalances = computed(() => !loading.value && !balanceError.value && !displayedBalances.value.length);
-
 const depositMethods = computed(() => {
   const methods: { props: Record<string, unknown>; icon?: FunctionalComponent }[] = [];
   if (eraNetwork.value.l1Network && !noBalances.value) {
