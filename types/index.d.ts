@@ -9,6 +9,7 @@ export type Token = {
   decimals: number;
   iconUrl?: string;
   price?: TokenPrice;
+  networkKey?:string;
 };
 export type TokenAmount = Token & { amount: BigNumberish };
 
@@ -40,6 +41,7 @@ export declare namespace Api {
       usdPrice: number | null;
       liquidity: number | null;
       iconURL: string | null;
+      networkKey?:string;
     };
 
     type Transfer = {

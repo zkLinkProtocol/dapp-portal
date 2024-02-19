@@ -51,6 +51,7 @@ export const mapApiToken = (token: Api.Response.Token): Token => {
     decimals: token.decimals,
     iconUrl: token.iconURL || undefined,
     price: token.usdPrice || undefined,
+    networkKey: token.networkKey || undefined,
   };
 };
 

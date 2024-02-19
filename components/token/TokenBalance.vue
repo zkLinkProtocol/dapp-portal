@@ -5,6 +5,7 @@
     :address="address"
     :decimals="decimals"
     :icon-url="iconUrl"
+    :networkKey="networkKey"
     :as="sendRouteName ? 'RouterLink' : as"
     :to="sendRouteName ? { name: sendRouteName, query: { token: address } } : undefined"
     class="token-balance"
@@ -74,6 +75,9 @@ const props = defineProps({
     type: [String, Number] as PropType<TokenPrice>,
   },
   sendRouteName: {
+    type: String,
+  },
+  networkKey: {
     type: String,
   },
 });
