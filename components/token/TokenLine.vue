@@ -1,7 +1,11 @@
 <template>
   <CommonButtonLineWithImg :as="as">
     <template #image>
-      <TokenImage :symbol="symbol" :address="address" :icon-url="iconUrl" />
+      <div class="image-wrap">
+        <TokenImage :symbol="symbol" :address="address" :icon-url="iconUrl" />
+        <img class="chain-icon" v-if="networkKey &&iconsList[networkKey]" :src="iconsList[networkKey]" />
+      </div>
+     
     </template>
     <template #default>
       <CommonButtonLineBodyInfo class="text-left">
@@ -39,6 +43,7 @@ import type { TokenPrice } from "@/types";
 import type { Component, PropType } from "vue";
 
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
+import { iconsList } from '@/data/iconlists'
 
 defineProps({
   as: {
@@ -69,9 +74,24 @@ defineProps({
   price: {
     type: [String, Number] as PropType<TokenPrice>,
   },
+  networkKey:{
+    type: String,
+
+  }
 });
 
 const { eraNetwork } = storeToRefs(useZkSyncProviderStore());
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.image-wrap{
+  position: relative;
+  .chain-icon{
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 16px;
+    height: 16px;
+  }
+}
+</style>
