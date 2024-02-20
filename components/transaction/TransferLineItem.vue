@@ -11,10 +11,24 @@
     <template #bottom-left>
       <template v-if="chainsLabel">
         <template v-if="chainsLabel.from !== chainsLabel.to">
-          <span>{{ chainsLabel.from }}</span>
-          <ArrowRightIcon class="relative -top-px mx-1 inline h-4 w-4" aria-hidden="true" />
-          <span>{{ chainsLabel.to }}</span
-          >.
+          <div class="chain-label-wrap">
+            <img
+              v-if="networkKey && transfer.type == 'deposit'"
+              v-tooltip="TokenName"
+              class="chain-icon left"
+              :src="iconsList[networkKey]"
+            />
+            <span>{{ chainsLabel.from }}</span>
+            <ArrowRightIcon class="relative -top-px mx-1 inline h-4 w-4" aria-hidden="true" />
+            <img
+              v-if="networkKey && transfer.type == 'withdrawal'"
+              v-tooltip="TokenName"
+              class="chain-icon"
+              :src="iconsList[networkKey]"
+            />
+            <span>{{ chainsLabel.to }}</span
+            >.
+          </div>
         </template>
         <template v-else>
           <span>{{ chainsLabel.from }}</span
@@ -57,6 +71,9 @@ import type { Component, PropType } from "vue";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { shortenAddress } from "@/utils/formatters";
+import { iconsList } from "@/data/iconlists";
+import { nexusNode, ZkSyncNetwork } from "@/data/networks";
+import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 
 const props = defineProps({
   as: {
@@ -101,13 +118,13 @@ const label = computed(() => {
     return `Sent to ${formatAddress(props.transfer.to)}`;
   } else if (props.transfer.type === "withdrawal") {
     if (props.transfer.to === account.value.address) {
-      return "Bridged";
+      return "Withdraw";
     }
     return `Bridged to ${formatAddress(props.transfer.to)}`;
   } else if (props.transfer.type === "deposit") {
     if (direction.value === "in") {
       if (props.transfer.from === account.value.address) {
-        return "Bridged";
+        return "Deposit";
       }
       return `Bridged from ${formatAddress(props.transfer.from)}`;
     } else {
@@ -120,6 +137,9 @@ const label = computed(() => {
   }
   return props.transfer.type || "Unknown";
 });
+const networkKey = computed(() => {
+  return props.transfer.token?.networkKey;
+});
 
 const getLayerName = (layer: NetworkLayer) => {
   if (layer === "L1") {
@@ -127,14 +147,45 @@ const getLayerName = (layer: NetworkLayer) => {
   }
   return eraNetwork.value.name;
 };
+const TokenName = computed(() => {
+  return nexusNode.find((item) => item.key === networkKey.value)?.name;
+});
+
+const getTokenName = () => {
+  const newNetwork = nexusNode.find((item) => item.l1Gateway && item.l1Gateway == props.transfer.gateway);
+  return newNetwork?.name;
+};
+const getLayerName2 = () => {
+  const { token, type, gateway, toNetwork, fromNetwork } = props.transfer;
+  if (token?.address != ETH_ADDRESS && gateway) {
+    if (type === "withdrawal") {
+      return {
+        from: getLayerName(fromNetwork),
+        to: getTokenName(),
+      };
+    } else if (type === "deposit") {
+      return {
+        from: token?.name,
+        to: getLayerName(toNetwork),
+      };
+    }
+  } else {
+    return {
+      from: getLayerName(fromNetwork),
+      to: getLayerName(toNetwork),
+    };
+  }
+};
+
 const chainsLabel = computed(() => {
   if (!eraNetwork.value.l1Network) {
     return;
   }
-  return {
-    from: getLayerName(props.transfer.fromNetwork),
-    to: getLayerName(props.transfer.toNetwork),
-  };
+  return getLayerName2();
+  // return {
+  //   to: getLayerName(props.transfer.toNetwork),
+  //   from: getLayerName(props.transfer.fromNetwork),
+  // };
 });
 const computeAmount = computed(() => {
   return BigNumber.from(props.transfer.amount || "0").toString();
@@ -166,3 +217,18 @@ const transactionIcon = computed(() => {
 
 const timeAgo = useTimeAgo(props.transfer.timestamp);
 </script>
+<style lang="scss" scoped>
+.chain-label-wrap {
+  @apply flex items-center;
+}
+
+.chain-icon {
+  display: inline-flex;
+  width: 18px;
+  height: auto;
+  margin-right: 6px;
+  &.left {
+    margin: 0 6px 0 0;
+  }
+}
+</style>

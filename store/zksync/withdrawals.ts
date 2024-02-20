@@ -76,6 +76,7 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
           completed: withdrawal.status === "Finalized",
           withdrawalFinalizationAvailable: transactionDetails.status === "verified",
         },
+        gateway: withdrawalTransfer.gateway,
       });
     }
   };

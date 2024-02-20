@@ -29,6 +29,7 @@ export type TransactionInfo = {
     withdrawalFinalizationAvailable?: boolean;
     completed: boolean;
   };
+  gateway: string;
 };
 //TODO Setting the secondary chain and primary chain separately.
 export const ESTIMATED_DEPOSIT_DELAY = 1 * 60 * 1000; // 1 minutes
