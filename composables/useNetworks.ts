@@ -3,7 +3,7 @@ import Hyperchains from "@/hyperchains/config.json";
 import type { ZkSyncNetwork } from "@/data/networks";
 import type { Token } from "@/types";
 
-import { zkSyncNetworks as defaultEraNetworks, nexusNode } from "@/data/networks";
+import { zkSyncNetworks as defaultEraNetworks, nexusGoerliNode, nexusSepoliaNode, nexusNode } from "@/data/networks";
 import { PRIMARY_CHAIN_KEY } from "~/zksync-web3-nova/src/utils";
 
 export default () => {
@@ -11,8 +11,13 @@ export default () => {
 
   const isCustomNode = !!runtimeConfig.public.nodeType;
   const zkSyncNetworks: ZkSyncNetwork[] = [];
+
   if (runtimeConfig.public.nodeType === "nexus") {
     zkSyncNetworks.push(...nexusNode);
+  } else if (runtimeConfig.public.nodeType === "nexus-goerli") {
+    zkSyncNetworks.push(...nexusGoerliNode);
+  } else if (runtimeConfig.public.nodeType === "nexus-sepolia") {
+    zkSyncNetworks.push(...nexusSepoliaNode);
   } else if (runtimeConfig.public.nodeType === "hyperchain") {
     zkSyncNetworks.push(
       ...(Hyperchains as unknown as Array<{ network: ZkSyncNetwork; tokens: Token[] }>).map((e) => ({
