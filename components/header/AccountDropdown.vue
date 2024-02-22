@@ -36,7 +36,7 @@
             </template>
           </CommonButtonDropdown>
         </MenuItem>
-        <MenuItem v-slot="{ active }" as="template">
+        <!-- <MenuItem v-slot="{ active }" as="template">
           <CommonButtonDropdown
             size="sm"
             no-chevron
@@ -49,7 +49,7 @@
             </template>
             <span>Help</span>
           </CommonButtonDropdown>
-        </MenuItem>
+        </MenuItem> -->
         <MenuItem v-slot="{ active }" as="template">
           <CommonButtonDropdown
             size="sm"
