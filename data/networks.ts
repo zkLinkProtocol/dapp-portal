@@ -1,4 +1,4 @@
-import { goerli, mainnet, sepolia, arbitrumSepolia, scrollSepolia, zkSyncSepoliaTestnet } from "@wagmi/core/chains";
+import { goerli, mainnet, sepolia, arbitrumSepolia, scrollSepolia, zkSyncSepoliaTestnet, lineaTestnet } from "@wagmi/core/chains";
 
 import type { Token } from "@/types";
 import type { Chain } from "@wagmi/core/chains";
@@ -38,6 +38,10 @@ export const l1Networks = {
     ...zkSyncSepoliaTestnet,
     name: "zkSync Sepolia Testnet",
   },
+  lineaGoerliTestnet: {
+    ...lineaTestnet,
+    name: "Linea Goerli Testnet",
+  },
 } as const;
 export type L1Network = Chain;
 export type ZkSyncNetwork = {
@@ -62,6 +66,43 @@ export type ZkSyncNetwork = {
 };
 
 export const nexusNode: ZkSyncNetwork[] = [
+];
+
+export const nexusGoerliNode: ZkSyncNetwork[] = [
+  {
+    id: 810182,
+    key: "goerli",
+    name: "zkLink Nova Testnet",
+    rpcUrl: "https://goerli.rpc.zklink.network",
+    logoUrl: "/img/ethereum.svg",
+    blockExplorerUrl: "https://goerli.explorer.zklink.network",
+    blockExplorerApi: "https://goerli.explorer-api.zklink.network",
+    withdrawalFinalizerApi: "https://goerli.withdrawal-api.zklink.network",
+    mainContract: "0xB3A5E5AE1472ff104061C9b39e8aE8396Fd74Eb7",
+    erc20BridgeL1: "0x8c965AAb7450Ea5b99bAb0B39371Db869d1A200D",
+    erc20BridgeL2: "0x1b6954b93d9b1Cf25D372eE74d0F30C3Cf0345a5",
+    l1Gateway: "0x2BD3d34D8c05bbAD53BB801177c086a83014e7ff",
+    //TODO
+    l1Network: l1Networks.goerli,
+  },
+  {
+    id: 810182,
+    key: PRIMARY_CHAIN_KEY, //"primary"
+    name: "zkLink Nova Testnet",
+    rpcUrl: "https://goerli.rpc.zklink.network",
+    logoUrl: "/img/linea.svg",
+    blockExplorerUrl: "https://goerli.explorer.zklink.network",
+    blockExplorerApi: "https://goerli.explorer-api.zklink.network",
+    withdrawalFinalizerApi: "https://goerli.withdrawal-api.zklink.network",
+    mainContract: "0xcbcd12A9479EeE74A618e014a5D95e877C83A93b",
+    erc20BridgeL1: "0x9aCd0f29dae518A548371E8880df9cD488aBE99c",
+    erc20BridgeL2: "0x2dbBC031B357332478ac31648779b7Ea7b32A652",
+    //TODO
+    l1Network: l1Networks.lineaGoerliTestnet,
+  },
+];
+
+export const nexusSepoliaNode: ZkSyncNetwork[] = [
   {
     id: 810181,
     key: "sepolia",
