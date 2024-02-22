@@ -79,9 +79,9 @@ export const nexusGoerliNode: ZkSyncNetwork[] = [
     blockExplorerApi: "https://goerli.explorer-api.zklink.network",
     withdrawalFinalizerApi: "https://goerli.withdrawal-api.zklink.network",
     mainContract: "0xB3A5E5AE1472ff104061C9b39e8aE8396Fd74Eb7",
-    erc20BridgeL1: "0x9FF541E9de225157d245Ca46cFF6868e5c289C8F",
-    erc20BridgeL2: "0x3247575b4336C79956C5Df667A19C0AcBA9C62D6",
-    l1Gateway: "0xABE785340e1C1ed3228BC7ec460d2fEdD82260a0",
+    erc20BridgeL1: "0x8c965AAb7450Ea5b99bAb0B39371Db869d1A200D",
+    erc20BridgeL2: "0x1b6954b93d9b1Cf25D372eE74d0F30C3Cf0345a5",
+    l1Gateway: "0x2BD3d34D8c05bbAD53BB801177c086a83014e7ff",
     //TODO
     l1Network: l1Networks.goerli,
   },
