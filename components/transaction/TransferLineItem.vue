@@ -10,29 +10,26 @@
     <template #top-left>{{ label }}</template>
     <template #bottom-left>
       <template v-if="chainsLabel">
-        <template v-if="chainsLabel.from !== chainsLabel.to">
-          <div class="chain-label-wrap">
-            <img
-              v-if="networkKey && transfer.type == 'deposit'"
-              v-tooltip="TokenName"
-              class="chain-icon left"
-              :src="iconsList[networkKey]"
-            />
+        <div v-if="transfer.type == 'deposit'">
+          From:
+          <img v-if="chainIconUrl" class="chain-icon left" :src="chainIconUrl" />
+          <span>{{ chainsLabel.from }}</span
+          >.
+        </div>
+        <div v-else-if="transfer.type == 'withdrawal'">
+          To:
+          <img v-if="chainIconUrl" class="chain-icon" :src="chainIconUrl" />
+          <span>{{ chainsLabel.to }}</span
+          >.
+        </div>
+        <template v-else>
+          <div v-if="chainsLabel.from !== chainsLabel.to" class="chain-label-wrap">
             <span>{{ chainsLabel.from }}</span>
             <ArrowRightIcon class="relative -top-px mx-1 inline h-4 w-4" aria-hidden="true" />
-            <img
-              v-if="networkKey && transfer.type == 'withdrawal'"
-              v-tooltip="TokenName"
-              class="chain-icon"
-              :src="iconsList[networkKey]"
-            />
             <span>{{ chainsLabel.to }}</span
             >.
           </div>
-        </template>
-        <template v-else>
-          <span>{{ chainsLabel.from }}</span
-          >.
+          <span v-else>{{ chainsLabel.from }} .</span>
         </template>
       </template>
       <span>{{ timeAgo }}</span>
@@ -72,7 +69,7 @@ import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { shortenAddress } from "@/utils/formatters";
 import { iconsList } from "@/data/iconlists";
-import { nexusNode, ZkSyncNetwork } from "@/data/networks";
+import { nexusGoerliNode, ZkSyncNetwork } from "@/data/networks";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 
 const props = defineProps({
@@ -137,8 +134,9 @@ const label = computed(() => {
   }
   return props.transfer.type || "Unknown";
 });
-const networkKey = computed(() => {
-  return props.transfer.token?.networkKey;
+const chainIconUrl = computed(() => {
+  // return props.transfer.token?.chainIconUrl;
+  return getNetworkInfo()?.logoUrl;
 });
 
 const getLayerName = (layer: NetworkLayer) => {
@@ -147,25 +145,22 @@ const getLayerName = (layer: NetworkLayer) => {
   }
   return eraNetwork.value.name;
 };
-const TokenName = computed(() => {
-  return nexusNode.find((item) => item.key === networkKey.value)?.name;
-});
 
-const getTokenName = () => {
-  const newNetwork = nexusNode.find((item) => item.l1Gateway && item.l1Gateway == props.transfer.gateway);
-  return newNetwork?.name;
+const getNetworkInfo = () => {
+  const newNetwork = nexusGoerliNode.find((item) => item.l1Gateway && item.l1Gateway == props.transfer.gateway);
+  return newNetwork!;
 };
-const getLayerName2 = () => {
+const getl1NetworkName = () => {
   const { token, type, gateway, toNetwork, fromNetwork } = props.transfer;
   if (token?.address != ETH_ADDRESS && gateway) {
     if (type === "withdrawal") {
       return {
         from: getLayerName(fromNetwork),
-        to: getTokenName(),
+        to: getNetworkInfo().l1Network?.name,
       };
     } else if (type === "deposit") {
       return {
-        from: token?.name,
+        from: getNetworkInfo().l1Network?.name,
         to: getLayerName(toNetwork),
       };
     }
@@ -181,7 +176,7 @@ const chainsLabel = computed(() => {
   if (!eraNetwork.value.l1Network) {
     return;
   }
-  return getLayerName2();
+  return getl1NetworkName();
   // return {
   //   to: getLayerName(props.transfer.toNetwork),
   //   from: getLayerName(props.transfer.fromNetwork),

@@ -90,6 +90,8 @@ const { eraNetwork } = storeToRefs(useZkSyncProviderStore());
     right: 0;
     width: 20px;
     height: 20px;
+    border-radius: 50%;
+    overflow: hidden;
   }
 }
 </style>
