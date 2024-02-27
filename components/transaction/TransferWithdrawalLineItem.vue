@@ -147,10 +147,17 @@ const getl1NetworkName = () => {
     }
   } else {
     // primary chain
-    return {
-      from: primaryNetwork.l1Network?.name,
-      to: primaryNetwork.l1Network?.name,
-    };
+    if (type === "transfer") {
+      return {
+        from: eraNetwork.value.name,
+        to: eraNetwork.value.name,
+      };
+    } else {
+      return {
+        from: primaryNetwork.l1Network?.name,
+        to: primaryNetwork.l1Network?.name,
+      };
+    }
   }
 };
 const chainsLabel = computed(() => {
