@@ -77,7 +77,7 @@
               :noChevron="true"
               size="xs"
               variant="light"
-              style="cursor: default;"
+              style="cursor: default"
             >
               <template #left-icon>
                 <img :src="destination.iconUrl" class="h-full w-full" />
@@ -378,7 +378,6 @@ import { silentRouterChange } from "@/utils/helpers";
 import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/transitions";
 import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
 
-
 const route = useRoute();
 const router = useRouter();
 
@@ -390,7 +389,7 @@ const eraWalletStore = useZkSyncWalletStore();
 const { account, isConnected } = storeToRefs(onboardStore);
 const { eraNetwork } = storeToRefs(providerStore);
 const { destinations } = storeToRefs(useDestinationsStore());
-const { l1BlockExplorerUrl,selectedNetwork } = storeToRefs(useNetworkStore());
+const { l1BlockExplorerUrl, selectedNetwork } = storeToRefs(useNetworkStore());
 const { l1Tokens, tokensRequestInProgress, tokensRequestError } = storeToRefs(tokensStore);
 const { balance, balanceInProgress, balanceError } = storeToRefs(zkSyncEthereumBalance);
 const { isCustomNode } = useNetworks();
@@ -413,7 +412,12 @@ const destination = computed(() => destinations.value.nova);
 
 const availableTokens = computed<Token[]>(() => {
   if (balance.value) return balance.value;
-  return Object.values(l1Tokens.value ?? []);
+
+  const filterL1tokens = Object.values(l1Tokens.value ?? []).filter(
+    (e) => e.networkKey === eraNetwork.value.key || e.address === ETH_TOKEN.l1Address
+  );
+  return filterL1tokens;
+  // return Object.values(l1Tokens.value ?? []);
 });
 const availableBalances = computed<TokenAmount[]>(() => {
   return balance.value ?? [];
@@ -432,6 +436,7 @@ const tokenWithHighestBalancePrice = computed(() => {
   });
   return tokenWithHighestBalancePrice[0] ? tokenWithHighestBalancePrice[0] : undefined;
 });
+
 const defaultToken = computed(() => availableTokens.value[0] ?? undefined);
 const selectedTokenAddress = ref<string | undefined>(
   routeTokenAddress.value ?? tokenWithHighestBalancePrice.value?.address ?? defaultToken.value?.address
@@ -598,6 +603,7 @@ const estimate = async () => {
   if (!transaction.value?.from.address || !transaction.value?.to.address || !selectedToken.value) {
     return;
   }
+
   await estimateFee(transaction.value.to.address, selectedToken.value.address);
 };
 watch(

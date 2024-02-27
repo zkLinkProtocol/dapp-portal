@@ -49,8 +49,11 @@ export const useZkSyncEthereumBalanceStore = defineStore("zkSyncEthereumBalances
     if (!l1Tokens.value) throw new Error("Tokens are not available");
     if (!account.value.address) throw new Error("Account is not available");
 
+    const filterL1tokens = Object.values(l1Tokens.value ?? []).filter(
+      (e) => e.networkKey === selectedNetwork.value.key || e.address === ETH_TOKEN.l1Address
+    );
     return await Promise.all([
-      ...Object.values(l1Tokens.value ?? []).map(async (token) => {
+      ...filterL1tokens.map(async (token) => {
         const amount = await fetchBalance({
           address: account.value.address!,
           chainId: l1Network.value!.id,

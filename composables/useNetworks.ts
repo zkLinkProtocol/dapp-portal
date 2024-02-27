@@ -34,9 +34,14 @@ export default () => {
   if (!primaryNetwork) {
     throw new Error("can not find primary chain. nodeType: " + runtimeConfig.public.nodeType);
   }
+  const nexusNetworks: Record<string, ZkSyncNetwork> = {};
+  for (let index = 0; index < zkSyncNetworks.length; index++) {
+    const element = zkSyncNetworks[index];
+    nexusNetworks[element.key] = element;
+  }
   return {
     isCustomNode,
-
+    nexusNetworks,
     zkSyncNetworks,
     defaultNetwork,
     primaryNetwork,
