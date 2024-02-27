@@ -37,7 +37,7 @@
       </NuxtLink>
       <NuxtLink class="link-item" :to="{ name: 'transfers' }">
         <ArrowsRightLeftIcon class="link-icon" aria-hidden="true" />
-        Transfers
+        History
         <transition v-bind="TransitionOpacity()">
           <CommonBadge v-if="withdrawalsAvailableForClaiming.length">
             {{ withdrawalsAvailableForClaiming.length }}

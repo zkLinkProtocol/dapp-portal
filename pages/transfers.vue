@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageTitle>Transfers</PageTitle>
+    <PageTitle>History</PageTitle>
 
     <template v-if="!isConnected">
       <ConnectWalletBlock>Connect wallet to view your latest transfers on {{ eraNetwork.name }}</ConnectWalletBlock>

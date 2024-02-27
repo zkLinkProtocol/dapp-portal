@@ -42,7 +42,7 @@
             </template>
             <template #label>
               <div class="flex items-center gap-2">
-                <span>Transfers</span>
+                <span>History</span>
                 <CommonBadge v-if="withdrawalsAvailableForClaiming.length">
                   {{ withdrawalsAvailableForClaiming.length }}
                 </CommonBadge>
