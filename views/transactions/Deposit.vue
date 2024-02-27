@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageTitle v-if="step === 'form'">Bridge</PageTitle>
+    <PageTitle v-if="step === 'form'">Deposit</PageTitle>
     <PageTitle
       v-else-if="step === 'confirm'"
       :back-function="
@@ -15,7 +15,7 @@
     <NetworkSelectModal
       v-model:opened="fromNetworkModalOpened"
       title="From"
-      :network-key="destinations.arbitrum.key"
+      :network-key="selectedNetwork.key"
       @update:network-key="fromNetworkSelected($event)"
     />
     <NetworkSelectModal
@@ -59,9 +59,9 @@
               @click="fromNetworkModalOpened = true"
             >
               <template #left-icon>
-                <img :src="destinations.arbitrum.iconUrl" class="h-full w-full" />
+                <img :src="selectedNetwork.logoUrl" class="h-full w-full" />
               </template>
-              <span>{{ destinations.arbitrum.label }}</span>
+              <span>{{ selectedNetwork.l1Network?.name }}</span>
             </CommonButtonDropdown>
           </template>
         </CommonInputTransactionAmount>
@@ -76,7 +76,6 @@
               :toggled="toNetworkModalOpened"
               size="xs"
               variant="light"
-              @click="toNetworkModalOpened = true"
             >
               <template #left-icon>
                 <img :src="destination.iconUrl" class="h-full w-full" />
@@ -86,7 +85,7 @@
           </template>
           <template #input-body v-if="tokenCustomBridge">
             <div class="mt-4">
-              Bridging {{ tokenCustomBridge.symbol }} token to {{ destination.label }} requires custom bridge. Please
+              Depositing {{ tokenCustomBridge.symbol }} token to {{ destination.label }} requires custom deposit. Please
               use
               <a :href="tokenCustomBridge.bridgeUrlDeposit" target="_blank" class="underline underline-offset-2">
                 {{ tokenCustomBridge.bridgeName }} </a
@@ -109,7 +108,7 @@
       </template>
       <template v-else-if="step === 'confirm'">
         <CommonCardWithLineButtons>
-          <TransactionSummaryTokenEntry label="You bridge" :token="transaction!.token" />
+          <TransactionSummaryTokenEntry label="You deposit" :token="transaction!.token" />
           <TransactionSummaryAddressEntry
             label="From"
             :address="transaction!.from.address"
@@ -226,7 +225,7 @@
                 </a>
               </template>
               <template #underline>
-                Before depositing you need to give our bridge permission to spend specified amount of
+                Before depositing you need to give our deposit permission to spend specified amount of
                 {{ selectedToken?.symbol }}.
                 <span v-if="allowance && !allowance.isZero()"
                   >You can deposit up to
@@ -319,7 +318,7 @@
                 <transition v-bind="TransitionPrimaryButtonText" mode="out-in">
                   <span v-if="transactionStatus === 'processing'">Processing...</span>
                   <span v-else-if="transactionStatus === 'waiting-for-signature'">Waiting for confirmation</span>
-                  <span v-else>Bridge now</span>
+                  <span v-else>Deposit now</span>
                 </transition>
               </CommonButton>
               <TransactionButtonUnderlineConfirmTransaction :opened="transactionStatus === 'waiting-for-signature'" />
@@ -377,6 +376,7 @@ import { silentRouterChange } from "@/utils/helpers";
 import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/transitions";
 import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
 
+
 const route = useRoute();
 const router = useRouter();
 
@@ -388,7 +388,7 @@ const eraWalletStore = useZkSyncWalletStore();
 const { account, isConnected } = storeToRefs(onboardStore);
 const { eraNetwork } = storeToRefs(providerStore);
 const { destinations } = storeToRefs(useDestinationsStore());
-const { l1BlockExplorerUrl } = storeToRefs(useNetworkStore());
+const { l1BlockExplorerUrl,selectedNetwork } = storeToRefs(useNetworkStore());
 const { l1Tokens, tokensRequestInProgress, tokensRequestError } = storeToRefs(tokensStore);
 const { balance, balanceInProgress, balanceError } = storeToRefs(zkSyncEthereumBalance);
 const { isCustomNode } = useNetworks();
