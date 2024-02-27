@@ -707,6 +707,7 @@ const makeTransaction = async () => {
       token: transaction.value!.token,
       from: transaction.value!.from,
       to: transaction.value!.to,
+      fromChainKey: selectedNetwork.value.key,
       info: {
         expectedCompleteTimestamp:
           transaction.value?.type === "withdrawal"
