@@ -342,6 +342,7 @@ import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/
 import TransferSubmitted from "@/views/transactions/TransferSubmitted.vue";
 import WithdrawalSubmitted from "@/views/transactions/WithdrawalSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
+import { useNetworkStore } from "@/store/network";
 
 const props = defineProps({
   type: {
@@ -676,6 +677,7 @@ watch(step, (newStep) => {
 const transactionInfo = ref<TransactionInfo | undefined>();
 const makeTransaction = async () => {
   if (continueButtonDisabled.value) return;
+  const { selectedNetwork } = storeToRefs(useNetworkStore());
 
   const tx = await commitTransaction(
     {
@@ -706,6 +708,7 @@ const makeTransaction = async () => {
       token: transaction.value!.token,
       from: transaction.value!.from,
       to: transaction.value!.to,
+      fromChainKey: selectedNetwork.value.key,
       info: {
         expectedCompleteTimestamp:
           transaction.value?.type === "withdrawal"
@@ -713,6 +716,7 @@ const makeTransaction = async () => {
             : undefined,
         completed: false,
       },
+      gateway: eraNetwork.value.l1Gateway as string,
     };
     saveTransaction(transactionInfo.value);
     silentRouterChange(

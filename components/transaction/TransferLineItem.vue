@@ -12,13 +12,13 @@
       <template v-if="chainsLabel">
         <div v-if="transfer.type == 'deposit'">
           From:
-          <img v-if="chainIconUrl" class="chain-icon left" :src="chainIconUrl" />
+          <!-- <img v-if="chainIconUrl" class="chain-icon left" :src="chainIconUrl" /> -->
           <span>{{ chainsLabel.from }}</span
           >.
         </div>
         <div v-else-if="transfer.type == 'withdrawal'">
           To:
-          <img v-if="chainIconUrl" class="chain-icon" :src="chainIconUrl" />
+          <!-- <img v-if="chainIconUrl" class="chain-icon" :src="chainIconUrl" /> -->
           <span>{{ chainsLabel.to }}</span
           >.
         </div>
@@ -55,7 +55,7 @@ import {
   MinusIcon,
   PlusIcon,
 } from "@heroicons/vue/24/outline";
-import { useTimeAgo } from "@vueuse/core";
+import { useNetwork, useTimeAgo } from "@vueuse/core";
 import { BigNumber } from "ethers";
 import { storeToRefs } from "pinia";
 
@@ -71,6 +71,7 @@ import { shortenAddress } from "@/utils/formatters";
 import { iconsList } from "@/data/iconlists";
 import { nexusGoerliNode, ZkSyncNetwork } from "@/data/networks";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
+import useNetworks from "@/composables/useNetworks";
 
 const props = defineProps({
   as: {
@@ -146,41 +147,47 @@ const getLayerName = (layer: NetworkLayer) => {
   return eraNetwork.value.name;
 };
 
+const { primaryNetwork } = useNetworks();
+
 const getNetworkInfo = () => {
-  const newNetwork = nexusGoerliNode.find((item) => item.l1Gateway && item.l1Gateway == props.transfer.gateway);
-  return newNetwork!;
+  const newNetwork = nexusGoerliNode.find(
+    (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === props.transfer.gateway?.toLowerCase()
+  );
+  return newNetwork ?? primaryNetwork;
 };
 const getl1NetworkName = () => {
-  const { token, type, gateway, toNetwork, fromNetwork } = props.transfer;
-  if (token?.address != ETH_ADDRESS && gateway) {
+  const { type, gateway } = props.transfer;
+  // other chain
+  if (gateway) {
     if (type === "withdrawal") {
       return {
-        from: getLayerName(fromNetwork),
+        from: "",
         to: getNetworkInfo().l1Network?.name,
       };
     } else if (type === "deposit") {
       return {
-        from: getNetworkInfo().l1Network?.name,
-        to: getLayerName(toNetwork),
+        from: "", // TODO
+        to: "",
       };
     }
   } else {
-    return {
-      from: getLayerName(fromNetwork),
-      to: getLayerName(toNetwork),
-    };
+    // primary chain
+    if (type === "transfer") {
+      return {
+        from: eraNetwork.value.name,
+        to: eraNetwork.value.name,
+      };
+    } else {
+      return {
+        from: primaryNetwork.l1Network?.name,
+        to: primaryNetwork.l1Network?.name,
+      };
+    }
   }
 };
 
 const chainsLabel = computed(() => {
-  if (!eraNetwork.value.l1Network) {
-    return;
-  }
   return getl1NetworkName();
-  // return {
-  //   to: getLayerName(props.transfer.toNetwork),
-  //   from: getLayerName(props.transfer.fromNetwork),
-  // };
 });
 const computeAmount = computed(() => {
   return BigNumber.from(props.transfer.amount || "0").toString();

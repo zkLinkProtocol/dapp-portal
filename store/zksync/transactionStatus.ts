@@ -29,7 +29,7 @@ export type TransactionInfo = {
     withdrawalFinalizationAvailable?: boolean;
     completed: boolean;
   };
-  gateway: string;
+  gateway?: string;
 };
 //TODO Setting the secondary chain and primary chain separately.
 export const ESTIMATED_DEPOSIT_DELAY = 1 * 60 * 1000; // 1 minutes
@@ -71,10 +71,10 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
 
   const savedTransactions = computed<TransactionInfo[]>({
     get: () => {
-      return storageSavedTransactions.value[eraNetwork.value.key] || [];
+      return storageSavedTransactions.value["eraNetwork.value.key"] || [];
     },
     set: (transactions: TransactionInfo[]) => {
-      storageSavedTransactions.value[eraNetwork.value.key] = transactions;
+      storageSavedTransactions.value["eraNetwork.value.key"] = transactions;
     },
   });
   const userTransactions = computed(() =>

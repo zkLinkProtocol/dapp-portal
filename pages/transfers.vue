@@ -158,6 +158,11 @@ const actionRequiredBridgeTransactions = computed(() =>
 
 const actionNotRequiredBridgeTransactions = computed(() => {
   const actionRequiredHashes = actionRequiredBridgeTransactions.value.map((e) => e.transactionHash);
+  console.log(
+    "recent",
+    recentBridgeOperations.value.filter((e) => !actionRequiredHashes.includes(e.transactionHash))
+  );
+
   return recentBridgeOperations.value.filter((e) => !actionRequiredHashes.includes(e.transactionHash));
 });
 const displayedTransfers = computed(() => {
