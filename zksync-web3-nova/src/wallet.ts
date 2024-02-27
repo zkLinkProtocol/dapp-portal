@@ -7,7 +7,7 @@ import { ProgressCallback } from '@ethersproject/json-wallets';
 import { AdapterL1, AdapterL2 } from './adapters';
 
 export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
-    override readonly provider: Provider;
+    declare readonly provider: Provider;
     providerL1?: ethers.providers.Provider;
     public eip712: EIP712Signer;
 
