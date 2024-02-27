@@ -74,8 +74,10 @@
           <template #dropdown>
             <CommonButtonDropdown
               :toggled="toNetworkModalOpened"
+              :noChevron="true"
               size="xs"
               variant="light"
+              style="cursor: default;"
             >
               <template #left-icon>
                 <img :src="destination.iconUrl" class="h-full w-full" />
