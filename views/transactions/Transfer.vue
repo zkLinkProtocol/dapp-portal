@@ -31,7 +31,7 @@
     <NetworkSelectModal
       v-model:opened="toNetworkModalOpened"
       title="To"
-      :network-key="destination.key"
+      :network-key="selectedNetwork.key"
       @update:network-key="toNetworkSelected($event)"
     />
 
@@ -65,7 +65,6 @@
               size="xs"
               variant="light"
               class="overflow-hidden"
-              @click="fromNetworkModalOpened = true"
             >
               <template #left-icon>
                 <img :src="destinations.nova.iconUrl" class="h-full w-full" />
@@ -342,6 +341,7 @@ import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/
 import TransferSubmitted from "@/views/transactions/TransferSubmitted.vue";
 import WithdrawalSubmitted from "@/views/transactions/WithdrawalSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
+import { useNetworkStore } from "@/store/network";
 
 const props = defineProps({
   type: {
@@ -350,6 +350,7 @@ const props = defineProps({
   },
 });
 
+const { selectedNetwork } = storeToRefs(useNetworkStore());
 const route = useRoute();
 const router = useRouter();
 

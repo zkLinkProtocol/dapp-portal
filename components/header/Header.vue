@@ -13,11 +13,19 @@
     <div class="links-container">
       <NuxtLink
         class="link-item"
-        :to="{ name: 'index' }"
+        :to="{ name: 'index'}"
         :class="{ 'router-link-exact-active': routes.bridge.includes(route.name?.toString() || '') }"
       >
         <ArrowsUpDownIcon class="link-icon" aria-hidden="true" />
-        Bridge
+        Deposit
+      </NuxtLink>
+      <NuxtLink
+        class="link-item"
+        :to="{ name: 'withdraw'}"
+        :class="{ 'router-link-exact-active': routes.withdraw.includes(route.name?.toString() || '') }"
+      >
+        <ArrowsUpDownIcon class="link-icon" aria-hidden="true" />
+        Withdraw
       </NuxtLink>
       <NuxtLink
         class="link-item"
@@ -38,7 +46,7 @@
       </NuxtLink>
     </div>
     <div class="right-side">
-      <HeaderNetworkDropdown class="network-dropdown" />
+      <!-- <HeaderNetworkDropdown class="network-dropdown" /> -->
       <CommonButton v-if="!isConnected" variant="primary" @click="onboardStore.openModal()">
         <span class="whitespace-nowrap">Connect wallet</span>
       </CommonButton>
@@ -87,7 +95,8 @@ import { useZkSyncWithdrawalsStore } from "@/store/zksync/withdrawals";
 
 const route = useRoute();
 const routes = {
-  bridge: ["index", "withdraw"],
+  bridge: ["index"],
+  withdraw: ["withdraw"],
   assets: ["assets", "balances", "receive-methods", "receive", "send-methods", "send"],
 };
 

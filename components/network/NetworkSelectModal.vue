@@ -13,23 +13,22 @@
         </template>
       </CommonInputSearch> -->
       <div class="-mx-block-padding-1/2 h-full overflow-auto px-block-padding-1/2">
-        <div v-for="(group, groupIndex) in displayedGroups" :key="groupIndex" class="category">
+        <div v-for="(group, groupIndex) in arr" :key="groupIndex" class="category">
           <!-- <TypographyCategoryLabel size="sm" variant="darker" class="group-category-label">
             {{ group.title }}
           </TypographyCategoryLabel> -->
           <div class="-mx-block-padding-1/4 sm:-mx-block-padding-1/2">
             <DestinationItem
-              v-for="(item, itemIndex) in group.destinations"
-              v-bind="item"
-              :key="itemIndex"
-              :icon="item.key === selectedNetworkKey ? CheckIcon : undefined"
+              v-bind="group"
+              :key="groupIndex"
+              :icon="group.key === selectedNetworkKey ? CheckIcon : undefined"
               variant="light"
               size="sm"
-              @click="selectedNetworkKey = item.key!"
+              @click="buttonClicked(zkSyncNetwork[groupIndex]);selectedNetworkKey = group.key!"
             />
           </div>
         </div>
-        <p v-if="search && !displayedGroups.length" class="mt-block-padding-1/2 text-center">
+        <p v-if="search && !arr.length" class="mt-block-padding-1/2 text-center">
           No chains found for "{{ search }}"
         </p>
         <slot name="body-bottom" />
@@ -45,10 +44,16 @@ import { Combobox } from "@headlessui/vue";
 import { CheckIcon } from "@heroicons/vue/24/outline";
 import { storeToRefs } from "pinia";
 
+import useNetworks from "@/composables/useNetworks";
 import type { TransactionDestination } from "@/store/destinations";
 
 import { useDestinationsStore } from "@/store/destinations";
+import type { ZkSyncNetwork } from "@/data/networks";
+import { useNetworkStore } from "@/store/network";
 
+import { useRoute } from "#app";
+
+const route = useRoute();
 const props = defineProps({
   title: {
     type: String,
@@ -69,8 +74,27 @@ const emit = defineEmits<{
   (eventName: "update:networkKey", networkKey?: string): void;
 }>();
 
+const { zkSyncNetworks } = useNetworks();
+const zkSyncNetwork = zkSyncNetworks.filter((e) => !e.hidden)
+let arr : any[] = [];
+zkSyncNetwork.map((i)=> {
+  const obj = {
+    iconUrl: i.logoUrl,
+    key: i.key,
+    label: i.l1Network?.name
+  }
+  arr.push(obj)
+})
 const { destinations } = storeToRefs(useDestinationsStore());
 
+const { selectedNetwork } = storeToRefs(useNetworkStore());
+const isNetworkSelected = (network: ZkSyncNetwork) => selectedNetwork.value.key === network.key;
+const buttonClicked = (network: ZkSyncNetwork) => {
+  if (isNetworkSelected(network)) {
+    return;
+  }
+  window.location.href = getNetworkUrl(network, route.fullPath);
+};
 const search = ref("");
 const filterDestinations = (networks: TransactionDestination[]) => {
   const lowercaseSearch = search.value.toLowerCase();
@@ -94,7 +118,6 @@ const displayedGroups = computed(() =>
     }))
     .filter((e) => e.destinations.length)
 );
-
 const selectedNetworkKey = computed({
   get: () => props.networkKey,
   set: (value) => {
