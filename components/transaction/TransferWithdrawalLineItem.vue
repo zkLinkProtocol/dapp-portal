@@ -15,10 +15,27 @@
             </template>
             <template #underline>
               <template v-if="chainsLabel">
-                <span>{{ chainsLabel.from }}</span>
-                <ArrowRightIcon class="relative -top-px mx-1 inline h-4 w-4" aria-hidden="true" />
-                <span>{{ chainsLabel.to }}</span
-                >.
+                <div v-if="transfer.type == 'deposit'">
+                  From:
+                  <img v-if="chainIconUrl" class="chain-icon left" :src="chainIconUrl" />
+                  <span>{{ chainsLabel.from }}</span
+                  >.
+                </div>
+                <div v-else-if="transfer.type == 'withdrawal'">
+                  To:
+                  <img v-if="chainIconUrl" class="chain-icon" :src="chainIconUrl" />
+                  <span>{{ chainsLabel.to }}</span
+                  >.
+                </div>
+                <template v-else>
+                  <div v-if="chainsLabel.from !== chainsLabel.to" class="chain-label-wrap">
+                    <span>{{ chainsLabel.from }}</span>
+                    <ArrowRightIcon class="relative -top-px mx-1 inline h-4 w-4" aria-hidden="true" />
+                    <span>{{ chainsLabel.to }}</span
+                    >.
+                  </div>
+                  <span v-else>{{ chainsLabel.from }} .</span>
+                </template>
               </template>
               <span>{{ timeAgo }}</span>
             </template>
@@ -57,6 +74,8 @@ import { storeToRefs } from "pinia";
 
 import TokenAmount from "@/components/transaction/lineItem/TokenAmount.vue";
 import TotalPrice from "@/components/transaction/lineItem/TotalPrice.vue";
+import { nexusGoerliNode } from "@/data/networks";
+import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 
 import type { NetworkLayer, Transfer } from "@/utils/mappers";
 import type { PropType } from "vue";
@@ -93,20 +112,46 @@ const formatAddress = (address: string) => {
   }
   return shortenAddress(address);
 };
+const chainIconUrl = computed(() => {
+  // return props.transfer.token?.chainIconUrl;
+  return getNetworkInfo()?.logoUrl;
+});
 const getLayerName = (layer: NetworkLayer) => {
   if (layer === "L1") {
     return eraNetwork.value.l1Network?.name;
   }
   return eraNetwork.value.name;
 };
+const getNetworkInfo = () => {
+  const newNetwork = nexusGoerliNode.find((item) => item.l1Gateway && item.l1Gateway == props.transfer.gateway);
+  return newNetwork!;
+};
+const getl1NetworkName = () => {
+  const { token, type, gateway, toNetwork, fromNetwork } = props.transfer;
+  if (token?.address != ETH_ADDRESS && gateway) {
+    if (type === "withdrawal") {
+      return {
+        from: getLayerName(fromNetwork),
+        to: getNetworkInfo().l1Network?.name,
+      };
+    } else if (type === "deposit") {
+      return {
+        from: getNetworkInfo().l1Network?.name,
+        to: getLayerName(toNetwork),
+      };
+    }
+  } else {
+    return {
+      from: getLayerName(fromNetwork),
+      to: getLayerName(toNetwork),
+    };
+  }
+};
 const chainsLabel = computed(() => {
   if (!eraNetwork.value.l1Network) {
     return;
   }
-  return {
-    from: getLayerName(props.transfer.fromNetwork),
-    to: getLayerName(props.transfer.toNetwork),
-  };
+  return getl1NetworkName();
 });
 const computeAmount = computed(() => {
   return BigNumber.from(props.transfer.amount || "0").toString();
