@@ -31,7 +31,7 @@
     <NetworkSelectModal
       v-model:opened="toNetworkModalOpened"
       title="To"
-      :network-key="destination.key"
+      :network-key="selectedNetwork.key"
       @update:network-key="toNetworkSelected($event)"
     />
 
@@ -65,7 +65,6 @@
               size="xs"
               variant="light"
               class="overflow-hidden"
-              @click="fromNetworkModalOpened = true"
             >
               <template #left-icon>
                 <img :src="destinations.nova.iconUrl" class="h-full w-full" />
@@ -351,6 +350,7 @@ const props = defineProps({
   },
 });
 
+const { selectedNetwork } = storeToRefs(useNetworkStore());
 const route = useRoute();
 const router = useRouter();
 

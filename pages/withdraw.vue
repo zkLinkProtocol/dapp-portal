@@ -3,7 +3,7 @@
 
   <TransferView type="withdrawal">
     <template #title>
-      <PageTitle>Bridge</PageTitle>
+      <PageTitle>Withdraw</PageTitle>
     </template>
   </TransferView>
 </template>
