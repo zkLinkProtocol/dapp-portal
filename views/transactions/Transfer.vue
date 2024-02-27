@@ -65,7 +65,8 @@
               size="xs"
               variant="light"
               class="overflow-hidden"
-              style="cursor: no-drop;"
+              :noChevron="true"
+              style="cursor: default;"
             >
               <template #left-icon>
                 <img :src="destinations.nova.iconUrl" class="h-full w-full" />
