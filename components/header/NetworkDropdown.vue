@@ -4,7 +4,7 @@
       <CommonButtonDropdown :toggled="open">
         <template #left-icon>
           <!-- <IconsEra /> -->
-          <img class="image-loader-image loaded" :src="selectedNetwork.logoUrl">
+          <img class="image-loader-image loaded" :src="selectedNetwork.logoUrl" />
         </template>
         <span>{{ selectedNetwork.l1Network?.name }}</span>
       </CommonButtonDropdown>
@@ -27,7 +27,7 @@
           >
             <template #left-icon>
               <!-- <IconsEra /> -->
-            <img class="image-loader-image loaded" :src="item.logoUrl">
+              <img class="image-loader-image loaded" :src="item.logoUrl" />
             </template>
             <span>{{ item.l1Network?.name }}</span>
             <template #right-icon>
@@ -64,7 +64,9 @@ const buttonClicked = (network: ZkSyncNetwork) => {
   if (isNetworkSelected(network)) {
     return;
   }
-  window.location.href = getNetworkUrl(network, route.fullPath);
+  console.log("1111", network, route.fullPath);
+
+  // window.location.href = getNetworkUrl(network, route.fullPath);
 };
 </script>
 

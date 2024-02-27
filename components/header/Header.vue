@@ -19,6 +19,10 @@
         <ArrowsUpDownIcon class="link-icon" aria-hidden="true" />
         Bridge
       </NuxtLink>
+      <NuxtLink class="link-item" :to="{ name: 'withdraw' }">
+        <ArrowsUpDownIcon class="link-icon" aria-hidden="true" />
+        Withdraw
+      </NuxtLink>
       <NuxtLink
         class="link-item"
         :to="{ name: 'assets' }"
@@ -29,7 +33,7 @@
       </NuxtLink>
       <NuxtLink class="link-item" :to="{ name: 'transfers' }">
         <ArrowsRightLeftIcon class="link-icon" aria-hidden="true" />
-        Transfers
+        History
         <transition v-bind="TransitionOpacity()">
           <CommonBadge v-if="withdrawalsAvailableForClaiming.length">
             {{ withdrawalsAvailableForClaiming.length }}
@@ -38,7 +42,7 @@
       </NuxtLink>
     </div>
     <div class="right-side">
-      <HeaderNetworkDropdown class="network-dropdown" />
+      <HeaderNetworkDropdown />
       <CommonButton v-if="!isConnected" variant="primary" @click="onboardStore.openModal()">
         <span class="whitespace-nowrap">Connect wallet</span>
       </CommonButton>

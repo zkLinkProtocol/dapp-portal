@@ -11,13 +11,14 @@
     >
       Confirm transaction
     </PageTitle>
-
-    <NetworkSelectModal
+    <!-- from 的弹窗 -->
+    <NetworkSelect
       v-model:opened="fromNetworkModalOpened"
       title="From"
-      :network-key="destinations.arbitrum.key"
+      :network-key="selectedNetworkKey"
       @update:network-key="fromNetworkSelected($event)"
     />
+    <!-- to的弹窗 需要禁用 -->
     <NetworkSelectModal
       v-model:opened="toNetworkModalOpened"
       title="To"
@@ -51,6 +52,7 @@
           :loading="tokensRequestInProgress || balanceInProgress"
           class="mb-block-padding-1/2 sm:mb-block-gap"
         >
+          <!-- new dropdown -->
           <template #dropdown>
             <CommonButtonDropdown
               :toggled="fromNetworkModalOpened"
@@ -59,9 +61,9 @@
               @click="fromNetworkModalOpened = true"
             >
               <template #left-icon>
-                <img :src="destinations.arbitrum.iconUrl" class="h-full w-full" />
+                <img :src="currentFromNetwork?.iconUrl" class="h-full w-full" />
               </template>
-              <span>{{ destinations.arbitrum.label }}</span>
+              <span>{{ currentFromNetwork?.label }}</span>
             </CommonButtonDropdown>
           </template>
         </CommonInputTransactionAmount>
@@ -72,12 +74,7 @@
           :address-input-hidden="!!tokenCustomBridge"
         >
           <template #dropdown>
-            <CommonButtonDropdown
-              :toggled="toNetworkModalOpened"
-              size="xs"
-              variant="light"
-              @click="toNetworkModalOpened = true"
-            >
+            <CommonButtonDropdown :toggled="toNetworkModalOpened" size="xs" variant="light" :noChevron="true">
               <template #left-icon>
                 <img :src="destination.iconUrl" class="h-full w-full" />
               </template>
@@ -150,7 +147,7 @@
           <CommonAlert v-if="!enoughBalanceToCoverFee" class="mt-4" variant="error" :icon="ExclamationTriangleIcon">
             <p>
               Insufficient <span class="font-medium">{{ feeToken?.symbol }}</span> balance on
-              <span class="font-medium">{{ destinations.arbitrum.label }}</span> to cover the fee
+              <span class="font-medium">{{ currentFromNetwork?.label }}</span> to cover the fee
             </p>
             <NuxtLink :to="{ name: 'receive-methods' }" class="alert-link">Receive funds</NuxtLink>
           </CommonAlert>
@@ -164,7 +161,7 @@
           >
             <p>
               Insufficient <span class="font-medium">{{ feeToken?.symbol }}</span> balance on
-              {{ destinations.arbitrum.label }} to cover the fee. We recommend having at least
+              {{ currentFromNetwork?.label }} to cover the fee. We recommend having at least
               <span class="font-medium"
                 >{{
                   feeToken?.price
@@ -391,7 +388,7 @@ const { destinations } = storeToRefs(useDestinationsStore());
 const { l1BlockExplorerUrl } = storeToRefs(useNetworkStore());
 const { l1Tokens, tokensRequestInProgress, tokensRequestError } = storeToRefs(tokensStore);
 const { balance, balanceInProgress, balanceError } = storeToRefs(zkSyncEthereumBalance);
-const { isCustomNode } = useNetworks();
+const { isCustomNode, zkSyncNetworks, zkSyncNetworksDisplay } = useNetworks();
 
 const toNetworkModalOpened = ref(false);
 const toNetworkSelected = (networkKey?: string) => {
@@ -400,11 +397,13 @@ const toNetworkSelected = (networkKey?: string) => {
   }
 };
 const fromNetworkModalOpened = ref(false);
+const { zkSyncNetworksDisplay: displayedGroup } = useNetworks();
+const selectedNetworkKey = ref(displayedGroup.value[0].key);
+
 const fromNetworkSelected = (networkKey?: string) => {
-  if (destinations.value.nova.key === networkKey) {
-    router.replace({ name: "withdraw", query: route.query });
-  }
+  selectedNetworkKey.value = networkKey!;
 };
+const currentFromNetwork = computed(() => displayedGroup.value.find((e) => e.key === selectedNetworkKey.value));
 
 const step = ref<"form" | "confirm" | "submitted">("form");
 const destination = computed(() => destinations.value.nova);

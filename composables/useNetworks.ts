@@ -34,11 +34,21 @@ export default () => {
   if (!primaryNetwork) {
     throw new Error("can not find primary chain. nodeType: " + runtimeConfig.public.nodeType);
   }
+  const zkSyncNetworksDisplay = computed(() =>
+    zkSyncNetworks
+      .filter((e) => !e.hidden)
+      .map((e) => ({
+        key: e.key,
+        label: e.l1Network?.name,
+        iconUrl: e.logoUrl,
+      }))
+  );
   return {
     isCustomNode,
 
     zkSyncNetworks,
     defaultNetwork,
     primaryNetwork,
+    zkSyncNetworksDisplay,
   };
 };
