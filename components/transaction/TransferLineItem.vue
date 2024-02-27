@@ -10,15 +10,26 @@
     <template #top-left>{{ label }}</template>
     <template #bottom-left>
       <template v-if="chainsLabel">
-        <template v-if="chainsLabel.from !== chainsLabel.to">
-          <span>{{ chainsLabel.from }}</span>
-          <ArrowRightIcon class="relative -top-px mx-1 inline h-4 w-4" aria-hidden="true" />
-          <span>{{ chainsLabel.to }}</span
-          >.
-        </template>
-        <template v-else>
+        <div v-if="transfer.type == 'deposit'">
+          From:
+          <img v-if="chainIconUrl" class="chain-icon left" :src="chainIconUrl" />
           <span>{{ chainsLabel.from }}</span
           >.
+        </div>
+        <div v-else-if="transfer.type == 'withdrawal'">
+          To:
+          <img v-if="chainIconUrl" class="chain-icon" :src="chainIconUrl" />
+          <span>{{ chainsLabel.to }}</span
+          >.
+        </div>
+        <template v-else>
+          <div v-if="chainsLabel.from !== chainsLabel.to" class="chain-label-wrap">
+            <span>{{ chainsLabel.from }}</span>
+            <ArrowRightIcon class="relative -top-px mx-1 inline h-4 w-4" aria-hidden="true" />
+            <span>{{ chainsLabel.to }}</span
+            >.
+          </div>
+          <span v-else>{{ chainsLabel.from }} .</span>
         </template>
       </template>
       <span>{{ timeAgo }}</span>
@@ -57,6 +68,9 @@ import type { Component, PropType } from "vue";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { shortenAddress } from "@/utils/formatters";
+import { iconsList } from "@/data/iconlists";
+import { nexusGoerliNode, ZkSyncNetwork } from "@/data/networks";
+import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 
 const props = defineProps({
   as: {
@@ -101,13 +115,13 @@ const label = computed(() => {
     return `Sent to ${formatAddress(props.transfer.to)}`;
   } else if (props.transfer.type === "withdrawal") {
     if (props.transfer.to === account.value.address) {
-      return "Bridged";
+      return "Withdraw";
     }
     return `Bridged to ${formatAddress(props.transfer.to)}`;
   } else if (props.transfer.type === "deposit") {
     if (direction.value === "in") {
       if (props.transfer.from === account.value.address) {
-        return "Bridged";
+        return "Deposit";
       }
       return `Bridged from ${formatAddress(props.transfer.from)}`;
     } else {
@@ -120,6 +134,10 @@ const label = computed(() => {
   }
   return props.transfer.type || "Unknown";
 });
+const chainIconUrl = computed(() => {
+  // return props.transfer.token?.chainIconUrl;
+  return getNetworkInfo()?.logoUrl;
+});
 
 const getLayerName = (layer: NetworkLayer) => {
   if (layer === "L1") {
@@ -127,14 +145,42 @@ const getLayerName = (layer: NetworkLayer) => {
   }
   return eraNetwork.value.name;
 };
+
+const getNetworkInfo = () => {
+  const newNetwork = nexusGoerliNode.find((item) => item.l1Gateway && item.l1Gateway == props.transfer.gateway);
+  return newNetwork!;
+};
+const getl1NetworkName = () => {
+  const { token, type, gateway, toNetwork, fromNetwork } = props.transfer;
+  if (token?.address != ETH_ADDRESS && gateway) {
+    if (type === "withdrawal") {
+      return {
+        from: getLayerName(fromNetwork),
+        to: getNetworkInfo().l1Network?.name,
+      };
+    } else if (type === "deposit") {
+      return {
+        from: getNetworkInfo().l1Network?.name,
+        to: getLayerName(toNetwork),
+      };
+    }
+  } else {
+    return {
+      from: getLayerName(fromNetwork),
+      to: getLayerName(toNetwork),
+    };
+  }
+};
+
 const chainsLabel = computed(() => {
   if (!eraNetwork.value.l1Network) {
     return;
   }
-  return {
-    from: getLayerName(props.transfer.fromNetwork),
-    to: getLayerName(props.transfer.toNetwork),
-  };
+  return getl1NetworkName();
+  // return {
+  //   to: getLayerName(props.transfer.toNetwork),
+  //   from: getLayerName(props.transfer.fromNetwork),
+  // };
 });
 const computeAmount = computed(() => {
   return BigNumber.from(props.transfer.amount || "0").toString();
@@ -166,3 +212,18 @@ const transactionIcon = computed(() => {
 
 const timeAgo = useTimeAgo(props.transfer.timestamp);
 </script>
+<style lang="scss" scoped>
+.chain-label-wrap {
+  @apply flex items-center;
+}
+
+.chain-icon {
+  display: inline-flex;
+  width: 18px;
+  height: auto;
+  margin-right: 6px;
+  &.left {
+    margin: 0 6px 0 0;
+  }
+}
+</style>

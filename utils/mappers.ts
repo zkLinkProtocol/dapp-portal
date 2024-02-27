@@ -68,6 +68,7 @@ export function mapApiTransfer(transfer: Api.Response.Transfer) {
     amount: transfer.amount,
     token,
     timestamp: transfer.timestamp,
+    gateway: transfer.gateway,
   };
 }
 export type Transfer = ReturnType<typeof mapApiTransfer>;

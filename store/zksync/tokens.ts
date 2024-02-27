@@ -5,10 +5,12 @@ import type { Token } from "@/types";
 
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { mapApiToken } from "@/utils/mappers";
+import { useRoute } from "#vue-router";
 
 export const useZkSyncTokensStore = defineStore("zkSyncTokens", () => {
   const providerStore = useZkSyncProviderStore();
   const { eraNetwork } = storeToRefs(providerStore);
+  const route = useRoute();
   const {
     result: tokensRaw,
     inProgress: tokensRequestInProgress,
@@ -17,8 +19,9 @@ export const useZkSyncTokensStore = defineStore("zkSyncTokens", () => {
     reset: resetTokens,
   } = usePromise<Token[]>(async () => {
     if (eraNetwork.value.blockExplorerApi) {
+      const networkVal = route.path === "/assets" || route.path === "/balances" ? "" : eraNetwork.value.key;
       const response: Api.Response.Collection<Api.Response.Token> = await $fetch(
-        `${eraNetwork.value.blockExplorerApi}/tokens?limit=100&key=` + eraNetwork.value.key
+        `${eraNetwork.value.blockExplorerApi}/tokens?limit=100&key=` + networkVal
       );
       const explorerTokens = response.items.map(mapApiToken);
       const etherExplorerToken = explorerTokens.find((token) => token.address === ETH_TOKEN.address);

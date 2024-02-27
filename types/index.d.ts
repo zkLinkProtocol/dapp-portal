@@ -54,6 +54,7 @@ export declare namespace Api {
       tokenAddress: string;
       timestamp: string;
       type: "deposit" | "transfer" | "withdrawal" | "fee" | "mint" | "refund";
+      gateway: string;
     };
 
     type TokenAddress = {

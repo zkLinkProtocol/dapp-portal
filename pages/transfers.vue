@@ -146,18 +146,20 @@ const recentBridgeOperations = computed<RecentBridgeOperation[]>(() => {
         completed: tx.info.completed,
         finalizationAvailable:
           tx.type === "withdrawal" ? !tx.info.completed && tx.info.withdrawalFinalizationAvailable : undefined,
+        gateway: tx.gateway,
       } as RecentBridgeOperation;
     }),
   ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 });
+
 const actionRequiredBridgeTransactions = computed(() =>
   recentBridgeOperations.value.filter((e) => e.finalizationAvailable)
 );
+
 const actionNotRequiredBridgeTransactions = computed(() => {
   const actionRequiredHashes = actionRequiredBridgeTransactions.value.map((e) => e.transactionHash);
   return recentBridgeOperations.value.filter((e) => !actionRequiredHashes.includes(e.transactionHash));
 });
-
 const displayedTransfers = computed(() => {
   return transfers.value.filter(
     (transfer) => !recentBridgeOperations.value.find((tx) => tx.transactionHash === transfer.transactionHash)
