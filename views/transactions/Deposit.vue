@@ -76,6 +76,7 @@
               :toggled="toNetworkModalOpened"
               size="xs"
               variant="light"
+              style="cursor: no-drop;"
             >
               <template #left-icon>
                 <img :src="destination.iconUrl" class="h-full w-full" />

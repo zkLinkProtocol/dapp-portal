@@ -65,6 +65,7 @@
               size="xs"
               variant="light"
               class="overflow-hidden"
+              style="cursor: no-drop;"
             >
               <template #left-icon>
                 <img :src="destinations.nova.iconUrl" class="h-full w-full" />
