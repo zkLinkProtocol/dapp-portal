@@ -17,13 +17,26 @@
             </template>
           </DestinationItem>
         </CommonCardWithLineButtons>
-
         <TypographyCategoryLabel size="sm">Portal</TypographyCategoryLabel>
         <CommonCardWithLineButtons>
-          <DestinationItem label="Bridge" as="RouterLink" :to="{ name: 'index' }" size="sm">
+          <DestinationItem label="Deposit" as="RouterLink" :to="{ name: 'index' }" size="sm">
             <template #image>
               <DestinationIconContainer>
                 <ArrowsUpDownIcon aria-hidden="true" />
+              </DestinationIconContainer>
+            </template>
+          </DestinationItem>
+          <DestinationItem label="Withdraw" as="RouterLink" :to="{ name: 'withdraw' }" size="sm">
+            <template #image>
+              <DestinationIconContainer>
+                <ArrowsUpDownIcon aria-hidden="true" />
+              </DestinationIconContainer>
+            </template>
+          </DestinationItem>
+          <DestinationItem v-if="isShowFaucet" label="Faucet" as="RouterLink" :to="{ name: 'faucet' }" size="sm">
+            <template #image>
+              <DestinationIconContainer>
+                <IconsFaucet aria-hidden="true" />
               </DestinationIconContainer>
             </template>
           </DestinationItem>
@@ -50,7 +63,6 @@
             </template>
           </DestinationItem>
         </CommonCardWithLineButtons>
-
         <TypographyCategoryLabel size="sm">Theme</TypographyCategoryLabel>
         <CommonCardWithLineButtons>
           <DestinationItem
@@ -92,10 +104,8 @@
     </transition>
   </HeaderMobileNavigation>
 </template>
-
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue";
-
 import {
   ArrowsRightLeftIcon,
   ArrowsUpDownIcon,
@@ -106,12 +116,9 @@ import {
   WalletIcon,
 } from "@heroicons/vue/24/outline";
 import { storeToRefs } from "pinia";
-
 import useColorMode from "@/composables/useColorMode";
 import useNetworks from "@/composables/useNetworks";
-
 import type { ZkSyncNetwork } from "@/data/networks";
-
 import { useRoute } from "#imports";
 import { useNetworkStore } from "@/store/network";
 import { useZkSyncWithdrawalsStore } from "@/store/zksync/withdrawals";
@@ -124,19 +131,14 @@ const props = defineProps({
     default: false,
   },
 });
-
 const emit = defineEmits<{
   (eventName: "update:opened", value: boolean): void;
 }>();
-
 const route = useRoute();
-
 const { withdrawalsAvailableForClaiming } = storeToRefs(useZkSyncWithdrawalsStore());
-
 const TabsTransition = computed(() =>
   openedTab.value === "main" ? TransitionSlideOutToRight : TransitionSlideOutToLeft
 );
-
 const openedTab = ref<"main" | "network">("main");
 const modalOpened = computed({
   get: () => props.opened,
@@ -150,10 +152,8 @@ watch(
     }
   }
 );
-
 const { switchColorMode, selectedColorMode } = useColorMode();
-
-const { zkSyncNetworks } = useNetworks();
+const { zkSyncNetworks, defaultNetwork } = useNetworks();
 const { selectedNetwork } = storeToRefs(useNetworkStore());
 const isNetworkSelected = (network: ZkSyncNetwork) => selectedNetwork.value.key === network.key;
 const buttonClicked = (network: ZkSyncNetwork) => {
@@ -162,6 +162,6 @@ const buttonClicked = (network: ZkSyncNetwork) => {
   }
   window.location.href = getNetworkUrl(network, route.fullPath);
 };
+const isShowFaucet = computed(() => defaultNetwork.id === 810182);
 </script>
-
 <style scoped lang="scss"></style>

@@ -13,7 +13,7 @@
     <div class="links-container">
       <NuxtLink
         class="link-item"
-        :to="{ name: 'index'}"
+        :to="{ name: 'index' }"
         :class="{ 'router-link-exact-active': routes.bridge.includes(route.name?.toString() || '') }"
       >
         <ArrowsUpDownIcon class="link-icon" aria-hidden="true" />
@@ -21,11 +21,20 @@
       </NuxtLink>
       <NuxtLink
         class="link-item"
-        :to="{ name: 'withdraw'}"
+        :to="{ name: 'withdraw' }"
         :class="{ 'router-link-exact-active': routes.withdraw.includes(route.name?.toString() || '') }"
       >
         <ArrowsUpDownIcon class="link-icon" aria-hidden="true" />
         Withdraw
+      </NuxtLink>
+      <NuxtLink
+        v-if="isShowFaucet"
+        class="link-item"
+        :to="{ name: 'faucet' }"
+        :class="{ 'router-link-exact-active': routes.faucet.includes(route.name?.toString() || '') }"
+      >
+        <IconsFaucet class="link-icon" aria-hidden="true" />
+        Faucet
       </NuxtLink>
       <NuxtLink
         class="link-item"
@@ -92,11 +101,13 @@ import useColorMode from "@/composables/useColorMode";
 import { useRoute } from "#imports";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncWithdrawalsStore } from "@/store/zksync/withdrawals";
-
+import useNetworks from "@/composables/useNetworks";
+const { defaultNetwork } = useNetworks();
 const route = useRoute();
 const routes = {
   bridge: ["index"],
   withdraw: ["withdraw"],
+  faucet: ["faucet"],
   assets: ["assets", "balances", "receive-methods", "receive", "send-methods", "send"],
 };
 
@@ -108,6 +119,7 @@ const mobileMainNavigationOpened = ref(false);
 const mobileAccountNavigationOpened = ref(false);
 
 const { selectedColorMode, switchColorMode } = useColorMode();
+const isShowFaucet = computed(() => defaultNetwork.id === 810182);
 </script>
 
 <style lang="scss" scoped>
