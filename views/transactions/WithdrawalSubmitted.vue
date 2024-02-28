@@ -146,6 +146,7 @@ import { computed, watch } from "vue";
 import { ExclamationTriangleIcon } from "@heroicons/vue/24/outline";
 import { storeToRefs } from "pinia";
 
+import useNetworks from "@/composables/useNetworks";
 import { isWithdrawalManualFinalizationRequired } from "@/composables/zksync/useTransaction";
 import useWithdrawalFinalization from "@/composables/zksync/useWithdrawalFinalization";
 
@@ -170,6 +171,7 @@ const props = defineProps({
 
 const onboardStore = useOnboardStore();
 const transactionStatusStore = useZkSyncTransactionStatusStore();
+const { isCustomNode } = useNetworks();
 const { eraNetwork, blockExplorerUrl } = storeToRefs(useZkSyncProviderStore());
 const { l1BlockExplorerUrl } = storeToRefs(useNetworkStore());
 const { connectorName, isCorrectNetworkSet } = storeToRefs(onboardStore);
@@ -177,7 +179,8 @@ const { connectorName, isCorrectNetworkSet } = storeToRefs(onboardStore);
 const withdrawalManualFinalizationRequired = computed(() => {
   return (
     !props.transaction.info.completed &&
-    isWithdrawalManualFinalizationRequired(props.transaction.token, eraNetwork.value.l1Network?.id || -1)
+    (isCustomNode ||
+      isWithdrawalManualFinalizationRequired(props.transaction.token, eraNetwork.value.l1Network?.id || -1))
   );
 });
 const withdrawalFinalizationAvailable = computed(() => {
