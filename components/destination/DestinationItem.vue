@@ -11,7 +11,9 @@
           <slot name="label">{{ label }}</slot>
         </template>
         <template #underline v-if="description || $slots['underline']">
-          <slot name="underline">{{ description }}</slot>
+          <slot name="underline">
+            <div :class="ellipsisdescription ? 'ellipsis' : ''">{{ description }}</div>
+          </slot>
         </template>
       </CommonButtonLineBodyInfo>
     </template>
@@ -40,6 +42,10 @@ defineProps({
   icon: {
     type: [Object, Function] as PropType<Component>,
   },
+  ellipsisdescription: {
+    type: Boolean,
+    default: false,
+  },
 });
 </script>
 
@@ -51,6 +57,11 @@ defineProps({
     .image-loader-image {
       @apply box-content;
     }
+  }
+  .ellipsis {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 }
 </style>
