@@ -3,7 +3,7 @@
     <HeaderMobileMainNavigation v-model:opened="mobileMainNavigationOpened" />
     <HeaderMobileAccountNavigation v-model:opened="mobileAccountNavigationOpened" />
     <div class="logo-container">
-      <NuxtLink :to="{ name: 'index' }">
+      <NuxtLink to="https://zklink.io/" target="_blank">
         <img v-if="selectedColorMode === 'dark'" src="/img/logo.png" alt="" class="logo-icon" />
         <img v-else src="/img/logoWhite.png" alt="" class="logo-icon" />
         <!-- <IconsZkSync class="logo-icon" /> -->
