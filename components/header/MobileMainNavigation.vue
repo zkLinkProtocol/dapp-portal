@@ -20,7 +20,14 @@
 
         <TypographyCategoryLabel size="sm">Portal</TypographyCategoryLabel>
         <CommonCardWithLineButtons>
-          <DestinationItem label="Bridge" as="RouterLink" :to="{ name: 'index' }" size="sm">
+          <DestinationItem label="Deposit" as="RouterLink" :to="{ name: 'index' }" size="sm">
+            <template #image>
+              <DestinationIconContainer>
+                <ArrowsUpDownIcon aria-hidden="true" />
+              </DestinationIconContainer>
+            </template>
+          </DestinationItem>
+          <DestinationItem label="Withdraw" as="RouterLink" :to="{ name: 'withdraw' }" size="sm">
             <template #image>
               <DestinationIconContainer>
                 <ArrowsUpDownIcon aria-hidden="true" />
