@@ -371,8 +371,9 @@ import { useZkSyncTokensStore } from "@/store/zksync/tokens";
 import { ESTIMATED_DEPOSIT_DELAY, useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransfersHistoryStore } from "@/store/zksync/transfersHistory";
 import { useZkSyncWalletStore } from "@/store/zksync/wallet";
+import { ETH_TOKEN } from "@/utils/constants";
 import { TOKEN_ALLOWANCE } from "@/utils/doc-links";
-import { checksumAddress, decimalToBigNumber, formatRawTokenPrice, parseTokenAmount } from "@/utils/formatters";
+import { checksumAddress, decimalToBigNumber, parseTokenAmount } from "@/utils/formatters";
 import { silentRouterChange } from "@/utils/helpers";
 import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/transitions";
 import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
@@ -422,18 +423,10 @@ const routeTokenAddress = computed(() => {
   }
   return checksumAddress(route.query.token);
 });
-const tokenWithHighestBalancePrice = computed(() => {
-  const tokenWithHighestBalancePrice = [...availableBalances.value].sort((a, b) => {
-    const aPrice = typeof a.price === "number" ? formatRawTokenPrice(a.amount, a.decimals, a.price) : 0;
-    const bPrice = typeof b.price === "number" ? formatRawTokenPrice(b.amount, b.decimals, b.price) : 0;
-    return bPrice - aPrice;
-  });
-  return tokenWithHighestBalancePrice[0] ? tokenWithHighestBalancePrice[0] : undefined;
-});
-const defaultToken = computed(() => availableTokens.value[0] ?? undefined);
-const selectedTokenAddress = ref<string | undefined>(
-  routeTokenAddress.value ?? tokenWithHighestBalancePrice.value?.address ?? defaultToken.value?.address
+const defaultToken = computed(
+  () => availableTokens.value.find((e) => e.address === ETH_TOKEN.l1Address) ?? availableTokens.value[0] ?? undefined
 );
+const selectedTokenAddress = ref<string | undefined>(routeTokenAddress.value ?? defaultToken.value?.address);
 const selectedToken = computed<Token | undefined>(() => {
   if (!selectedTokenAddress.value) {
     return defaultToken.value;
@@ -739,11 +732,7 @@ const fetchBalances = async (force = false) => {
   tokensStore.requestTokens();
   if (!isConnected.value) return;
 
-  await zkSyncEthereumBalance.requestBalance({ force }).then(() => {
-    if (!selectedToken.value) {
-      selectedTokenAddress.value = tokenWithHighestBalancePrice.value?.address;
-    }
-  });
+  await zkSyncEthereumBalance.requestBalance({ force });
 };
 fetchBalances();
 
