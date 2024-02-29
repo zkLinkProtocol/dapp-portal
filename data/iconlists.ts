@@ -1,10 +1,11 @@
+import type { ZkSyncNetwork } from "@/data/networks";
+import useNetworks from "@/composables/useNetworks";
 export type IconsList = {
   [key: string]: string;
 };
-export const iconsList: IconsList = {
-  goerli: "/img/ethereum.svg",
-  primary: "/img/linea.svg",
-  sepolia: "/img/ethereum.svg",
-  zksyncsepolia: "/img/era.svg",
-  scrollsepolia: "/img/sepolia.jpg",
-};
+
+const { zkSyncNetworks } = useNetworks();
+export const iconsList: IconsList = zkSyncNetworks.reduce((obj: IconsList, item: ZkSyncNetwork) => {
+  obj[item.key] = item.logoUrl!;
+  return obj;
+}, {});

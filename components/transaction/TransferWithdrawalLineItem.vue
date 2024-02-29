@@ -74,7 +74,6 @@ import { storeToRefs } from "pinia";
 
 import TokenAmount from "@/components/transaction/lineItem/TokenAmount.vue";
 import TotalPrice from "@/components/transaction/lineItem/TotalPrice.vue";
-import { nexusGoerliNode } from "@/data/networks";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 
 import type { NetworkLayer, Transfer } from "@/utils/mappers";
@@ -117,15 +116,9 @@ const chainIconUrl = computed(() => {
   // return props.transfer.token?.chainIconUrl;
   return getNetworkInfo()?.logoUrl;
 });
-const getLayerName = (layer: NetworkLayer) => {
-  if (layer === "L1") {
-    return eraNetwork.value.l1Network?.name;
-  }
-  return eraNetwork.value.name;
-};
-const { primaryNetwork } = useNetworks();
+const { primaryNetwork, zkSyncNetworks } = useNetworks();
 const getNetworkInfo = () => {
-  const newNetwork = nexusGoerliNode.find(
+  const newNetwork = zkSyncNetworks.find(
     (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === props.transfer.gateway?.toLowerCase()
   );
   return newNetwork ?? primaryNetwork;
@@ -141,7 +134,7 @@ const getl1NetworkName = () => {
       };
     } else if (type === "deposit") {
       return {
-        from: "", // TODO
+        from: getNetworkInfo().l1Network?.name,
         to: "",
       };
     }

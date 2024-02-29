@@ -706,6 +706,7 @@ const makeTransaction = async () => {
       from: transaction.value!.from,
       to: transaction.value!.to,
       fromChainKey: selectedNetwork.value.key,
+      gateway: selectedNetwork.value.l1Gateway,
       info: {
         expectedCompleteTimestamp: new Date(
           new Date().getTime() + getEstmatdDepositDelay(eraNetwork.value.key)
