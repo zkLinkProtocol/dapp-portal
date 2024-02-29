@@ -63,6 +63,5 @@ defineProps({
     required: false,
   },
 });
-
 const { blockExplorerUrl } = storeToRefs(useZkSyncProviderStore());
 </script>

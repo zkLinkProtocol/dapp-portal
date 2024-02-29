@@ -382,7 +382,6 @@ const fromNetworkSelected = (networkKey?: string) => {
 
 const step = ref<"form" | "withdrawal-finalization-warning" | "confirm" | "submitted">("form");
 const destination = computed(() => (props.type === "transfer" ? destinations.value.nova : destinations.value.arbitrum));
-
 const availableTokens = computed(() => {
   if (!tokens.value) return [];
   if (props.type === "withdrawal") {

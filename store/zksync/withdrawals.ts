@@ -6,6 +6,12 @@ import { useDestinationsStore } from "@/store/destinations";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncTransactionStatusStore, WITHDRAWAL_DELAY } from "@/store/zksync/transactionStatus";
+import { useZkSyncWalletStore } from "@/store/zksync/wallet";
+import { nexusGoerliNode } from "@/data/networks";
+import { Provider } from "@/zksync-web3-nova/src";
+import { useNetworkStore } from "@/store/network";
+import useNetworks from "@/composables/useNetworks";
+import type { ZkSyncNetwork } from "@/data/networks";
 
 const FETCH_TIME_LIMIT = 31 * 24 * 60 * 60 * 1000; // 31 days
 
@@ -18,44 +24,97 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
   const { userTransactions } = storeToRefs(transactionStatusStore);
   const { destinations } = storeToRefs(useDestinationsStore());
 
+  const TRANSACTIONS_FETCH_LIMIT = 50;
+
+  function sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+  const setStatus = async(obj:{transactionHash:any,status:string})=> {
+    const isFinalized = await useZkSyncWalletStore()
+    .getL1VoidSigner(true)
+    ?.isWithdrawalFinalized(obj.transactionHash)
+    .catch(() => false);
+    obj.status = isFinalized? 'Finalized':''
+  }
   const updateWithdrawals = async () => {
     if (!isConnected.value) throw new Error("Account is not available");
     if (!eraNetwork.value.withdrawalFinalizerApi)
       throw new Error(`Withdrawal Finalizer API is not available on ${eraNetwork.value.name}`);
     if (!eraNetwork.value.blockExplorerApi)
       throw new Error(`Block Explorer API is not available on ${eraNetwork.value.name}`);
-    const withdrawals: Api.Response.Finalizer_Withdrawal[] = await $fetch(
-      `${eraNetwork.value.withdrawalFinalizerApi}/withdrawals/${account.value.address}?limit=100`
+
+    const transfers: {items: any[]} = await $fetch(
+      `${eraNetwork.value.blockExplorerApi}/address/${account.value.address}/transfers?limit=${TRANSACTIONS_FETCH_LIMIT.toString()}`
     );
+    let withdrawals = transfers.items.filter((e) => e.type === "withdrawal" && e.token && e.amount);
     for (const withdrawal of withdrawals) {
-      const transactionFromStorage = transactionStatusStore.getTransaction(withdrawal.tx_hash);
+      const transactionFromStorage = transactionStatusStore.getTransaction(withdrawal.transactionHash);
       if (transactionFromStorage) {
-        if (withdrawal.status === "Finalized" && !transactionFromStorage.info.completed) {
-          transactionStatusStore.updateTransactionData(withdrawal.tx_hash, {
-            ...transactionFromStorage,
-            info: {
-              ...transactionFromStorage.info,
-              completed: true,
-            },
-          });
+        if (!transactionFromStorage.info.completed) {
+          await setStatus(withdrawal)
+          await sleep(200);
+          if (withdrawal.status === "Finalized") {
+            transactionStatusStore.updateTransactionData(withdrawal.transactionHash, {
+              ...transactionFromStorage,
+              info: {
+                ...transactionFromStorage.info,
+                completed: true,
+              },
+            });
+          }
         }
         continue;
+      } else {
+        await setStatus(withdrawal)
+        await sleep(200);
       }
-
       const transactionTransfers: Api.Response.Collection<Api.Response.Transfer> = await $fetch(
-        `${eraNetwork.value.blockExplorerApi}/transactions/${withdrawal.tx_hash}/transfers?limit=100&page=1`
+        `${eraNetwork.value.blockExplorerApi}/transactions/${withdrawal.transactionHash}/transfers?limit=100&page=1`
       );
       const transfers = transactionTransfers.items.map(mapApiTransfer);
       const withdrawalTransfer = transfers.find((e) => e.type === "withdrawal" && e.token && e.amount);
+      
+      const { primaryNetwork } = useNetworks();
+      
+      const getNetworkInfo = () => {
+        const newNetwork = nexusGoerliNode.find(
+          (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === withdrawal.gateway?.toLowerCase()
+        );
+        return newNetwork ?? primaryNetwork;
+      };
+  
+      const { selectedNetwork } = storeToRefs(useNetworkStore());
+      let provider: Provider | undefined;
+      let eraNetworks:ZkSyncNetwork
+      let obj = {}
+      const request = () => {
+        eraNetworks = getNetworkInfo() || selectedNetwork.value;
+        obj = {
+          iconUrl: eraNetworks.logoUrl,
+          key: "nova",
+          label: eraNetworks?.l1Network?.name,
+        }
+        if (!provider) {
+          provider = new Provider(eraNetworks.rpcUrl);
+        }
+        //if provider.networkKey != eraNetwork.key
+        provider.setContractAddresses(eraNetworks.key, {
+          mainContract: eraNetworks.mainContract,
+          erc20BridgeL1: eraNetworks.erc20BridgeL1,
+          erc20BridgeL2: eraNetworks.erc20BridgeL2,
+          l1Gateway: eraNetworks.l1Gateway,
+        });
+        return provider;
+      };
+
       if (!withdrawalTransfer) continue;
       if (new Date(withdrawalTransfer.timestamp).getTime() < Date.now() - FETCH_TIME_LIMIT) break;
       const transactionDetails = await retry(() =>
-        providerStore.requestProvider().getTransactionDetails(withdrawal.tx_hash)
+        request().getTransactionDetails(withdrawal.transactionHash)
       );
-
       transactionStatusStore.saveTransaction({
         type: "withdrawal",
-        transactionHash: withdrawal.tx_hash,
+        transactionHash: withdrawal.transactionHash,
         timestamp: withdrawalTransfer.timestamp,
         token: {
           ...withdrawalTransfer.token!,
@@ -67,7 +126,7 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
         },
         to: {
           address: withdrawalTransfer.to,
-          destination: destinations.value.arbitrum,
+          destination: obj,
         },
         info: {
           expectedCompleteTimestamp: new Date(

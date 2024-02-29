@@ -96,9 +96,15 @@ const props = defineProps({
   },
 });
 
+const { primaryNetwork } = useNetworks();
+const getNetworkInfo = () => {
+  const newNetwork = nexusGoerliNode.find(
+    (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === props.transfer.gateway?.toLowerCase()
+  );
+  return newNetwork ?? primaryNetwork;
+};
 const { account } = storeToRefs(useOnboardStore());
-const { eraNetwork } = storeToRefs(useZkSyncProviderStore());
-
+const eraNetwork = getNetworkInfo();
 const label = computed(() => {
   const article = props.inProgress ? "Bridging" : "Bridged";
   if (props.transfer.to === account.value.address) {
@@ -119,16 +125,9 @@ const chainIconUrl = computed(() => {
 });
 const getLayerName = (layer: NetworkLayer) => {
   if (layer === "L1") {
-    return eraNetwork.value.l1Network?.name;
+    return eraNetwork.l1Network?.name;
   }
-  return eraNetwork.value.name;
-};
-const { primaryNetwork } = useNetworks();
-const getNetworkInfo = () => {
-  const newNetwork = nexusGoerliNode.find(
-    (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === props.transfer.gateway?.toLowerCase()
-  );
-  return newNetwork ?? primaryNetwork;
+  return eraNetwork.name;
 };
 const getl1NetworkName = () => {
   const { type, gateway } = props.transfer;
@@ -149,8 +148,8 @@ const getl1NetworkName = () => {
     // primary chain
     if (type === "transfer") {
       return {
-        from: eraNetwork.value.name,
-        to: eraNetwork.value.name,
+        from: eraNetwork.name,
+        to: eraNetwork.name,
       };
     } else {
       return {

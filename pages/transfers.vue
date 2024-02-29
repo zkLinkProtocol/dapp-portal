@@ -22,7 +22,6 @@
             />
           </CommonCardWithLineButtons>
         </div>
-
         <CommonCardWithLineButtons
           v-if="actionNotRequiredBridgeTransactions.length"
           :class="{ 'mt-block-gap': actionRequiredBridgeTransactions.length }"
@@ -115,7 +114,6 @@ const {
 } = storeToRefs(transfersHistoryStore);
 const { destinations } = storeToRefs(useDestinationsStore());
 const { userTransactions } = storeToRefs(useZkSyncTransactionStatusStore());
-
 type RecentBridgeOperation = Transfer & {
   identifierTransactionHash: string;
   completed: boolean;
