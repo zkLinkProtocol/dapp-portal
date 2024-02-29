@@ -41,7 +41,11 @@ export const useZkSyncEthereumBalanceStore = defineStore("zkSyncEthereumBalances
           ...e,
           amount: "0",
         })),
-    ];
+    ].sort((a, b) => {
+      if (a.address === ETH_TOKEN.l1Address) return -1; // Always bring ETH to the beginning
+      if (b.address === ETH_TOKEN.l1Address) return 1; // Keep ETH at the beginning if comparing with any other token
+      return 0; // Keep other tokens' order unchanged
+    });
   };
   const getBalancesFromRPC = async (): Promise<TokenAmount[]> => {
     await tokensStore.requestTokens();
@@ -76,9 +80,9 @@ export const useZkSyncEthereumBalanceStore = defineStore("zkSyncEthereumBalances
         ([l1Networks.mainnet.id, l1Networks.goerli.id] as number[]).includes(l1Network.value?.id) &&
         runtimeConfig.public.ankrToken
       ) {
-        return getBalancesFromApi();
+        return await getBalancesFromApi();
       } else {
-        return getBalancesFromRPC();
+        return await getBalancesFromRPC();
       }
     },
     { cache: 30000 }

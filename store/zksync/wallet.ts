@@ -126,10 +126,16 @@ export const useZkSyncWalletStore = defineStore("zkSyncWallet", () => {
   const balance = computed<TokenAmount[]>(() => {
     if (!balancesResult.value) return [];
 
-    const knownTokens: TokenAmount[] = Object.entries(tokens.value ?? {}).map(([, token]) => {
-      const amount = balancesResult.value!.find((e) => e.address === token.address)?.amount ?? "0";
-      return { ...token, amount };
-    });
+    const knownTokens: TokenAmount[] = Object.entries(tokens.value ?? {})
+      .map(([, token]) => {
+        const amount = balancesResult.value!.find((e) => e.address === token.address)?.amount ?? "0";
+        return { ...token, amount };
+      })
+      .sort((a, b) => {
+        if (a.address === ETH_TOKEN.address) return -1; // Always bring ETH to the beginning
+        if (b.address === ETH_TOKEN.address) return 1; // Keep ETH at the beginning if comparing with any other token
+        return 0; // Keep other tokens' order unchanged
+      });
     const knownTokenAddresses = new Set(knownTokens.map((token) => token.address));
 
     // Filter out the tokens in `balancesResult` that are not in `tokens`
