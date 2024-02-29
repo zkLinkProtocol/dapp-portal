@@ -23,6 +23,7 @@
       :expected-complete-timestamp="transaction.info.expectedCompleteTimestamp"
       :token="transaction!.token"
       :completed="transaction.info.completed"
+      :failed="transaction.info.failed"
     />
 
     <EcosystemBlock v-if="eraNetwork.displaySettings?.showPartnerLinks" class="mt-block-gap" />

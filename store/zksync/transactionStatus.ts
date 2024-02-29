@@ -23,6 +23,7 @@ export type TransactionInfo = {
     toTransactionHash?: string;
     expectedCompleteTimestamp?: string;
     withdrawalFinalizationAvailable?: boolean;
+    failed?: boolean;
     completed: boolean;
   };
 };
@@ -77,7 +78,7 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
     }
     throw new Error("No L2 transaction hash found");
   };
-  const updateDepositStatus = async (transaction: TransactionInfo) => {
+  const getDepositStatus = async (transaction: TransactionInfo) => {
     const transactionHash = await getDepositL2TransactionHash(transaction.transactionHash);
     const transactionReceipt = await providerStore.requestProvider().getTransactionReceipt(transactionHash);
     if (!transactionReceipt) return transaction;
@@ -90,6 +91,12 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
       const transactionDetails = await providerStore
         .requestProvider()
         .getTransactionDetails(transaction.transactionHash);
+      if (transactionDetails.status === "failed") {
+        transaction.info.withdrawalFinalizationAvailable = false;
+        transaction.info.failed = true;
+        transaction.info.completed = true;
+        return transaction;
+      }
       if (transactionDetails.status !== "verified") {
         return transaction;
       }
@@ -105,13 +112,17 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
   const getTransferStatus = async (transaction: TransactionInfo) => {
     const transactionReceipt = await providerStore.requestProvider().getTransactionReceipt(transaction.transactionHash);
     if (!transactionReceipt) return transaction;
+    const transactionDetails = await providerStore.requestProvider().getTransactionDetails(transaction.transactionHash);
+    if (transactionDetails.status === "failed") {
+      transaction.info.failed = true;
+    }
     transaction.info.completed = true;
     return transaction;
   };
   const waitForCompletion = async (transaction: TransactionInfo) => {
     if (transaction.info.completed) return transaction;
     if (transaction.type === "deposit") {
-      transaction = await updateDepositStatus(transaction);
+      transaction = await getDepositStatus(transaction);
     } else if (transaction.type === "withdrawal") {
       transaction = await getWithdrawalStatus(transaction);
     } else if (transaction.type === "transfer") {

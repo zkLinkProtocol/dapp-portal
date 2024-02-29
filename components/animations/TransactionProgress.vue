@@ -1,7 +1,11 @@
 <template>
   <div
     class="transaction-progress-animation"
-    :class="{ 'transaction-completed': state === 'completed', 'stopped-in-the-end': state === 'stopped-in-the-end' }"
+    :class="{
+      'transaction-completed': state === 'completed',
+      'transaction-failed': state === 'failed',
+      'stopped-in-the-end': state === 'stopped-in-the-end',
+    }"
   >
     <div class="no-overflow-container">
       <div class="lines-inner">
@@ -19,16 +23,19 @@
       <div class="check-icon">
         <CheckIcon aria-hidden="true" />
       </div>
+      <div class="fail-icon">
+        <XMarkIcon aria-hidden="true" />
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { CheckIcon } from "@heroicons/vue/24/outline";
+import { CheckIcon, XMarkIcon } from "@heroicons/vue/24/outline";
 
 import type { PropType } from "vue";
 
-export type AnimationState = "playing" | "stopped-in-the-end" | "completed";
+export type AnimationState = "playing" | "stopped-in-the-end" | "failed" | "completed";
 
 defineProps({
   state: {
@@ -62,6 +69,19 @@ defineProps({
         @apply opacity-0;
       }
       .check-icon {
+        animation: bounce-in 1s linear forwards;
+      }
+    }
+  }
+  &.transaction-failed {
+    .no-overflow-container {
+      .lines-inner {
+        animation-play-state: paused;
+      }
+      .airplane {
+        @apply opacity-0;
+      }
+      .fail-icon {
         animation: bounce-in 1s linear forwards;
       }
     }
@@ -123,6 +143,46 @@ defineProps({
     }
     .check-icon {
       @apply absolute left-1/2 top-1/2 h-9 w-9 origin-top-left transform rounded-full bg-success-400 p-1 text-black opacity-0 transition-opacity;
+      @keyframes bounce-in {
+        0% {
+          transform: scale(0) translate(-50%, -50%);
+          animation-timing-function: ease-in;
+          opacity: 0;
+        }
+        35% {
+          transform: scale(1) translate(-50%, -50%);
+          animation-timing-function: ease-out;
+          opacity: 1;
+        }
+        55% {
+          transform: scale(1.5) translate(-50%, -50%);
+          animation-timing-function: ease-in;
+        }
+        70% {
+          transform: scale(1) translate(-50%, -50%);
+          animation-timing-function: ease-out;
+        }
+        80% {
+          transform: scale(1.24) translate(-50%, -50%);
+          animation-timing-function: ease-in;
+        }
+        90% {
+          transform: scale(1) translate(-50%, -50%);
+          animation-timing-function: ease-out;
+        }
+        95% {
+          transform: scale(1.04) translate(-50%, -50%);
+          animation-timing-function: ease-in;
+        }
+        100% {
+          transform: scale(1) translate(-50%, -50%);
+          animation-timing-function: ease-out;
+          opacity: 1;
+        }
+      }
+    }
+    .fail-icon {
+      @apply absolute left-1/2 top-1/2 h-9 w-9 origin-top-left transform rounded-full bg-red-400 p-1 text-black opacity-0 transition-opacity;
       @keyframes bounce-in {
         0% {
           transform: scale(0) translate(-50%, -50%);

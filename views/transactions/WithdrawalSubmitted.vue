@@ -48,6 +48,7 @@
       :to-explorer-link="finalizeTransactionHash || transaction.info.toTransactionHash ? l1BlockExplorerUrl : undefined"
       :token="transaction.token"
       :completed="transaction.info.completed"
+      :failed="transaction.info.failed"
       :animation-state="withdrawalFinalizationAvailable ? 'stopped-in-the-end' : undefined"
       :expected-complete-timestamp="
         withdrawalFinalizationAvailable ? undefined : transaction.info.expectedCompleteTimestamp

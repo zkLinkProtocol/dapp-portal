@@ -54,10 +54,7 @@
         </div>
       </template>
 
-      <AnimationsTransactionProgress
-        :state="animationState ?? (completed ? 'completed' : 'playing')"
-        class="transaction-animation"
-      />
+      <AnimationsTransactionProgress :state="transactionProgressAnimationState" class="transaction-animation" />
 
       <div v-if="fromExplorerLink || fromTransactionHash" class="info-column bottom-left mt-block-gap-1/2">
         <TransactionHashButton :explorer-url="fromExplorerLink" :transaction-hash="fromTransactionHash" />
@@ -159,6 +156,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  failed: {
+    type: Boolean,
+    default: false,
+  },
   animationState: {
     type: String as PropType<AnimationState>,
   },
@@ -168,6 +169,13 @@ const isSameAddress = computed(() => props.fromAddress === props.toAddress);
 const isSameAddressDifferentDestination = computed(
   () => isSameAddress.value && props.fromDestination.label !== props.toDestination.label
 );
+
+const transactionProgressAnimationState = computed<AnimationState>(() => {
+  if (props.animationState) return props.animationState;
+  if (props.failed) return "failed";
+  if (props.completed) return "completed";
+  return "playing";
+});
 </script>
 
 <style lang="scss" scoped>
