@@ -69,7 +69,6 @@ import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { shortenAddress } from "@/utils/formatters";
 import { iconsList } from "@/data/iconlists";
-import { nexusGoerliNode, ZkSyncNetwork } from "@/data/networks";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 import useNetworks from "@/composables/useNetworks";
 
@@ -140,17 +139,10 @@ const chainIconUrl = computed(() => {
   return getNetworkInfo()?.logoUrl;
 });
 
-const getLayerName = (layer: NetworkLayer) => {
-  if (layer === "L1") {
-    return eraNetwork.value.l1Network?.name;
-  }
-  return eraNetwork.value.name;
-};
-
-const { primaryNetwork } = useNetworks();
+const { primaryNetwork, zkSyncNetworks } = useNetworks();
 
 const getNetworkInfo = () => {
-  const newNetwork = nexusGoerliNode.find(
+  const newNetwork = zkSyncNetworks.find(
     (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === props.transfer.gateway?.toLowerCase()
   );
   return newNetwork ?? primaryNetwork;
@@ -166,7 +158,7 @@ const getl1NetworkName = () => {
       };
     } else if (type === "deposit") {
       return {
-        from: "", // TODO
+        from: getNetworkInfo().l1Network?.name,
         to: "",
       };
     }
