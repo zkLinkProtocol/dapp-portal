@@ -146,6 +146,7 @@ import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncWalletStore } from "@/store/zksync/wallet";
 import { parseTokenAmount, removeSmallAmount } from "@/utils/formatters";
 import { isOnlyZeroes } from "@/utils/helpers";
+import useNetworks from "@/composables/useNetworks";
 
 const onboardStore = useOnboardStore();
 const walletStore = useZkSyncWalletStore();
@@ -168,19 +169,24 @@ const displayedBalances = computed(() => {
   });
 });
 const noBalances = computed(() => !loading.value && !balanceError.value && !displayedBalances.value.length);
+const { zkSyncNetworks } = useNetworks();
+const zkSyncNetworkDisplay = zkSyncNetworks.filter((e) => !e.hidden);
+
 const depositMethods = computed(() => {
   const methods: { props: Record<string, unknown>; icon?: FunctionalComponent }[] = [];
-  if (eraNetwork.value.l1Network && !noBalances.value) {
-    methods.push({
-      props: {
-        iconUrl: destinations.value.arbitrum.iconUrl,
-        label: `Bridge from ${eraNetwork.value.l1Network?.name}`,
-        description: `Receive tokens from your ${eraNetwork.value.l1Network?.name} account`,
-        as: "RouterLink",
-        to: {
-          name: "index",
+  if (!noBalances.value) {
+    zkSyncNetworkDisplay.map((i) => {
+      const obj = {
+        props: {
+          iconUrl: i.logoUrl,
+          key: i.key,
+          label: `Bridge from ${i.l1Network?.name}`,
+          description: `Receive tokens from your ${i.l1Network?.name} account`,
+          as: "a",
+          href: `/?network=${i.key}`,
         },
-      },
+      };
+      methods.push(obj);
     });
   }
 
