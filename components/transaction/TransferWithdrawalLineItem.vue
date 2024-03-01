@@ -105,7 +105,7 @@ const getNetworkInfo = () => {
 const { account } = storeToRefs(useOnboardStore());
 const eraNetwork = getNetworkInfo();
 const label = computed(() => {
-  const article = props.inProgress ? "Bridging" : "Bridged";
+  const article = 'Withdraw';
   if (props.transfer.to === account.value.address) {
     return article;
   }

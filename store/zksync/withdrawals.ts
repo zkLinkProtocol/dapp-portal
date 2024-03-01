@@ -74,10 +74,10 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
       const transfers = transactionTransfers.items.map(mapApiTransfer);
       const withdrawalTransfer = transfers.find((e) => e.type === "withdrawal" && e.token && e.amount);
       
-      const { primaryNetwork } = useNetworks();
+    const { primaryNetwork, zkSyncNetworks } = useNetworks();
       
       const getNetworkInfo = () => {
-        const newNetwork = nexusGoerliNode.find(
+        const newNetwork = zkSyncNetworks.find(
           (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === withdrawal.gateway?.toLowerCase()
         );
         return newNetwork ?? primaryNetwork;

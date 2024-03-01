@@ -185,10 +185,10 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
     return transaction;
   };
   const getWithdrawalStatus = async (transaction: TransactionInfo) => {
-    const { primaryNetwork } = useNetworks();
+    const { primaryNetwork, zkSyncNetworks } = useNetworks();
     
     const getNetworkInfo = () => {
-      const newNetwork = nexusGoerliNode.find(
+      const newNetwork = zkSyncNetworks.find(
         (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === transaction.gateway?.toLowerCase()
       );
       return newNetwork ?? primaryNetwork;
