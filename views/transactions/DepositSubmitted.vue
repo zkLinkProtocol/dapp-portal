@@ -47,7 +47,8 @@ import type { PropType } from "vue";
 import { useNetworkStore } from "@/store/network";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 
-defineProps({
+const { primaryNetwork, zkSyncNetworks } = useNetworks();
+let prop = defineProps({
   transaction: {
     type: Object as PropType<TransactionInfo>,
     required: true,
@@ -58,6 +59,12 @@ defineProps({
   },
 });
 
-const { l1BlockExplorerUrl } = storeToRefs(useNetworkStore());
+const getNetworkInfo = () => {
+  const newNetwork = zkSyncNetworks.find(
+    (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === prop.transaction.gateway?.toLowerCase()
+  );
+  return newNetwork ?? primaryNetwork;
+};
+const l1BlockExplorerUrl = getNetworkInfo()?.l1Network?.blockExplorers?.default.url;
 const { eraNetwork, blockExplorerUrl } = storeToRefs(useZkSyncProviderStore());
 </script>

@@ -76,13 +76,6 @@ const emit = defineEmits<{
   (eventName: "update:networkKey", networkKey?: string): void;
 }>();
 const onboardStore = useOnboardStore();
-const { primaryNetwork, zkSyncNetworks } = useNetworks();
-const getNetworkInfo = () => {
-  const newNetwork = zkSyncNetworks.find(
-    (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === props.transaction?.gateway?.toLowerCase()
-  );
-  return newNetwork ?? primaryNetwork;
-};
 const {
   account,
   isConnectingWallet,
@@ -93,6 +86,14 @@ const {
   walletName,
 } = storeToRefs(onboardStore);
 const { selectedNetwork, l1Network } = storeToRefs(useNetworkStore());
+const { primaryNetwork, zkSyncNetworks } = useNetworks();
+const getNetworkInfo = () => {
+  const newNetwork = zkSyncNetworks.find(
+    (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === props.transaction?.gateway?.toLowerCase()
+  );
+  const obj = {l1Network:{id: l1Network.value?.id}}
+  return props.transaction? (newNetwork ?? primaryNetwork): obj;
+};
 
 const network = ref(getNetwork());
 
