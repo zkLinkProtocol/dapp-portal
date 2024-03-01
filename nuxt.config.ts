@@ -25,7 +25,7 @@ export default defineNuxtConfig({
         },
         {
           property: "og:image:type",
-          content: "image/jpeg",
+          content: "image/png",
         },
         {
           property: "og:image:width",
