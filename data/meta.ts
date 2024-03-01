@@ -3,7 +3,7 @@ export const portal = {
   description:
     "zkLink Nova Portal allows you to view your balances, transfer tokens and bridge assets between zkLink Nova and Ethereum",
   previewImg: {
-    src: "/img/preview.png",
+    src: "https://goerli.portal.zklink.io/preview.png",
     alt: "zkLink Nova Portal",
   },
 };
