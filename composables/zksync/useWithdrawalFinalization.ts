@@ -12,6 +12,9 @@ import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncTokensStore } from "@/store/zksync/tokens";
 import { formatError } from "@/utils/formatters";
+import useNetworks from "@/composables/useNetworks";
+import { Provider } from "@/zksync-web3-nova/src";
+import { useNetworkStore } from "@/store/network";
 
 export default (transactionInfo: ComputedRef<TransactionInfo>) => {
   const status = ref<"not-started" | "processing" | "waiting-for-signature" | "sending" | "done">("not-started");
@@ -22,14 +25,38 @@ export default (transactionInfo: ComputedRef<TransactionInfo>) => {
   const tokensStore = useZkSyncTokensStore();
   const { isCorrectNetworkSet } = storeToRefs(onboardStore);
   const { tokens } = storeToRefs(tokensStore);
+  const { primaryNetwork, zkSyncNetworks } = useNetworks();
+    
+  const getNetworkInfo = () => {
+    const newNetwork = zkSyncNetworks.find(
+      (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === transactionInfo.value.gateway?.toLowerCase()
+    );
+    return newNetwork ?? primaryNetwork;
+  };
 
+  const { selectedNetwork } = storeToRefs(useNetworkStore());
+  let provider: Provider | undefined;
+  const request = () => {
+    const eraNetwork = getNetworkInfo() || selectedNetwork.value;
+    if (!provider) {
+      provider = new Provider(eraNetwork.rpcUrl);
+    }
+    //if provider.networkKey != eraNetwork.key
+    console.log(eraNetwork.key);
+    provider.setContractAddresses(eraNetwork.key, {
+      mainContract: eraNetwork.mainContract,
+      erc20BridgeL1: eraNetwork.erc20BridgeL1,
+      erc20BridgeL2: eraNetwork.erc20BridgeL2,
+      l1Gateway: eraNetwork.l1Gateway,
+    });
+    return provider;
+  };
   const retrieveBridgeAddress = useMemoize(() =>
-    providerStore
-      .requestProvider()
+  request()
       .getDefaultBridgeAddresses()
       .then((e) => e.erc20L1)
   );
-  const retrieveMainContractAddress = useMemoize(() => providerStore.requestProvider().getMainContractAddress());
+  const retrieveMainContractAddress = useMemoize(() => request().getMainContractAddress());
 
   const gasLimit = ref<BigNumberish | undefined>();
   const gasPrice = ref<BigNumberish | undefined>();
@@ -54,7 +81,7 @@ export default (transactionInfo: ComputedRef<TransactionInfo>) => {
   const usingMainContract = computed(() => transactionInfo.value.token.address === ETH_TOKEN.address);
 
   const getFinalizationParams = async () => {
-    const provider = providerStore.requestProvider();
+    const provider = request();
     const wallet = new Wallet(
       // random private key cause we don't care about actual signer
       // finalizeWithdrawalParams method only exists on Wallet class

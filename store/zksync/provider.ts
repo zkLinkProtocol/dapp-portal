@@ -14,7 +14,6 @@ export const useZkSyncProviderStore = defineStore("zkSyncProvider", () => {
       provider = new Provider(eraNetwork.rpcUrl);
     }
     //if provider.networkKey != eraNetwork.key
-    console.log(eraNetwork.key);
     provider.setContractAddresses(eraNetwork.key, {
       mainContract: eraNetwork.mainContract,
       erc20BridgeL1: eraNetwork.erc20BridgeL1,

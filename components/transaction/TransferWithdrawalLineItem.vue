@@ -95,11 +95,17 @@ const props = defineProps({
   },
 });
 
+const { primaryNetwork, zkSyncNetworks } = useNetworks();
+const getNetworkInfo = () => {
+  const newNetwork = zkSyncNetworks.find(
+    (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === props.transfer.gateway?.toLowerCase()
+  );
+  return newNetwork ?? primaryNetwork;
+};
 const { account } = storeToRefs(useOnboardStore());
-const { eraNetwork } = storeToRefs(useZkSyncProviderStore());
-
+const eraNetwork = getNetworkInfo();
 const label = computed(() => {
-  const article = props.inProgress ? "Bridging" : "Bridged";
+  const article = 'Withdraw';
   if (props.transfer.to === account.value.address) {
     return article;
   }
@@ -116,13 +122,6 @@ const chainIconUrl = computed(() => {
   // return props.transfer.token?.chainIconUrl;
   return getNetworkInfo()?.logoUrl;
 });
-const { primaryNetwork, zkSyncNetworks } = useNetworks();
-const getNetworkInfo = () => {
-  const newNetwork = zkSyncNetworks.find(
-    (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === props.transfer.gateway?.toLowerCase()
-  );
-  return newNetwork ?? primaryNetwork;
-};
 const getl1NetworkName = () => {
   const { type, gateway } = props.transfer;
   // other chain
@@ -142,8 +141,8 @@ const getl1NetworkName = () => {
     // primary chain
     if (type === "transfer") {
       return {
-        from: eraNetwork.value.name,
-        to: eraNetwork.value.name,
+        from: eraNetwork.name,
+        to: eraNetwork.name,
       };
     } else {
       return {

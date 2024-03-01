@@ -5,12 +5,11 @@
       <CommonErrorBlock
         v-if="buttonStep === 'network' && switchingNetworkError"
         class="mb-2"
-        @try-again="onboardStore.setCorrectNetwork"
+        @try-again="onboardStore.setCorrectNetwork(getNetworkInfo().l1Network?.id)"
       >
         Network change error: {{ switchingNetworkError.message }}
       </CommonErrorBlock>
     </transition>
-
     <div v-if="buttonStep === 'connect'" class="transaction-footer-row">
       <CommonButton variant="primary" :disabled="isConnectingWallet" class="w-full" @click="onboardStore.openModal">
         Connect wallet
@@ -25,7 +24,7 @@
           :disabled="switchingNetworkInProgress"
           variant="primary"
           class="w-full"
-          @click="onboardStore.setCorrectNetwork"
+          @click="onboardStore.setCorrectNetwork(getNetworkInfo().l1Network?.id)"
         >
           <slot v-bind="{ l1Network, walletName }" name="change-network-auto">
             Change wallet network to {{ l1Network.name }}
@@ -59,9 +58,31 @@ import { storeToRefs } from "pinia";
 import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
 import { TransitionAlertScaleInOutTransition } from "@/utils/transitions";
+import type { TransactionInfo } from "@/store/zksync/transactionStatus";
+import useNetworks from "@/composables/useNetworks";
+import {
+  getNetwork,
+  watchNetwork
+} from "@wagmi/core";
 
+const props = defineProps({
+  transaction: {
+    type: Object as PropType<TransactionInfo>,
+    required: true,
+  },
+});
+const emit = defineEmits<{
+  (eventName: "update:opened", value: boolean): void;
+  (eventName: "update:networkKey", networkKey?: string): void;
+}>();
 const onboardStore = useOnboardStore();
-
+const { primaryNetwork, zkSyncNetworks } = useNetworks();
+const getNetworkInfo = () => {
+  const newNetwork = zkSyncNetworks.find(
+    (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === props.transaction?.gateway?.toLowerCase()
+  );
+  return newNetwork ?? primaryNetwork;
+};
 const {
   account,
   isConnectingWallet,
@@ -73,10 +94,15 @@ const {
 } = storeToRefs(onboardStore);
 const { selectedNetwork, l1Network } = storeToRefs(useNetworkStore());
 
+const network = ref(getNetwork());
+
+watchNetwork((updatedNetwork) => {
+  network.value = updatedNetwork;
+});
 const buttonStep = computed(() => {
   if (!account.value.address || isConnectingWallet.value) {
     return "connect";
-  } else if (!isCorrectNetworkSet.value) {
+  } else if (!(network.value.chain?.id === getNetworkInfo().l1Network?.id)) {
     return "network";
   } else {
     return "continue";

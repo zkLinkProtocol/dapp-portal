@@ -14,6 +14,10 @@ import { useZkSyncWalletStore } from "@/store/zksync/wallet";
 import { abi as secondaryAbi } from "@/views/transactions/ZkLink.json";
 import { ethers, type BigNumberish, type BytesLike } from "ethers";
 import { PRIMARY_CHAIN_KEY } from "~/zksync-web3-nova/src/utils";
+import { nexusGoerliNode } from "@/data/networks";
+import useNetworks from "@/composables/useNetworks";
+import { Provider } from "@/zksync-web3-nova/src";
+import { useNetworkStore } from "@/store/network";
 
 export type TransactionInfo = {
   type: FeeEstimationParams["type"] | "deposit";
@@ -181,9 +185,35 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
     return transaction;
   };
   const getWithdrawalStatus = async (transaction: TransactionInfo) => {
+    const { primaryNetwork, zkSyncNetworks } = useNetworks();
+    
+    const getNetworkInfo = () => {
+      const newNetwork = zkSyncNetworks.find(
+        (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === transaction.gateway?.toLowerCase()
+      );
+      return newNetwork ?? primaryNetwork;
+    };
+
+    const { selectedNetwork } = storeToRefs(useNetworkStore());
+    let provider: Provider | undefined;
+    const request = () => {
+      const eraNetwork = getNetworkInfo() || selectedNetwork.value;
+      if (!provider) {
+        provider = new Provider(eraNetwork.rpcUrl);
+      }
+      //if provider.networkKey != eraNetwork.key
+      console.log(eraNetwork.key);
+      provider.setContractAddresses(eraNetwork.key, {
+        mainContract: eraNetwork.mainContract,
+        erc20BridgeL1: eraNetwork.erc20BridgeL1,
+        erc20BridgeL2: eraNetwork.erc20BridgeL2,
+        l1Gateway: eraNetwork.l1Gateway,
+      });
+      return provider;
+    };
+
     if (!transaction.info.withdrawalFinalizationAvailable) {
-      const transactionDetails = await providerStore
-        .requestProvider()
+      const transactionDetails = await request()
         .getTransactionDetails(transaction.transactionHash);
       if (transactionDetails.status !== "verified") {
         return transaction;

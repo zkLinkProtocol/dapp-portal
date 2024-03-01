@@ -189,8 +189,8 @@ export const useOnboardStore = defineStore("onboard", () => {
     },
     { cache: false }
   );
-  const setCorrectNetwork = async () => {
-    return await switchNetwork().catch(() => undefined);
+  const setCorrectNetwork = async (id:any) => {
+    return await switchNetworkById(id).catch(() => undefined);
   };
 
   const { subscribe: subscribeOnAccountChange, notify: notifyOnAccountChange } = useObservable<string | undefined>();

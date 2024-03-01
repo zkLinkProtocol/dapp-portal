@@ -54,12 +54,12 @@
       "
     >
       <template #to-button v-if="withdrawalFinalizationAvailable">
-        <template v-if="!isCorrectNetworkSet">
+        <template v-if="!(network.chain?.id === getNetworkInfo().l1Network?.id)">
           <CommonButton
             size="xs"
             variant="light"
             :disabled="connectorName === 'WalletConnect'"
-            @click="onboardStore.setCorrectNetwork()"
+            @click="onboardStore.setCorrectNetwork(getNetworkInfo().l1Network?.id)"
           >
             Change wallet network to claim
           </CommonButton>
@@ -96,7 +96,7 @@
           class="mt-4"
         />
 
-        <TransactionEthereumTransactionFooter>
+        <TransactionEthereumTransactionFooter :transaction="transaction">
           <template #after-checks>
             <CommonButton :disabled="continueButtonDisabled" class="w-full" variant="primary" @click="buttonContinue()">
               <transition v-bind="TransitionPrimaryButtonText" mode="out-in">
@@ -156,6 +156,10 @@ import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
+import {
+  getNetwork,watchNetwork
+} from "@wagmi/core";
+import useNetworks from "@/composables/useNetworks";
 
 const props = defineProps({
   transaction: {
@@ -168,6 +172,18 @@ const props = defineProps({
   },
 });
 
+const network = ref(getNetwork());
+
+watchNetwork((updatedNetwork) => {
+  network.value = updatedNetwork;
+});
+const { primaryNetwork, zkSyncNetworks } = useNetworks();
+const getNetworkInfo = () => {
+  const newNetwork = zkSyncNetworks.find(
+    (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === props.transaction?.gateway?.toLowerCase()
+  );
+  return newNetwork ?? primaryNetwork;
+};
 const onboardStore = useOnboardStore();
 const transactionStatusStore = useZkSyncTransactionStatusStore();
 const { eraNetwork, blockExplorerUrl } = storeToRefs(useZkSyncProviderStore());
