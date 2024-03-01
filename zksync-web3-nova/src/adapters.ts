@@ -258,7 +258,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const gasPriceForEstimation = overrides.maxFeePerGas || overrides.gasPrice;
 
       const zksyncContract = await this.getMainContract();
-      const gasPrice = this._providerL2().isPrimaryChain() ? await gasPriceForEstimation! : await this.getTxGasPrice();
+      const gasPrice = this._providerL2().isPrimaryChain() ? BigNumber.from(await gasPriceForEstimation!).mul(2) : await this.getTxGasPrice();
       const baseCost = await zksyncContract.l2TransactionBaseCost(gasPrice, tx.l2GasLimit, tx.gasPerPubdataByte);
 
       if (token == ETH_ADDRESS) {
