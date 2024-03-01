@@ -1,4 +1,4 @@
-import { goerli, mainnet, sepolia, arbitrumSepolia, scrollSepolia, zkSyncSepoliaTestnet, lineaTestnet } from "@wagmi/core/chains";
+import { goerli, mainnet, sepolia, arbitrumSepolia, scrollSepolia, zkSyncSepoliaTestnet, lineaTestnet, linea } from "@wagmi/core/chains";
 
 import type { Token } from "@/types";
 import type { Chain } from "@wagmi/core/chains";
@@ -19,7 +19,10 @@ export const l1Networks = {
     ...sepolia,
     name: "Ethereum Sepolia Testnet",
   },
-
+  linea: {
+    ...linea,
+    name: "Linea Mainnet",
+  },
   arbitrumSepolia: {
     ...arbitrumSepolia,
     name: "Arbitrum Sepolia Testnet",
@@ -66,6 +69,37 @@ export type ZkSyncNetwork = {
 };
 
 export const nexusNode: ZkSyncNetwork[] = [
+  {
+    id: 810180,
+    key: "ethereum",
+    name: "zkLink Nova",
+    rpcUrl: "https://rpc.zklink.io",
+    logoUrl: "/img/ethereum.svg",
+    blockExplorerUrl: "https://explorer.zklink.io",
+    blockExplorerApi: "https://explorer-api.zklink.io",
+    withdrawalFinalizerApi: "https://withdrawal-api.zklink.io",
+    mainContract: "0x5fD9F73286b7E8683Bab45019C94553b93e015Cf",
+    erc20BridgeL1: "0xAd16eDCF7DEB7e90096A259c81269d811544B6B6",
+    erc20BridgeL2: "0x36CaABbAbfB9C09B722d9C3697C3Cb4A93650ea7",
+    l1Gateway: "0x83Bc7394738A7A084081aF22EEC0051908c0055c",
+    //TODO
+    l1Network: l1Networks.mainnet,
+  },
+  {
+    id: 810180,
+    key: PRIMARY_CHAIN_KEY, //"primary"
+    name: "zkLink Nova",
+    rpcUrl: "https://rpc.zklink.io",
+    logoUrl: "/img/linea.svg",
+    blockExplorerUrl: "https://explorer.zklink.io",
+    blockExplorerApi: "https://explorer-api.zklink.io",
+    withdrawalFinalizerApi: "https://withdrawal-api.zklink.io",
+    mainContract: "0x5Cb18b6e4e6F3b46Ce646b0f4704D53724C5Df05",
+    erc20BridgeL1: "0x62cE247f34dc316f93D3830e4Bf10959FCe630f8",
+    erc20BridgeL2: "0x01c3f51294494e350AD69B999Db6B382b3B510b9",
+    //TODO
+    l1Network: l1Networks.linea,
+  },
 ];
 
 export const nexusGoerliNode: ZkSyncNetwork[] = [
