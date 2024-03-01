@@ -142,7 +142,7 @@ const TabsTransition = computed(() =>
 const openedTab = ref<"main" | "network">("main");
 const modalOpened = computed({
   get: () => props.opened,
-  set: (value) => emit("update:opened", value),
+  set: (value) => {emit("update:opened", value)},
 });
 watch(
   () => props.opened,

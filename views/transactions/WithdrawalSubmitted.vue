@@ -45,7 +45,7 @@
       :from-explorer-link="blockExplorerUrl"
       :from-transaction-hash="transaction.transactionHash"
       :to-transaction-hash="finalizeTransactionHash || transaction.info.toTransactionHash"
-      :to-explorer-link="finalizeTransactionHash || transaction.info.toTransactionHash ? l1BlockExplorerUrl : undefined"
+      :to-explorer-link="finalizeTransactionHash || transaction.info.toTransactionHash ? l1BlockExplorerUrls : undefined"
       :token="transaction.token"
       :completed="transaction.info.completed"
       :animation-state="withdrawalFinalizationAvailable ? 'stopped-in-the-end' : undefined"
@@ -178,16 +178,19 @@ watchNetwork((updatedNetwork) => {
   network.value = updatedNetwork;
 });
 const { primaryNetwork, zkSyncNetworks } = useNetworks();
+
+const { selectedNetwork, l1Network,l1BlockExplorerUrl } = storeToRefs(useNetworkStore());
 const getNetworkInfo = () => {
   const newNetwork = zkSyncNetworks.find(
     (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === props.transaction?.gateway?.toLowerCase()
   );
-  return newNetwork ?? primaryNetwork;
+  const obj = {l1Network:{id: l1Network.value?.id,blockExplorers:{default:{url:l1BlockExplorerUrl}}}}
+  return props.transaction? (newNetwork ?? primaryNetwork): obj;
 };
+const l1BlockExplorerUrls = getNetworkInfo().l1Network?.blockExplorers?.default.url;
 const onboardStore = useOnboardStore();
 const transactionStatusStore = useZkSyncTransactionStatusStore();
 const { eraNetwork, blockExplorerUrl } = storeToRefs(useZkSyncProviderStore());
-const { l1BlockExplorerUrl } = storeToRefs(useNetworkStore());
 const { connectorName, isCorrectNetworkSet } = storeToRefs(onboardStore);
 
 const withdrawalManualFinalizationRequired = computed(() => {

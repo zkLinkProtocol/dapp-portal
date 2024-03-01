@@ -178,42 +178,41 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
       transactionHash = await getDepositL2TransactionHash(transaction.transactionHash);
     }
 
-    const transactionReceipt = await providerStore.requestProvider().getTransactionReceipt(transactionHash);
+    const transactionReceipt = await request(transaction.gateway).getTransactionReceipt(transactionHash);
     if (!transactionReceipt) return transaction;
     transaction.info.toTransactionHash = transactionHash;
     transaction.info.completed = true;
     return transaction;
   };
+  const { primaryNetwork, zkSyncNetworks } = useNetworks();
+  const getNetworkInfo = (gateway:any) => {
+    const newNetwork = zkSyncNetworks.find(
+      (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === gateway?.toLowerCase()
+    );
+    return newNetwork ?? primaryNetwork;
+  };
+
+  const { selectedNetwork } = storeToRefs(useNetworkStore());
+  let provider: Provider | undefined;
+  const request = (gateway:any) => {
+    const eraNetwork = getNetworkInfo(gateway) || selectedNetwork.value;
+    if (!provider) {
+      provider = new Provider(eraNetwork.rpcUrl);
+    }
+    //if provider.networkKey != eraNetwork.key
+    console.log(eraNetwork.key);
+    provider.setContractAddresses(eraNetwork.key, {
+      mainContract: eraNetwork.mainContract,
+      erc20BridgeL1: eraNetwork.erc20BridgeL1,
+      erc20BridgeL2: eraNetwork.erc20BridgeL2,
+      l1Gateway: eraNetwork.l1Gateway,
+    });
+    return provider;
+  };
   const getWithdrawalStatus = async (transaction: TransactionInfo) => {
-    const { primaryNetwork, zkSyncNetworks } = useNetworks();
-    
-    const getNetworkInfo = () => {
-      const newNetwork = zkSyncNetworks.find(
-        (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === transaction.gateway?.toLowerCase()
-      );
-      return newNetwork ?? primaryNetwork;
-    };
-
-    const { selectedNetwork } = storeToRefs(useNetworkStore());
-    let provider: Provider | undefined;
-    const request = () => {
-      const eraNetwork = getNetworkInfo() || selectedNetwork.value;
-      if (!provider) {
-        provider = new Provider(eraNetwork.rpcUrl);
-      }
-      //if provider.networkKey != eraNetwork.key
-      console.log(eraNetwork.key);
-      provider.setContractAddresses(eraNetwork.key, {
-        mainContract: eraNetwork.mainContract,
-        erc20BridgeL1: eraNetwork.erc20BridgeL1,
-        erc20BridgeL2: eraNetwork.erc20BridgeL2,
-        l1Gateway: eraNetwork.l1Gateway,
-      });
-      return provider;
-    };
-
+   
     if (!transaction.info.withdrawalFinalizationAvailable) {
-      const transactionDetails = await request()
+      const transactionDetails = await request(transaction.gateway)
         .getTransactionDetails(transaction.transactionHash);
       if (transactionDetails.status !== "verified") {
         return transaction;
@@ -228,7 +227,7 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
     return transaction;
   };
   const getTransferStatus = async (transaction: TransactionInfo) => {
-    const transactionReceipt = await providerStore.requestProvider().getTransactionReceipt(transaction.transactionHash);
+    const transactionReceipt = await request(transaction.gateway).getTransactionReceipt(transaction.transactionHash);
     if (!transactionReceipt) return transaction;
     transaction.info.completed = true;
     return transaction;
