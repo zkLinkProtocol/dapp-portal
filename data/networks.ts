@@ -1,4 +1,14 @@
-import { goerli, mainnet, sepolia, arbitrumSepolia, scrollSepolia, zkSyncSepoliaTestnet, lineaTestnet, linea } from "@wagmi/core/chains";
+import {
+  goerli,
+  mainnet,
+  sepolia,
+  arbitrumSepolia,
+  scrollSepolia,
+  zkSyncSepoliaTestnet,
+  lineaTestnet,
+  linea,
+  mantleTestnet,
+} from "@wagmi/core/chains";
 
 import type { Token } from "@/types";
 import type { Chain } from "@wagmi/core/chains";
@@ -44,6 +54,10 @@ export const l1Networks = {
   lineaGoerliTestnet: {
     ...lineaTestnet,
     name: "Linea Goerli Testnet",
+  },
+  mantleGoerliTestnet: {
+    ...mantleTestnet,
+    name: "Mantle Goerli Testnet",
   },
 } as const;
 export type L1Network = Chain;
@@ -133,6 +147,22 @@ export const nexusGoerliNode: ZkSyncNetwork[] = [
     erc20BridgeL2: "0x7cB4A4fCF09dfF32f7f6557b966a942e803C7FAD",
     //TODO
     l1Network: l1Networks.lineaGoerliTestnet,
+  },
+  {
+    id: 810182,
+    key: "mantle",
+    name: "zkLink Nova Testnet",
+    rpcUrl: "https://goerli.rpc.zklink.io",
+    logoUrl: "/img/ethereum.svg",
+    blockExplorerUrl: "https://goerli.explorer.zklink.io",
+    blockExplorerApi: "https://goerli.explorer-api.zklink.io",
+    withdrawalFinalizerApi: "https://goerli.withdrawal-api.zklink.io",
+    mainContract: "0x8fC6d9dE787C4299684B7b307feF44AB3D317e20",
+    erc20BridgeL1: "0x0857FDf217E54954c0f4A77B62c04b246ef504CD",
+    erc20BridgeL2: "0xD1b7DD1B30b218901d035C951852ae0D97834b68",
+    l1Gateway: "0x7bf83D15C8f5a491B36506652A26d4bA0b6cC289",
+    //TODO
+    l1Network: l1Networks.mantleGoerliTestnet,
   },
 ];
 
