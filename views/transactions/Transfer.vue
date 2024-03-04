@@ -421,12 +421,6 @@ const amountInputTokenAddress = computed({
 const tokenBalance = computed<BigNumberish | undefined>(() => {
   return balance.value.find((e) => e.address === selectedToken.value?.address)?.amount;
 });
-const selectedTokenZeroBalance = computed(() => {
-  if (!tokenBalance.value) {
-    return true;
-  }
-  return BigNumber.from(tokenBalance.value).isZero();
-});
 
 const unsubscribe = onboardStore.subscribeOnAccountChange(() => {
   step.value = "form";
@@ -548,8 +542,7 @@ const estimate = async () => {
     !transaction.value?.from.address ||
     !transaction.value?.to.address ||
     !selectedToken.value ||
-    !tokenBalance.value ||
-    selectedTokenZeroBalance.value
+    !tokenBalance.value
   ) {
     return;
   }
@@ -561,7 +554,7 @@ const estimate = async () => {
   });
 };
 watch(
-  [() => selectedToken.value?.address, () => selectedTokenZeroBalance.value],
+  [() => selectedToken.value?.address, () => tokenBalance.value?.toString()],
   () => {
     resetFee();
     estimate();
