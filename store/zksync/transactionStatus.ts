@@ -207,6 +207,7 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
       erc20BridgeL2: eraNetwork.erc20BridgeL2,
       l1Gateway: eraNetwork.l1Gateway,
     });
+    provider.setIsEthGasToken(eraNetwork.isEthGasToken ?? true);
     return provider;
   };
   const getWithdrawalStatus = async (transaction: TransactionInfo) => {

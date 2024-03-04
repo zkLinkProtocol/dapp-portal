@@ -48,6 +48,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   protected contractAddressesMap: Map<string, ContractAddresses>;
 
   protected networkKey: string;
+  protected _isEthGasToken: boolean;
 
   override async getTransactionReceipt(transactionHash: string | Promise<string>): Promise<TransactionReceipt> {
     await this.getNetwork();
@@ -289,12 +290,16 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     this.contractAddressesMap = new Map<string, ContractAddresses>();
     networkKey = networkKey || PRIMARY_CHAIN_KEY;
     this.networkKey = networkKey;
+    this._isEthGasToken = true;
     this.contractAddressesMap.set(networkKey, {});
     this.formatter.transaction = parseTransaction;
   }
 
   isPrimaryChain(): boolean {
     return this.networkKey === PRIMARY_CHAIN_KEY;
+  }
+  isEthGasToken(): boolean {
+    return this._isEthGasToken;
   }
   getL1Gateway(): Address | undefined {
     return this.contractAddressesMap.get(this.networkKey)?.l1Gateway;
@@ -304,6 +309,9 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     if (!this.contractAddressesMap.get(networkKey)) {
       this.contractAddressesMap.set(networkKey, {});
     }
+  }
+  setIsEthGasToken(isEthGasToken: boolean) {
+    this._isEthGasToken = isEthGasToken;
   }
 
   setContractAddresses(networkKey: string, contractAddresses: ContractAddresses) {

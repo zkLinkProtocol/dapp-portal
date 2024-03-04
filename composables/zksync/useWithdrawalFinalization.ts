@@ -49,6 +49,7 @@ export default (transactionInfo: ComputedRef<TransactionInfo>) => {
       erc20BridgeL2: eraNetwork.erc20BridgeL2,
       l1Gateway: eraNetwork.l1Gateway,
     });
+    provider.setIsEthGasToken(eraNetwork.isEthGasToken ?? true);
     return provider;
   };
   const retrieveBridgeAddress = useMemoize(() =>

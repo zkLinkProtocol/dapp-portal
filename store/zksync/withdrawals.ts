@@ -104,6 +104,7 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
           erc20BridgeL2: eraNetworks.erc20BridgeL2,
           l1Gateway: eraNetworks.l1Gateway,
         });
+        provider.setIsEthGasToken(eraNetworks.isEthGasToken ?? true);
         return provider;
       };
 

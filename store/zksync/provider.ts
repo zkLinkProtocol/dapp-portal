@@ -20,6 +20,7 @@ export const useZkSyncProviderStore = defineStore("zkSyncProvider", () => {
       erc20BridgeL2: eraNetwork.erc20BridgeL2,
       l1Gateway: eraNetwork.l1Gateway,
     });
+    provider.setIsEthGasToken(eraNetwork.isEthGasToken ?? true);
     return provider;
   };
 
@@ -33,6 +34,7 @@ export const useZkSyncProviderStore = defineStore("zkSyncProvider", () => {
       erc20BridgeL2: primaryNetwork.erc20BridgeL2,
       l1Gateway: primaryNetwork.l1Gateway,
     });
+    primaryProvider.setIsEthGasToken(primaryNetwork.isEthGasToken ?? true);
     return primaryProvider;
   };
 
