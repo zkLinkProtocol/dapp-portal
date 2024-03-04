@@ -83,7 +83,7 @@ import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
 import { useSearchtokenStore } from "@/store/searchToken";
 import { useZkSyncEthereumBalanceStore } from "@/store/zksync/ethereumBalance";
-import { fetchErc20 } from "~/zksync-web3-nova/src/utils";
+import { ETH_ADDRESS, L2_ETH_TOKEN_ADDRESS, fetchErc20 } from "~/zksync-web3-nova/src/utils";
 
 const props = defineProps({
   title: {
@@ -124,7 +124,6 @@ const zkSyncEthereumBalance = useZkSyncEthereumBalanceStore();
 const search = ref("");
 const showLoading = ref(false);
 const hasBalances = computed(() => props.balances.length > 0);
-
 const onboardStore = useOnboardStore();
 const { account } = storeToRefs(onboardStore);
 const searchtokenStore = useSearchtokenStore();
@@ -161,10 +160,9 @@ const filterTokens = (tokens: Token[]) => {
   return newTokens;
 };
 
-const displayedTokens = computed(() => filterTokens(props.tokens));
-const displayedBalances = computed(() => filterTokens(props.balances) as TokenAmount[]);
+const displayedTokens = computed(() => filterTokens(props.tokens.filter((e) => selectedNetwork.value.isEthGasToken || (e.address !== ETH_ADDRESS && e.address.toLowerCase() !== L2_ETH_TOKEN_ADDRESS))));
+const displayedBalances = computed(() => filterTokens(props.balances.filter((e) => selectedNetwork.value.isEthGasToken || (e.address !== ETH_ADDRESS && e.address.toLowerCase() !== L2_ETH_TOKEN_ADDRESS))) as TokenAmount[]);
 const balanceGroups = groupBalancesByAmount(displayedBalances);
-
 const selectedTokenAddress = computed({
   get: () => props.tokenAddress,
   set: (value) => emit("update:tokenAddress", value),
@@ -174,7 +172,7 @@ const selectedToken = computed({
     if (!props.tokens) {
       return undefined;
     }
-    return props.tokens.find((e) => e.address === selectedTokenAddress.value);
+    return props.tokens.filter((e)=> selectedNetwork.value.isEthGasToken || (e.address !== ETH_ADDRESS && e.address.toLowerCase() !== L2_ETH_TOKEN_ADDRESS)).find((e) => e.address === selectedTokenAddress.value);
   },
   set: (value) => {
     if (value) {
@@ -185,7 +183,6 @@ const selectedToken = computed({
     closeModal();
   },
 });
-
 const isModalOpened = computed({
   get: () => props.opened,
   set: (value) => emit("update:opened", value),

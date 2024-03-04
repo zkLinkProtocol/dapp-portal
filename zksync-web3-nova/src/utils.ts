@@ -50,8 +50,8 @@ export const L1_FEE_ESTIMATION_COEF_NUMERATOR = BigNumber.from(12);
 export const L1_FEE_ESTIMATION_COEF_DENOMINATOR = BigNumber.from(10);
 
 // This gas limit will be used for displaying the error messages when the users do not have enough fee.
-export const L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT = 400000;
-export const L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT = 200000;
+// export const L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT = 1000000000;
+// export const L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT = 200000;
 
 // The large L2 gas per pubdata to sign. This gas is enough to ensure that
 // any reasonable limit will be accepted. Note, that the operator is NOT required to

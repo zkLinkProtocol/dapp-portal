@@ -105,9 +105,10 @@ import { BigNumber } from "ethers";
 import type { Token, TokenAmount } from "@/types";
 import type { BigNumberish } from "ethers";
 import type { PropType } from "vue";
-
+import { useNetworkStore } from "@/store/network";
 import { decimalToBigNumber, formatTokenPrice, parseTokenAmount, removeSmallAmountPretty } from "@/utils/formatters";
-
+import { ETH_ADDRESS, L2_ETH_TOKEN_ADDRESS } from "~/zksync-web3-nova/src/utils";
+const { selectedNetwork } = storeToRefs(useNetworkStore());
 const props = defineProps({
   modelValue: {
     type: String,
@@ -157,7 +158,7 @@ const selectedTokenAddress = computed({
 });
 const selectedToken = computed(() => {
   const tokens = props.balances.length ? props.balances : props.tokens;
-  return tokens.find((e) => e.address === props.tokenAddress);
+  return tokens.filter((e)=> selectedNetwork.value.isEthGasToken || (e.address !== ETH_ADDRESS && e.address.toLowerCase() !== L2_ETH_TOKEN_ADDRESS)).find((e) => e.address === props.tokenAddress);
 });
 const tokenBalance = computed(() => {
   if (!props.balances.length || !selectedToken.value) {

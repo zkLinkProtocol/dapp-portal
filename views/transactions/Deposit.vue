@@ -18,13 +18,7 @@
       :network-key="selectedNetwork.key"
       @update:network-key="fromNetworkSelected($event)"
     />
-    <NetworkSelectModal
-      v-model:opened="toNetworkModalOpened"
-      title="To"
-      :network-key="destination.key"
-      @update:network-key="toNetworkSelected($event)"
-    />
-
+  
     <CommonErrorBlock v-if="tokensRequestError" @try-again="fetchBalances">
       Getting tokens error: {{ tokensRequestError.message }}
     </CommonErrorBlock>
@@ -377,6 +371,7 @@ import { checksumAddress, decimalToBigNumber, formatRawTokenPrice, parseTokenAmo
 import { silentRouterChange } from "@/utils/helpers";
 import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/transitions";
 import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
+import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 
 const route = useRoute();
 const router = useRouter();
@@ -395,11 +390,6 @@ const { balance, balanceInProgress, balanceError } = storeToRefs(zkSyncEthereumB
 const { isCustomNode } = useNetworks();
 
 const toNetworkModalOpened = ref(false);
-const toNetworkSelected = (networkKey?: string) => {
-  if (destinations.value.arbitrum.key === networkKey) {
-    router.replace({ name: "withdraw", query: route.query });
-  }
-};
 const fromNetworkModalOpened = ref(false);
 const fromNetworkSelected = (networkKey?: string) => {
   if (destinations.value.nova.key === networkKey) {
@@ -443,13 +433,20 @@ const selectedTokenAddress = ref<string | undefined>(
 );
 const selectedToken = computed<Token | undefined>(() => {
   if (!selectedTokenAddress.value) {
+    if(defaultToken.value?.address === ETH_ADDRESS){
+      return availableTokens.value[1];
+    }
     return defaultToken.value;
   }
-  return (
+  const res = (
     availableTokens.value.find((e) => e.address === selectedTokenAddress.value) ||
     availableBalances.value.find((e) => e.address === selectedTokenAddress.value) ||
     defaultToken.value
   );
+  if(res.address === ETH_ADDRESS){
+    return availableTokens.value[1];
+  }
+  return res;
 });
 const tokenCustomBridge = computed(() => {
   if (!selectedToken.value) {

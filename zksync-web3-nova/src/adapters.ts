@@ -1,5 +1,5 @@
 import { BigNumber, BigNumberish, BytesLike, ethers, utils } from "ethers";
-import { IERC20MetadataFactory, IL1BridgeFactory, IL2BridgeFactory, IZkSyncFactory } from "../typechain";
+import { IERC20MetadataFactory, IL1Bridge, IL1BridgeFactory, IL2BridgeFactory, IZkSyncFactory } from "../typechain";
 import { Provider } from "./provider";
 import {
   Address,
@@ -23,12 +23,11 @@ import {
   undoL1ToL2Alias,
   estimateDefaultBridgeDepositL2Gas,
   scaleGasLimit,
-  L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT,
-  L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT,
 } from "./utils";
 import { Hash } from "~/types";
 import { Interface } from "ethers/lib/utils";
 import { abi as primaryGetterAbi } from "../abi/GettersFacet.json";
+import { l1EthDepositAbi } from "./abi";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -146,7 +145,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     }): Promise<BigNumber> {
       const zksyncContract = await this.getMainContract();
       const parameters = { ...layer1TxDefaults(), ...params };
-      parameters.gasPrice ??= await this._providerL1().getGasPrice();
+      parameters.gasPrice ??= (await this._providerL1().getGasPrice()).mul(2);
       parameters.gasPerPubdataByte ??= REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
 
       const gasPrice = this._providerL2().isPrimaryChain() ? parameters.gasPrice : await this.getTxGasPrice();
@@ -190,7 +189,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             await approveTx.wait();
           }
         }
-
         const baseGasLimit = await this._providerL1().estimateGas(depositTx);
         const gasLimit = scaleGasLimit(baseGasLimit);
 
@@ -220,6 +218,38 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       }
 
       return scaleGasLimit(baseGasLimit);
+    }
+
+    async getDepositEstimateGasForUseFee(): Promise<ethers.BigNumber> {
+      const l2GasLimit = await this._providerL2().estimateL1ToL2Execute({
+        contractAddress: await this.getAddress(),
+        gasPerPubdataByte: REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
+        caller: await this.getAddress(),
+        calldata: "0x",
+        l2Value: 0,
+      });
+      const dummyAmount = 0; // must be 0, cause some secondary chain does not support deposit GAS Token, suck as Mantle
+
+      const baseCost = await this.getBaseCost({
+        gasLimit: l2GasLimit,
+        gasPerPubdataByte: REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
+      });
+      let baseGasLimit: BigNumber;
+      const face = new Interface([l1EthDepositAbi]);
+      baseGasLimit = await this._providerL1().estimateGas({
+        to: await this._providerL2().getMainContractAddress(),
+        value: baseCost.add(dummyAmount),
+        data: face.encodeFunctionData("requestL2Transaction", [
+          await this.getAddress(),
+          dummyAmount,
+          "0x",
+          l2GasLimit,
+          REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
+          [],
+          await this.getAddress(),
+        ]),
+      });
+      return baseGasLimit.mul(2);
     }
 
     async getDepositTx(transaction: {
@@ -258,7 +288,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const gasPriceForEstimation = overrides.maxFeePerGas || overrides.gasPrice;
 
       const zksyncContract = await this.getMainContract();
-      const gasPrice = this._providerL2().isPrimaryChain() ? BigNumber.from(await gasPriceForEstimation!).mul(2) : await this.getTxGasPrice();
+      const gasPrice = this._providerL2().isPrimaryChain()
+        ? BigNumber.from(await gasPriceForEstimation!).mul(2)
+        : await this.getTxGasPrice();
       const baseCost = await zksyncContract.l2TransactionBaseCost(gasPrice, tx.l2GasLimit, tx.gasPerPubdataByte);
 
       if (token == ETH_ADDRESS) {
@@ -327,11 +359,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
       // We could 0 in, because the final fee will anyway be bigger than
       if (baseCost.gte(selfBalanceETH.add(dummyAmount))) {
-        const recommendedETHBalance = BigNumber.from(
-          tx.token == ETH_ADDRESS
-            ? L1_RECOMMENDED_MIN_ETH_DEPOSIT_GAS_LIMIT
-            : L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT
-        )
+        const recommendedETHBalance = (await this.getDepositEstimateGasForUseFee())
           .mul(gasPriceForMessages!)
           .add(baseCost);
         const formattedRecommendedBalance = ethers.utils.formatEther(recommendedETHBalance);

@@ -2,8 +2,6 @@ import { computed, ref } from "vue";
 
 import { BigNumber } from "ethers";
 import { parseEther } from "ethers/lib/utils";
-import { L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT } from "@/zksync-web3-nova/src/utils";
-
 import useTimedCache from "@/composables/useTimedCache";
 
 import type { Token, TokenAmount } from "@/types";
@@ -14,7 +12,7 @@ import type { L1Signer } from "@/zksync-web3-nova/src";
 
 import { retry } from "@/utils/helpers";
 import { calculateFee } from "@/utils/helpers";
-
+import { useNetworkStore } from "@/store/network";
 export type DepositFeeValues = {
   maxFeePerGas?: BigNumber;
   maxPriorityFeePerGas?: BigNumber;
@@ -34,7 +32,7 @@ export default (
     to: undefined as string | undefined,
     tokenAddress: undefined as string | undefined,
   };
-
+  const { selectedNetwork } = storeToRefs(useNetworkStore());
   const fee = ref<DepositFeeValues | undefined>();
   const recommendedBalance = ref<BigNumberish | undefined>();
 
@@ -53,7 +51,16 @@ export default (
   });
 
   const feeToken = computed(() => {
-    return tokens.value.find((e) => e.address === ETH_TOKEN.l1Address);
+    let res: Token | undefined = tokens.value.find((e) => e.address === ETH_TOKEN.l1Address);
+    //TODO if network's gas token is not eth, we should config it here
+    if(selectedNetwork.value.key==="mantle" && res && res.symbol){
+      res = {
+        address: res.address,
+        symbol: "MNT",
+        decimals: res.decimals
+      }
+    }
+    return res;
   });
   const enoughBalanceToCoverFee = computed(() => {
     if (!feeToken.value || !balances.value || inProgress.value) {
@@ -91,8 +98,9 @@ export default (
     });
   };
   const getERC20TransactionFee = async () => {
+    const signer = getL1VoidSigner();
     return {
-      l1GasLimit: BigNumber.from(L1_RECOMMENDED_MIN_ERC20_DEPOSIT_GAS_LIMIT),
+      l1GasLimit: await signer.getDepositEstimateGasForUseFee(),
     };
   };
   const getGasPrice = async () => {

@@ -156,7 +156,7 @@ export const nexusGoerliNode: ZkSyncNetwork[] = [
     key: "mantle",
     name: "zkLink Nova Testnet",
     rpcUrl: "https://goerli.rpc.zklink.io",
-    logoUrl: "/img/ethereum.svg",
+    logoUrl: "/img/mantle.svg",
     blockExplorerUrl: "https://goerli.explorer.zklink.io",
     blockExplorerApi: "https://goerli.explorer-api.zklink.io",
     withdrawalFinalizerApi: "https://goerli.withdrawal-api.zklink.io",
