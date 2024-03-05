@@ -8,7 +8,7 @@
         <img v-else src="/img/logoWhite.png" alt="" class="logo-icon" />
         <!-- <IconsZkSync class="logo-icon" /> -->
       </NuxtLink>
-      <span class="beta-label">Testnet</span>
+      <span class="beta-label" v-if="!isMainnet">Testnet</span>
     </div>
     <div class="links-container">
       <NuxtLink
@@ -102,7 +102,8 @@ import { useRoute } from "#imports";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncWithdrawalsStore } from "@/store/zksync/withdrawals";
 import useNetworks from "@/composables/useNetworks";
-const { defaultNetwork } = useNetworks();
+const { defaultNetwork, isMainnet } = useNetworks();
+
 const route = useRoute();
 const routes = {
   bridge: ["index"],
