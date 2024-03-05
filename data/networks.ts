@@ -9,6 +9,9 @@ import {
   linea,
   mantle,
   mantleTestnet,
+  manta,
+  mantaTestnet,
+  arbitrum,
 } from "@wagmi/core/chains";
 
 import type { Token } from "@/types";
@@ -38,6 +41,10 @@ export const l1Networks = {
     ...mantle,
     name: "Mantle Mainnet",
   },
+  manta: {
+    ...manta,
+    name: "Manta Mainnet",
+  },
   arbitrumSepolia: {
     ...arbitrumSepolia,
     name: "Arbitrum Sepolia Testnet",
@@ -63,6 +70,10 @@ export const l1Networks = {
   mantleGoerliTestnet: {
     ...mantleTestnet,
     name: "Mantle Goerli Testnet",
+  },
+  mantaGoerliTestnet: {
+    ...mantaTestnet,
+    name: "Manta Goerli Testnet",
   },
 } as const;
 export type L1Network = Chain;
@@ -136,6 +147,22 @@ export const nexusNode: ZkSyncNetwork[] = [
     isEthGasToken: false,
     l1Network: l1Networks.mantle,
   },
+  {
+    id: 810180,
+    key: "manta",
+    name: "zkLink Nova",
+    rpcUrl: "https://rpc.zklink.io",
+    logoUrl: "/img/manta.jpg",
+    blockExplorerUrl: "https://explorer.zklink.io",
+    blockExplorerApi: "https://explorer-api.zklink.io",
+    withdrawalFinalizerApi: "https://withdrawal-api.zklink.io",
+    mainContract: "0xD784d7128B46B60Ca7d8BdC17dCEC94917455657",
+    erc20BridgeL1: "0x44a65dc12865A1e5249b45b4868f32b0E37168FF",
+    erc20BridgeL2: "0xa898E175CfDE9C6ABfCF5948eEfBA1B852eE5B09",
+    l1Gateway: "0x649Dfa2c4d09D877419fA1eDC4005BfbEF7CD82D",
+    isEthGasToken: false,
+    l1Network: l1Networks.manta,
+  },
 ];
 
 export const nexusGoerliNode: ZkSyncNetwork[] = [
@@ -185,6 +212,22 @@ export const nexusGoerliNode: ZkSyncNetwork[] = [
     l1Gateway: "0x7bf83D15C8f5a491B36506652A26d4bA0b6cC289",
     isEthGasToken: false,
     l1Network: l1Networks.mantleGoerliTestnet,
+  },
+  {
+    id: 810182,
+    key: "manta",
+    name: "zkLink Nova Testnet",
+    rpcUrl: "https://goerli.rpc.zklink.io",
+    logoUrl: "/img/manta.jpg",
+    blockExplorerUrl: "https://goerli.explorer.zklink.io",
+    blockExplorerApi: "https://goerli.explorer-api.zklink.io",
+    withdrawalFinalizerApi: "https://goerli.withdrawal-api.zklink.io",
+    mainContract: "0x4Ba4e6Bd860dCDE11fabA9D36c9b03Ee89B0E8B6",
+    erc20BridgeL1: "0x91E20Cb04b20132eF5906b2Fd74859F089B61B2D",
+    erc20BridgeL2: "0xCDb194C84D5a456D5F155c7B99E71e3A446990d4",
+    l1Gateway: "0x296B386381e4EA49EE3cc77734C7c544B51a670C",
+    isEthGasToken: false,
+    l1Network: l1Networks.mantaGoerliTestnet,
   },
 ];
 
