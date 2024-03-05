@@ -170,10 +170,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const depositTx = await this.getDepositTx(transaction);
       if (transaction.token == ETH_ADDRESS) {
         depositTx.overrides ??= {};
-
-        if(!depositTx.overrides.gasLimit){
+        console.log("depositTx.overrides", depositTx.overrides);
+        if (!depositTx.overrides.gasLimit) {
           const baseGasLimit = await this.estimateGasRequestExecute(depositTx);
-          depositTx.overrides.gasLimit = scaleGasLimit(baseGasLimit);;
+          depositTx.overrides.gasLimit = scaleGasLimit(baseGasLimit);
         }
         return this.requestExecute(depositTx);
       } else {
@@ -189,7 +189,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             await approveTx.wait();
           }
         }
-        if(!depositTx.gasLimit){
+        if (!depositTx.gasLimit) {
           const baseGasLimit = await this._providerL1().estimateGas(depositTx);
           const gasLimit = scaleGasLimit(baseGasLimit);
           depositTx.gasLimit = gasLimit;
@@ -222,20 +222,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     }
 
     //TODO unused
-    async getDepositEstimateGasForUseFee(): Promise<ethers.BigNumber> {
-      const l2GasLimit = await this._providerL2().estimateL1ToL2Execute({
-        contractAddress: await this.getAddress(),
-        gasPerPubdataByte: REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
-        caller: await this.getAddress(),
-        calldata: "0x",
-        l2Value: 0,
-      });
-      const dummyAmount = 0; // must be 0, cause some secondary chain does not support deposit GAS Token, suck as Mantle
+    async getDepositEstimateGasForUseFee(l2GasLimit: BigNumber, baseCost: BigNumber): Promise<ethers.BigNumber> {
+      
 
-      const baseCost = await this.getBaseCost({
-        gasLimit: l2GasLimit,
-        gasPerPubdataByte: REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
-      });
+      const dummyAmount = 0; // must be 0, cause some secondary chain does not support deposit GAS Token, suck as Mantle
       let baseGasLimit: BigNumber;
       const face = new Interface([l1EthDepositAbi]);
       baseGasLimit = await this._providerL1().estimateGas({
@@ -252,7 +242,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           await this.getAddress(),
         ]),
       });
-      return baseGasLimit.mul(2);
+      return scaleGasLimit(baseGasLimit);
     }
 
     async getDepositTx(transaction: {
@@ -329,58 +319,73 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     async getFullRequiredDepositFee(transaction: {
       token: Address;
       to?: Address;
-      bridgeAddress?: Address;
-      gasPerPubdataByte?: BigNumberish;
+      // bridgeAddress?: Address;
+      // gasPerPubdataByte?: BigNumberish;
       overrides?: ethers.PayableOverrides;
     }): Promise<FullDepositFee> {
       // It is assumed that the L2 fee for the transaction does not depend on its value.
-      const dummyAmount = "1";
+      // const dummyAmount = "1";
 
       const { ...tx } = transaction;
-      const zksyncContract = await this.getMainContract();
+      // const zksyncContract = await this.getMainContract();
 
       tx.overrides ??= {};
       await insertGasPrice(this._providerL1(), tx.overrides);
-      const gasPriceForMessages = (await tx.overrides.maxFeePerGas) || (await tx.overrides.gasPrice);
+      // const gasPriceForMessages = (await tx.overrides.maxFeePerGas) || (await tx.overrides.gasPrice);
 
-      tx.to ??= await this.getAddress();
-      tx.gasPerPubdataByte ??= REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
+      // tx.to ??= await this.getAddress();
+      // tx.gasPerPubdataByte ??= REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
 
-      const l2GasLimit = await estimateDefaultBridgeDepositL2Gas(
-        this._providerL1(),
-        this._providerL2(),
-        tx.token,
-        dummyAmount,
-        tx.to,
-        await this.getAddress(),
-        tx.gasPerPubdataByte
-      );
-      const gasPrice = this._providerL2().isPrimaryChain() ? gasPriceForMessages! : await this.getTxGasPrice();
-      const baseCost = await zksyncContract.l2TransactionBaseCost(gasPrice, l2GasLimit, tx.gasPerPubdataByte);
+      // const l2GasLimit = await estimateDefaultBridgeDepositL2Gas(
+      //   this._providerL1(),
+      //   this._providerL2(),
+      //   tx.token,
+      //   dummyAmount,
+      //   tx.to,
+      //   await this.getAddress(),
+      //   tx.gasPerPubdataByte
+      // );
+      // const gasPrice = this._providerL2().isPrimaryChain() ? gasPriceForMessages! : await this.getTxGasPrice();
+      // const baseCost = await zksyncContract.l2TransactionBaseCost(gasPrice, l2GasLimit, tx.gasPerPubdataByte);
 
+      // const selfBalanceETH = await this.getBalanceL1();
+
+      // // We could 0 in, because the final fee will anyway be bigger than
+      // if (baseCost.gte(selfBalanceETH.add(dummyAmount))) {
+      //   // const recommendedETHBalance = (await this.getDepositEstimateGasForUseFee())
+      //   //   .mul(gasPriceForMessages!)
+      //   //   .add(baseCost);
+      //   // const formattedRecommendedBalance = ethers.utils.formatEther(recommendedETHBalance);
+      //   throw new Error(
+      //     // `Not enough balance for deposit. Under the provided gas price, the recommended balance to perform a deposit is ${formattedRecommendedBalance} ETH`
+      //     `Not enough balance for deposit`
+      //   );
+      // }
+      const l2GasLimit = await this._providerL2().estimateL1ToL2Execute({
+        contractAddress: await this.getAddress(),
+        gasPerPubdataByte: REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
+        caller: await this.getAddress(),
+        calldata: "0x",
+        l2Value: 0,
+      });
+
+      const baseCost = await this.getBaseCost({
+        gasLimit: l2GasLimit,
+        gasPerPubdataByte: REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
+      });
       const selfBalanceETH = await this.getBalanceL1();
-
-      // We could 0 in, because the final fee will anyway be bigger than
-      if (baseCost.gte(selfBalanceETH.add(dummyAmount))) {
-        // const recommendedETHBalance = (await this.getDepositEstimateGasForUseFee())
-        //   .mul(gasPriceForMessages!)
-        //   .add(baseCost);
-        // const formattedRecommendedBalance = ethers.utils.formatEther(recommendedETHBalance);
-        throw new Error(
-          // `Not enough balance for deposit. Under the provided gas price, the recommended balance to perform a deposit is ${formattedRecommendedBalance} ETH`
-          `Not enough balance for deposit`
-        );
+      if (baseCost.gte(selfBalanceETH)) {
+        throw new Error(`Not enough balance for deposit`);
       }
-
       // For ETH token the value that the user passes to the estimation is the one which has the
       // value for the L2 comission substracted.
-      let amountForEstimate: BigNumber;
-      if (isETH(tx.token)) {
-        amountForEstimate = BigNumber.from(dummyAmount);
-      } else {
-        amountForEstimate = BigNumber.from(dummyAmount);
+      // let amountForEstimate: BigNumber;
+      if (!isETH(tx.token)) {
+        // amountForEstimate = BigNumber.from(dummyAmount);
+        // } else {
+        // amountForEstimate = BigNumber.from(dummyAmount);
 
-        if ((await this.getAllowanceL1(tx.token)) < amountForEstimate) {
+        if ((await this.getAllowanceL1(tx.token)) < BigNumber.from(1)) {
           throw new Error("Not enough allowance to cover the deposit");
         }
       }
@@ -395,11 +400,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
       let l1GasLimit;
 
-      
-      if(this._providerL2().isEthereumChain()){
-        if(isETH(tx.token)){
+      if (this._providerL2().isEthereumChain()) {
+        if (isETH(tx.token)) {
           l1GasLimit = BigNumber.from(180000);
-        }else{
+        } else {
           /**
            * // from useFee.ts
            * if (params.tokenAddress !== feeToken.value?.address && fee.value && fee.value.l1GasLimit) {
@@ -407,23 +411,26 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 fee.value.l1GasLimit = fee.value.l1GasLimit.mul(3).div(2);
               }
            */
-          l1GasLimit = BigNumber.from(300000);//TODO never access here
+          l1GasLimit = BigNumber.from(300000); //TODO never access here
         }
-      }else{
-        l1GasLimit = await this.estimateGasDeposit({
-          ...tx,
-          amount: amountForEstimate,
-          overrides: estimationOverrides,
-          l2GasLimit,
-        });
+      } else {
+        // l1GasLimit = await this.estimateGasDeposit({
+        //   ...tx,
+        //   amount: amountForEstimate,
+        //   overrides: estimationOverrides,
+        //   l2GasLimit,
+        // });
+        l1GasLimit = await this.getDepositEstimateGasForUseFee(l2GasLimit, baseCost);
       }
+
+      console.log("l1GasLimit", l1GasLimit.toString());
 
       const fullCost: FullDepositFee = {
         baseCost,
         l1GasLimit,
         l2GasLimit,
       };
-
+      console.log("tx.overrides", tx.overrides);
       if (tx.overrides.gasPrice) {
         fullCost.gasPrice = BigNumber.from(await tx.overrides.gasPrice);
       } else {
@@ -732,12 +739,16 @@ async function insertGasPrice(l1Provider: ethers.providers.Provider, overrides: 
     // Sometimes baseFeePerGas is not available, so we use gasPrice instead.
     const baseFee = l1FeeData.lastBaseFeePerGas || l1FeeData.gasPrice;
 
-    // ethers.js by default uses multiplcation by 2, but since the price for the L2 part
-    // will depend on the L1 part, doubling base fee is typically too much.
-    const maxFeePerGas = baseFee!.add(l1FeeData.maxPriorityFeePerGas||0);
-    // const maxFeePerGas = baseFee!.mul(3).div(2).add(l1FeeData.maxPriorityFeePerGas!);
+    if (l1FeeData.maxFeePerGas && l1FeeData.maxPriorityFeePerGas) {
+      // ethers.js by default uses multiplcation by 2, but since the price for the L2 part
+      // will depend on the L1 part, doubling base fee is typically too much.
+      const maxFeePerGas = baseFee!.add(l1FeeData.maxPriorityFeePerGas || 0);
+      // const maxFeePerGas = baseFee!.mul(3).div(2).add(l1FeeData.maxPriorityFeePerGas!);
 
-    overrides.maxFeePerGas = maxFeePerGas;
-    overrides.maxPriorityFeePerGas = l1FeeData.maxPriorityFeePerGas!;
+      overrides.maxFeePerGas = maxFeePerGas;
+      overrides.maxPriorityFeePerGas = l1FeeData.maxPriorityFeePerGas!;
+    } else {
+      overrides.gasPrice = baseFee!;
+    }
   }
 }
