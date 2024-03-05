@@ -1,6 +1,6 @@
 import { computed, ref } from "vue";
 
-import { BigNumber } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { parseEther } from "ethers/lib/utils";
 import useTimedCache from "@/composables/useTimedCache";
 
@@ -38,7 +38,14 @@ export default (
 
   const totalFee = computed(() => {
     if (!fee.value) return undefined;
-
+    // console.log(
+    //   ethers.utils.formatEther( fee.value.l1GasLimit
+    //   .mul(fee.value.maxFeePerGas??fee.value.gasPrice)
+    //   .add(fee.value.baseCost || "0")
+    //   ))
+      // console.log("l1GasLimit",fee.value.l1GasLimit.toString())
+      // console.log("maxFeePerGas", ethers.utils.formatUnits(fee.value.maxFeePerGas,"gwei"))
+      // console.log("baseCost", ethers.utils.formatEther(fee.value.baseCost))
     if (fee.value.l1GasLimit && fee.value.maxFeePerGas && fee.value.maxPriorityFeePerGas) {
       return fee.value.l1GasLimit
         .mul(fee.value.maxFeePerGas)
@@ -93,16 +100,27 @@ export default (
             return;
           }
         }
+        // zksync era
+        if(err instanceof Error && err.message.indexOf("can't start a transaction from a non-account") > 0){
+          console.log("can't start a transaction from a non-account")
+          return;
+        }
+        //manta
+        if(err instanceof Error && err.message.indexOf("insufficient funds for intrinsic transaction cost") >= 0){
+          console.log("insufficient funds for intrinsic transaction cost")
+          return;
+        }
+
         throw err;
       }
     });
   };
-  const getERC20TransactionFee = async () => {
-    const signer = getL1VoidSigner();
-    return {
-      l1GasLimit: await signer.getDepositEstimateGasForUseFee(),
-    };
-  };
+  // const getERC20TransactionFee = async () => {
+  //   const signer = getL1VoidSigner();
+  //   return {
+  //     l1GasLimit: await signer.getDepositEstimateGasForUseFee(),
+  //   };
+  // };
   const getGasPrice = async () => {
     return BigNumber.from(await retry(() => getPublicClient().getGasPrice()))
       .mul(110)
@@ -118,10 +136,10 @@ export default (
       recommendedBalance.value = undefined;
       if (!feeToken.value) throw new Error("Fee tokens is not available");
 
-      if (params.tokenAddress === feeToken.value?.address) {
-        fee.value = await getEthTransactionFee();
-      } else {
-        fee.value = await getERC20TransactionFee();
+      fee.value = await getEthTransactionFee();
+      if (params.tokenAddress !== feeToken.value?.address && fee.value && fee.value.l1GasLimit) {
+        // fee.value = await getERC20TransactionFee();
+        fee.value.l1GasLimit = fee.value.l1GasLimit.mul(3).div(2);
       }
       /* It can be either maxFeePerGas or gasPrice */
       if (fee.value && !fee.value?.maxFeePerGas) {
