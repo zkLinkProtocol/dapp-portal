@@ -7,6 +7,7 @@ import {
   zkSyncSepoliaTestnet,
   lineaTestnet,
   linea,
+  mantle,
   mantleTestnet,
 } from "@wagmi/core/chains";
 
@@ -32,6 +33,10 @@ export const l1Networks = {
   linea: {
     ...linea,
     name: "Linea Mainnet",
+  },
+  mantle: {
+    ...mantle,
+    name: "Mantle Mainnet",
   },
   arbitrumSepolia: {
     ...arbitrumSepolia,
@@ -97,7 +102,7 @@ export const nexusNode: ZkSyncNetwork[] = [
     erc20BridgeL1: "0xAd16eDCF7DEB7e90096A259c81269d811544B6B6",
     erc20BridgeL2: "0x36CaABbAbfB9C09B722d9C3697C3Cb4A93650ea7",
     l1Gateway: "0x83Bc7394738A7A084081aF22EEC0051908c0055c",
-    //TODO
+    isEthGasToken: true,
     l1Network: l1Networks.mainnet,
   },
   {
@@ -112,8 +117,24 @@ export const nexusNode: ZkSyncNetwork[] = [
     mainContract: "0x5Cb18b6e4e6F3b46Ce646b0f4704D53724C5Df05",
     erc20BridgeL1: "0x62cE247f34dc316f93D3830e4Bf10959FCe630f8",
     erc20BridgeL2: "0x01c3f51294494e350AD69B999Db6B382b3B510b9",
-    //TODO
+    isEthGasToken: true,
     l1Network: l1Networks.linea,
+  },
+  {
+    id: 810180,
+    key: "mantle",
+    name: "zkLink Nova",
+    rpcUrl: "https://rpc.zklink.io",
+    logoUrl: "/img/mantle.svg",
+    blockExplorerUrl: "https://explorer.zklink.io",
+    blockExplorerApi: "https://explorer-api.zklink.io",
+    withdrawalFinalizerApi: "https://withdrawal-api.zklink.io",
+    mainContract: "0xD784d7128B46B60Ca7d8BdC17dCEC94917455657",
+    erc20BridgeL1: "0x62351b47e060c61868Ab7E05920Cb42bD9A5f2B2",
+    erc20BridgeL2: "0x321Ce902eDFC6466B224ce5D9A7Bc16858855272",
+    l1Gateway: "0xdE1Ce751405Fe6D836349226EEdCDFFE1C3BE269",
+    isEthGasToken: false,
+    l1Network: l1Networks.mantle,
   },
 ];
 
@@ -132,7 +153,6 @@ export const nexusGoerliNode: ZkSyncNetwork[] = [
     erc20BridgeL2: "0x369181F0724D485c2F50E918b1beCEc078C7077C",
     l1Gateway: "0x00546F01728048Af108223C41C4FaD7b124a476f",
     isEthGasToken: true,
-    //TODO
     l1Network: l1Networks.goerli,
   },
   {
@@ -148,7 +168,6 @@ export const nexusGoerliNode: ZkSyncNetwork[] = [
     erc20BridgeL1: "0xF58Da74B65544C86F5E16A0c898Ff20718C1cb7d",
     erc20BridgeL2: "0x7cB4A4fCF09dfF32f7f6557b966a942e803C7FAD",
     isEthGasToken: true,
-    //TODO
     l1Network: l1Networks.lineaGoerliTestnet,
   },
   {
@@ -165,7 +184,6 @@ export const nexusGoerliNode: ZkSyncNetwork[] = [
     erc20BridgeL2: "0xD1b7DD1B30b218901d035C951852ae0D97834b68",
     l1Gateway: "0x7bf83D15C8f5a491B36506652A26d4bA0b6cC289",
     isEthGasToken: false,
-    //TODO
     l1Network: l1Networks.mantleGoerliTestnet,
   },
 ];
