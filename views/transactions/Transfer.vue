@@ -433,7 +433,12 @@ const tokenWithHighestBalancePrice = computed(() => {
   });
   return tokenWithHighestBalancePrice[0] ?? undefined;
 });
-const defaultToken = computed(() => availableTokens.value?.[0] ?? undefined);
+const defaultToken = computed(() => {
+  if (!selectedNetwork.value.isEthGasToken) {
+    return availableTokens.value?.[1] ?? undefined;
+  }
+  return availableTokens.value?.[0] ?? undefined;
+});
 const selectedTokenAddress = ref<string | undefined>(
   routeTokenAddress.value ?? tokenWithHighestBalancePrice.value?.address ?? defaultToken.value?.address
 );
