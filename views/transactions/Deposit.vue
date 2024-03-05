@@ -243,7 +243,7 @@
           </CommonCardWithLineButtons>
         </CommonHeightTransition>
 
-        <EthereumTransactionFooter>
+        <EthereumTransactionFooter :transaction="transactionHasGateway!">
           <template #after-checks>
             <template v-if="step === 'form'">
               <template v-if="!enoughAllowance && !continueButtonDisabled">
@@ -593,6 +593,26 @@ const transaction = computed<
     },
   };
 });
+const transactionHasGateway = ref<TransactionInfo>();
+transactionHasGateway.value = {
+  type: "deposit",
+  transactionHash: "",
+  timestamp: new Date().toISOString(),
+  token: "",
+  from: "",
+  to: "",
+  // token: transaction.value!.token,
+  // from: transaction.value!.from,
+  // to: transaction.value!.to,
+  fromChainKey: selectedNetwork.value.key,
+  gateway: selectedNetwork.value.l1Gateway,
+  info: {
+    expectedCompleteTimestamp: new Date(
+      new Date().getTime() + getEstmatdDepositDelay(eraNetwork.value.key)
+    ).toISOString(),
+    completed: false,
+  },
+};
 
 const feeLoading = computed(() => feeInProgress.value || (!fee.value && balanceInProgress.value));
 const estimate = async () => {
