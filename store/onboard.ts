@@ -73,7 +73,7 @@ export const useOnboardStore = defineStore("onboard", () => {
     name: "zkLink Nova Portal",
     description: "zkLink Nova Portal - view balances, transfer and bridge tokens",
     url: "https://portal.zksync.io",
-    icons: ["../public/img/cion.png"],
+    icons: ["../public/img/icon.png"],
   };
   const wagmiConfig = createConfig({
     autoConnect: true,
