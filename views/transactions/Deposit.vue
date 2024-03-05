@@ -433,7 +433,7 @@ const selectedTokenAddress = ref<string | undefined>(
 );
 const selectedToken = computed<Token | undefined>(() => {
   if (!selectedTokenAddress.value) {
-    if (!selectedNetwork.value.isEthGasToken && defaultToken.value?.address === ETH_ADDRESS) {
+    if(!selectedNetwork.value.isEthGasToken && defaultToken.value?.address === ETH_ADDRESS){
       return availableTokens.value[1];
     }
     return defaultToken.value;
@@ -441,8 +441,9 @@ const selectedToken = computed<Token | undefined>(() => {
   const res =
     availableTokens.value.find((e) => e.address === selectedTokenAddress.value) ||
     availableBalances.value.find((e) => e.address === selectedTokenAddress.value) ||
-    defaultToken.value;
-  if (!selectedNetwork.value.isEthGasToken && res.address === ETH_ADDRESS) {
+    defaultToken.value
+  
+  if(!selectedNetwork.value.isEthGasToken && res.address === ETH_ADDRESS) {
     return availableTokens.value[1];
   }
   return res;
@@ -598,7 +599,7 @@ transactionHasGateway.value = {
   type: "deposit",
   transactionHash: "",
   timestamp: new Date().toISOString(),
-  token: "",
+  token: null,
   from: "",
   to: "",
   fromChainKey: selectedNetwork.value.key,
