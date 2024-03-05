@@ -39,11 +39,13 @@ export default () => {
     const element = zkSyncNetworks[index];
     nexusNetworks[element.key] = element;
   }
+  const isMainnet = runtimeConfig.public.nodeType === "nexus";
   return {
     isCustomNode,
     nexusNetworks,
     zkSyncNetworks,
     defaultNetwork,
     primaryNetwork,
+    isMainnet,
   };
 };
