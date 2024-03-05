@@ -9,14 +9,10 @@ import {
   linea,
   mantle,
   mantleTestnet,
-<<<<<<< HEAD
-  mantaTestnet,
-  arbitrum,
-=======
   zkSync,
   arbitrum,
   manta,
->>>>>>> main
+  mantaTestnet
 } from "@wagmi/core/chains";
 
 import type { Token } from "@/types";
@@ -80,17 +76,14 @@ export const l1Networks = {
     ...mantleTestnet,
     name: "Mantle Goerli Testnet",
   },
-<<<<<<< HEAD
   mantaGoerliTestnet: {
     ...mantaTestnet,
     name: "Manta Goerli Testnet",
   },
-=======
   manta: {
     ...manta,
     name: "Manta Mainnet",  
   }
->>>>>>> main
 } as const;
 export type L1Network = Chain;
 export type ZkSyncNetwork = {
