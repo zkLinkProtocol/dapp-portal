@@ -433,12 +433,7 @@ const tokenWithHighestBalancePrice = computed(() => {
   });
   return tokenWithHighestBalancePrice[0] ?? undefined;
 });
-const defaultToken = computed(() => {
-  if (!selectedNetwork.value.isEthGasToken) {
-    return availableTokens.value?.[1] ?? undefined;
-  }
-  return availableTokens.value?.[0] ?? undefined;
-});
+const defaultToken = computed(() => availableTokens.value?.[0] ?? undefined);
 const selectedTokenAddress = ref<string | undefined>(
   routeTokenAddress.value ?? tokenWithHighestBalancePrice.value?.address ?? defaultToken.value?.address
 );
@@ -446,11 +441,20 @@ const selectedToken = computed<Token | undefined>(() => {
   if (!tokens.value) {
     return undefined;
   }
-  return selectedTokenAddress.value
-    ? availableTokens.value.find((e) => e.address === selectedTokenAddress.value) ||
-        availableBalances.value.find((e) => e.address === selectedTokenAddress.value) ||
-        defaultToken.value
-    : defaultToken.value;
+  if (!selectedTokenAddress.value) {
+    if (!selectedNetwork.value.isEthGasToken) {
+      return availableTokens.value[1];
+    }
+    return defaultToken.value;
+  }
+  const res =
+    availableTokens.value.find((e) => e.address === selectedTokenAddress.value) ||
+    availableBalances.value.find((e) => e.address === selectedTokenAddress.value) ||
+    defaultToken.value;
+  if (!selectedNetwork.value.isEthGasToken) {
+    return availableTokens.value[1];
+  }
+  return res;
 });
 const tokenCustomBridge = computed(() => {
   if (props.type !== "withdrawal" && selectedToken.value) {

@@ -601,9 +601,6 @@ transactionHasGateway.value = {
   token: "",
   from: "",
   to: "",
-  // token: transaction.value!.token,
-  // from: transaction.value!.from,
-  // to: transaction.value!.to,
   fromChainKey: selectedNetwork.value.key,
   gateway: selectedNetwork.value.l1Gateway,
   info: {

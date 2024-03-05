@@ -16,7 +16,7 @@
       </div>
       <AddressAvatar class="account-avatar" :address="address">
         <template #icon>
-          <img v-tooltip="destination.label" :src="destination.iconUrl" :alt="destination.label" />
+          <img v-tooltip="destination.label" class="rounded-full" :src="destination.iconUrl" :alt="destination.label" />
         </template>
       </AddressAvatar>
     </div>
