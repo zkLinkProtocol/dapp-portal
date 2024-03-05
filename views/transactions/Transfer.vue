@@ -66,10 +66,10 @@
               variant="light"
               class="overflow-hidden"
               :noChevron="true"
-              style="cursor: default;"
+              style="cursor: default"
             >
               <template #left-icon>
-                <img :src="destinations.nova.iconUrl" class="h-full w-full" />
+                <img :src="destinations.nova.iconUrl" class="h-full w-full rounded-full" />
               </template>
               <span class="truncate">{{ destinations.nova.label }}</span>
             </CommonButtonDropdown>
@@ -93,7 +93,7 @@
               @click="toNetworkModalOpened = true"
             >
               <template #left-icon>
-                <img :src="destination.iconUrl" class="h-full w-full" />
+                <img :src="destination.iconUrl" class="h-full w-full rounded-full" />
               </template>
               <span class="truncate">{{ destination.label }}</span>
             </CommonButtonDropdown>
