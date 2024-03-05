@@ -9,7 +9,6 @@ import {
   linea,
   mantle,
   mantleTestnet,
-  manta,
   mantaTestnet,
   arbitrum,
 } from "@wagmi/core/chains";
@@ -40,10 +39,6 @@ export const l1Networks = {
   mantle: {
     ...mantle,
     name: "Mantle Mainnet",
-  },
-  manta: {
-    ...manta,
-    name: "Manta Mainnet",
   },
   arbitrumSepolia: {
     ...arbitrumSepolia,
@@ -146,22 +141,6 @@ export const nexusNode: ZkSyncNetwork[] = [
     l1Gateway: "0xdE1Ce751405Fe6D836349226EEdCDFFE1C3BE269",
     isEthGasToken: false,
     l1Network: l1Networks.mantle,
-  },
-  {
-    id: 810180,
-    key: "manta",
-    name: "zkLink Nova",
-    rpcUrl: "https://rpc.zklink.io",
-    logoUrl: "/img/manta.jpg",
-    blockExplorerUrl: "https://explorer.zklink.io",
-    blockExplorerApi: "https://explorer-api.zklink.io",
-    withdrawalFinalizerApi: "https://withdrawal-api.zklink.io",
-    mainContract: "0xD784d7128B46B60Ca7d8BdC17dCEC94917455657",
-    erc20BridgeL1: "0x44a65dc12865A1e5249b45b4868f32b0E37168FF",
-    erc20BridgeL2: "0xa898E175CfDE9C6ABfCF5948eEfBA1B852eE5B09",
-    l1Gateway: "0x649Dfa2c4d09D877419fA1eDC4005BfbEF7CD82D",
-    isEthGasToken: false,
-    l1Network: l1Networks.manta,
   },
 ];
 
