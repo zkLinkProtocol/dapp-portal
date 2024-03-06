@@ -31,7 +31,12 @@
         <div class="info-column left">
           <AddressAvatar class="mx-auto h-12 w-12" :address="fromAddress">
             <template #icon>
-              <img v-tooltip="fromDestination.label" :src="fromDestination.iconUrl" :alt="fromDestination.label" />
+              <img
+                class="rounded-full"
+                v-tooltip="fromDestination.label"
+                :src="fromDestination.iconUrl"
+                :alt="fromDestination.label"
+              />
             </template>
           </AddressAvatar>
           <div>
@@ -43,7 +48,12 @@
         <div class="info-column right">
           <AddressAvatar class="mx-auto h-12 w-12" :address="toAddress">
             <template #icon>
-              <img v-tooltip="toDestination.label" :src="toDestination.iconUrl" :alt="toDestination.label" />
+              <img
+                class="rounded-full"
+                v-tooltip="toDestination.label"
+                :src="toDestination.iconUrl"
+                :alt="toDestination.label"
+              />
             </template>
           </AddressAvatar>
           <div>
