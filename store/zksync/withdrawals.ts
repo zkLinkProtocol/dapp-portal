@@ -12,6 +12,9 @@ import { Provider } from "@/zksync-web3-nova/src";
 import { useNetworkStore } from "@/store/network";
 import useNetworks from "@/composables/useNetworks";
 import type { ZkSyncNetwork } from "@/data/networks";
+import { utils, ethers, BigNumber, BigNumberish, BytesLike, Contract } from "ethers";
+import { erc20ABI, getPublicClient } from "@wagmi/core";
+import { Wallet } from "@/zksync-web3-nova/src";
 
 const FETCH_TIME_LIMIT = 31 * 24 * 60 * 60 * 1000; // 31 days
 
@@ -29,12 +32,44 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
   function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
-  const setStatus = async(obj:{transactionHash:any,status:string})=> {
-    const isFinalized = await useZkSyncWalletStore()
-    .getL1VoidSigner(true)
-    ?.isWithdrawalFinalized(obj.transactionHash)
+  const setStatus = async(obj:{transactionHash:any,status:string,gateway:string})=> {
+    const { primaryNetwork, zkSyncNetworks } = useNetworks();
+      
+    const getNetworkInfo = () => {
+      const newNetwork = zkSyncNetworks.find(
+        (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === obj.gateway?.toLowerCase()
+      );
+      return newNetwork ?? primaryNetwork;
+    };
+
+    const { selectedNetwork } = storeToRefs(useNetworkStore());
+    let provider: Provider | undefined;
+    const request = () => {
+      const eraNetwork = getNetworkInfo() || selectedNetwork.value;
+      if (!provider) {
+        provider = new Provider(eraNetwork.rpcUrl);
+      }
+      provider.setContractAddresses(eraNetwork.key, {
+        mainContract: eraNetwork.mainContract,
+        erc20BridgeL1: eraNetwork.erc20BridgeL1,
+        erc20BridgeL2: eraNetwork.erc20BridgeL2,
+        l1Gateway: eraNetwork.l1Gateway,
+      });
+      provider.setIsEthGasToken(eraNetwork.isEthGasToken ?? true);
+      return provider;
+    };
+    
+    const web3Provider = new ethers.providers.Web3Provider(getPublicClient({ chainId: getNetworkInfo().l1Network?.id }) as any, "any");
+    const wallet = new Wallet(
+      "0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110",
+      request(),
+      web3Provider
+    );
+    const isFinalized = await wallet.isWithdrawalFinalized(obj.transactionHash)
     .catch(() => false);
+    console.log(isFinalized)
     obj.status = isFinalized? 'Finalized':''
+
   }
   const updateWithdrawals = async () => {
     if (!isConnected.value) throw new Error("Account is not available");
@@ -48,6 +83,14 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
     );
     let withdrawals = transfers.items.filter((e) => e.type === "withdrawal" && e.token && e.amount);
     for (const withdrawal of withdrawals) {
+      const { primaryNetwork, zkSyncNetworks } = useNetworks();
+        
+      const getNetworkInfo = () => {
+        const newNetwork = zkSyncNetworks.find(
+          (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === withdrawal.gateway?.toLowerCase()
+        );
+        return newNetwork ?? primaryNetwork;
+      };
       const transactionFromStorage = transactionStatusStore.getTransaction(withdrawal.transactionHash);
       if (transactionFromStorage) {
         if (!transactionFromStorage.info.completed) {
@@ -73,15 +116,6 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
       );
       const transfers = transactionTransfers.items.map(mapApiTransfer);
       const withdrawalTransfer = transfers.find((e) => e.type === "withdrawal" && e.token && e.amount);
-      
-    const { primaryNetwork, zkSyncNetworks } = useNetworks();
-      
-      const getNetworkInfo = () => {
-        const newNetwork = zkSyncNetworks.find(
-          (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === withdrawal.gateway?.toLowerCase()
-        );
-        return newNetwork ?? primaryNetwork;
-      };
   
       const { selectedNetwork } = storeToRefs(useNetworkStore());
       let provider: Provider | undefined;

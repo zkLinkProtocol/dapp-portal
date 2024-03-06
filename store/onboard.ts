@@ -228,9 +228,9 @@ export const useOnboardStore = defineStore("onboard", () => {
     switchNetworkById,
 
     getWallet,
-    getPublicClient: () => {
+    getPublicClient: (chainId:any = '') => {
       if (!l1Network.value) throw new Error(`L1 network is not available on ${selectedNetwork.value.name}`);
-      return getPublicClient({ chainId: l1Network.value?.id });
+      return getPublicClient({ chainId: chainId || l1Network.value?.id });
     },
 
     subscribeOnAccountChange,

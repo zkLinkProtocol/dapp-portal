@@ -16,12 +16,12 @@ export const useDestinationsStore = defineStore("destinations", () => {
     era: {
       key: "era",
       label: eraNetwork.value.name,
-      iconUrl: "/img/cion.png",
+      iconUrl: "/img/icon.png",
     },
     nova: {
       key: "nova",
       label: eraNetwork.value.name,
-      iconUrl: "/img/cion.png",
+      iconUrl: "/img/icon.png",
     },
     arbitrum: {
       key: "arbitrum",
