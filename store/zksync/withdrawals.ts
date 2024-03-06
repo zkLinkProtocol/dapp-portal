@@ -2,11 +2,6 @@ import { $fetch } from "ofetch";
 
 import type { Api } from "@/types";
 
-import { useDestinationsStore } from "@/store/destinations";
-import { useOnboardStore } from "@/store/onboard";
-import { useZkSyncProviderStore } from "@/store/zksync/provider";
-import { useZkSyncTransactionStatusStore, WITHDRAWAL_DELAY } from "@/store/zksync/transactionStatus";
-
 const FETCH_TIME_LIMIT = 31 * 24 * 60 * 60 * 1000; // 31 days
 
 export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => {
@@ -93,13 +88,13 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
     await updateWithdrawals();
   };
   const { reset: resetAutoUpdate, stop: stopAutoUpdate } = useInterval(() => {
-    updateWithdrawals();
+    updateWithdrawalsIfPossible();
   }, 60_000);
 
   onboardStore.subscribeOnAccountChange((account) => {
     if (account) {
       resetAutoUpdate();
-      updateWithdrawals();
+      updateWithdrawalsIfPossible();
     } else {
       stopAutoUpdate();
     }

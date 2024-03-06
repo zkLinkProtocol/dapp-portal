@@ -1,14 +1,8 @@
 import { BigNumber } from "ethers";
 
-import useTimedCache from "@/composables/useTimedCache";
-
 import type { Token, TokenAmount } from "@/types";
 import type { BigNumberish } from "ethers";
-import type { Ref } from "vue";
-import type { Provider } from "zksync-web3";
-
-import { retry } from "@/utils/helpers";
-import { calculateFee } from "@/utils/helpers";
+import type { Provider } from "zksync-ethers";
 
 export type FeeEstimationParams = {
   type: "transfer" | "withdrawal";
@@ -22,7 +16,7 @@ export default (
   tokens: Ref<{ [tokenSymbol: string]: Token } | undefined>,
   balances: Ref<TokenAmount[]>
 ) => {
-  let params: FeeEstimationParams | undefined = undefined;
+  let params: FeeEstimationParams | undefined;
 
   const gasLimit = ref<BigNumberish | undefined>();
   const gasPrice = ref<BigNumberish | undefined>();
