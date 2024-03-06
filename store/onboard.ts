@@ -50,12 +50,6 @@ export const useOnboardStore = defineStore("onboard", () => {
   const web3modal = createWeb3Modal({
     wagmiConfig,
     projectId: process.env.WALLET_CONNECT_PROJECT_ID!,
-    excludeWalletIds: ["bc949c5d968ae81310268bf9193f9c9fb7bb4e1283e1284af8f2bd4992535fd6"],
-    featuredWalletIds: [
-      "971e689d0a5be527bac79629b4ee9b925e82208e5168b733496a09c0faed0709",
-      "38f5d18bd8522c244bdd70cb4a68e0e718865155811c043f052fb9f1c51de662",
-      "1aa28414c95f5024133faf5766d376bb9c853c280d158cd3e22dc2b7b0a95a2d",
-    ],
     termsConditionsUrl: "https://zksync.io/terms",
     privacyPolicyUrl: "https://zksync.io/privacy",
     themeMode: selectedColorMode.value,
