@@ -13,6 +13,7 @@ import type { L1Signer } from "@/zksync-web3-nova/src";
 import { retry } from "@/utils/helpers";
 import { calculateFee } from "@/utils/helpers";
 import { useNetworkStore } from "@/store/network";
+import { suggestMaxPriorityFee } from "@rainbow-me/fee-suggestions";
 export type DepositFeeValues = {
   maxFeePerGas?: BigNumber;
   maxPriorityFeePerGas?: BigNumber;
@@ -140,21 +141,19 @@ export default (
         // fee.value = await getERC20TransactionFee();
         // ERC20
         //TODO this is a temp fix for mantel network;
-        fee.value.l1GasLimit = fee.value.l1GasLimit.mul(2);
+        fee.value.l1GasLimit = fee.value.l1GasLimit.mul(2);//maybe mul(3).div(2) is better
         if (selectedNetwork.value.key === "mantle") {
         } else {
-          // fee.value.l1GasLimit = fee.value.l1GasLimit.mul(3).div(2);
         }
-
       }
 
-      if(fee.value){
-        if(signer._providerL2().isLineaChain()){
-          //TODO this is a temp fix, should config gas price multipler in network config @Sarah
-          fee.value.maxFeePerGas = fee.value.maxFeePerGas?.mul(2)
-          console.log("linea", fee.value.maxFeePerGas?.toString())
+      if (fee.value) {
+        if (signer._providerL2().isLineaChain() && fee.value.maxFeePerGas && fee.value.maxPriorityFeePerGas) {
+          const lineaFeeSuggest = await suggestMaxPriorityFee(signer._providerL1(), "latest");
+          console.log("linea feesuggest", lineaFeeSuggest.maxPriorityFeeSuggestions);
+          fee.value.maxPriorityFeePerGas = BigNumber.from(lineaFeeSuggest.maxPriorityFeeSuggestions.fast);
+          fee.value.maxFeePerGas = fee.value.maxPriorityFeePerGas;
         }
-        
       }
       /* It can be either maxFeePerGas or gasPrice */
       if (fee.value && !fee.value?.maxFeePerGas) {
