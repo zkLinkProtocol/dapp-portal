@@ -9,7 +9,7 @@
               v-tooltip="fromDestination.label"
               :src="fromDestination.iconUrl"
               :alt="fromDestination.label"
-              class="h-6 w-6"
+              class="h-6 w-6 rounded-full"
             />
           </div>
           <div>Your account {{ shortenAddress(fromAddress) }}</div>
@@ -21,7 +21,7 @@
               v-tooltip="toDestination.label"
               :src="toDestination.iconUrl"
               :alt="toDestination.label"
-              class="h-6 w-6"
+              class="h-6 w-6 rounded-full"
             />
           </div>
           <div>{{ isSameAddress ? "Your account" : "Another account" }} {{ shortenAddress(toAddress) }}</div>

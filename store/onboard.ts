@@ -72,7 +72,7 @@ export const useOnboardStore = defineStore("onboard", () => {
   const metadata = {
     name: "zkLink Nova Portal",
     description: "zkLink Nova Portal - view balances, transfer and bridge tokens",
-    url: "https://portal.zksync.io",
+    url: "https://portal.zklink.io",
     icons: ["../public/img/icon.png"],
   };
   const wagmiConfig = createConfig({
@@ -117,19 +117,20 @@ export const useOnboardStore = defineStore("onboard", () => {
     }
   };
   identifyWalletName();
-
   const web3modal = createWeb3Modal({
     wagmiConfig,
     projectId: env.walletConnectProjectID,
     chains: extendedChains,
     excludeWalletIds: ["bc949c5d968ae81310268bf9193f9c9fb7bb4e1283e1284af8f2bd4992535fd6"],
     featuredWalletIds: [
-      "971e689d0a5be527bac79629b4ee9b925e82208e5168b733496a09c0faed0709",
-      "38f5d18bd8522c244bdd70cb4a68e0e718865155811c043f052fb9f1c51de662",
-      "1aa28414c95f5024133faf5766d376bb9c853c280d158cd3e22dc2b7b0a95a2d",
+      // "1ae92b26df02f0abca6304df07debccd18262fdf5fe82daa81593582dac9a369",rainbow
+      "971e689d0a5be527bac79629b4ee9b925e82208e5168b733496a09c0faed0709", // okx wallet 
+      "8a0ee50d1f22f6651afcae7eb4253e52a3310b90af5daef78a8c4929a9bb99d4", // binance web3 wallet
+
+      // "38f5d18bd8522c244bdd70cb4a68e0e718865155811c043f052fb9f1c51de662",//bitget
     ],
-    termsConditionsUrl: "https://zksync.io/terms",
-    privacyPolicyUrl: "https://zksync.io/privacy",
+    // termsConditionsUrl: "https://zksync.io/terms",
+    // privacyPolicyUrl: "https://zksync.io/privacy",
     themeMode: selectedColorMode.value,
   });
 

@@ -1,6 +1,6 @@
 import { computed, ref } from "vue";
 
-import { BigNumber } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { parseEther } from "ethers/lib/utils";
 import useTimedCache from "@/composables/useTimedCache";
 
@@ -38,7 +38,14 @@ export default (
 
   const totalFee = computed(() => {
     if (!fee.value) return undefined;
-
+    // console.log(
+    //   ethers.utils.formatEther( fee.value.l1GasLimit
+    //   .mul(fee.value.maxFeePerGas??fee.value.gasPrice)
+    //   .add(fee.value.baseCost || "0")
+    //   ))
+    // console.log("l1GasLimit",fee.value.l1GasLimit.toString())
+    // console.log("maxFeePerGas", ethers.utils.formatUnits(fee.value.maxFeePerGas,"gwei"))
+    // console.log("baseCost", ethers.utils.formatEther(fee.value.baseCost))
     if (fee.value.l1GasLimit && fee.value.maxFeePerGas && fee.value.maxPriorityFeePerGas) {
       return fee.value.l1GasLimit
         .mul(fee.value.maxFeePerGas)
@@ -53,12 +60,12 @@ export default (
   const feeToken = computed(() => {
     let res: Token | undefined = tokens.value.find((e) => e.address === ETH_TOKEN.l1Address);
     //TODO if network's gas token is not eth, we should config it here
-    if(selectedNetwork.value.key==="mantle" && res && res.symbol){
+    if (selectedNetwork.value.key === "mantle" && res && res.symbol) {
       res = {
         address: res.address,
         symbol: "MNT",
-        decimals: res.decimals
-      }
+        decimals: res.decimals,
+      };
     }
     return res;
   });
@@ -74,8 +81,7 @@ export default (
     return true;
   });
 
-  const getEthTransactionFee = async () => {
-    const signer = getL1VoidSigner();
+  const getEthTransactionFee = async (signer: L1Signer) => {
     if (!signer) throw new Error("Signer is not available");
 
     return retry(async () => {
@@ -93,16 +99,27 @@ export default (
             return;
           }
         }
+        // zksync era
+        if (err instanceof Error && err.message.indexOf("can't start a transaction from a non-account") > 0) {
+          console.log("can't start a transaction from a non-account");
+          return;
+        }
+        //manta
+        if (err instanceof Error && err.message.indexOf("insufficient funds for intrinsic transaction cost") >= 0) {
+          console.log("insufficient funds for intrinsic transaction cost");
+          return;
+        }
+
         throw err;
       }
     });
   };
-  const getERC20TransactionFee = async () => {
-    const signer = getL1VoidSigner();
-    return {
-      l1GasLimit: await signer.getDepositEstimateGasForUseFee(),
-    };
-  };
+  // const getERC20TransactionFee = async () => {
+  //   const signer = getL1VoidSigner();
+  //   return {
+  //     l1GasLimit: await signer.getDepositEstimateGasForUseFee(),
+  //   };
+  // };
   const getGasPrice = async () => {
     return BigNumber.from(await retry(() => getPublicClient().getGasPrice()))
       .mul(110)
@@ -117,11 +134,27 @@ export default (
     async () => {
       recommendedBalance.value = undefined;
       if (!feeToken.value) throw new Error("Fee tokens is not available");
+      const signer = getL1VoidSigner();
+      fee.value = await getEthTransactionFee(signer);
+      if (params.tokenAddress !== feeToken.value?.address && fee.value && fee.value.l1GasLimit) {
+        // fee.value = await getERC20TransactionFee();
+        // ERC20
+        //TODO this is a temp fix for mantel network;
+        fee.value.l1GasLimit = fee.value.l1GasLimit.mul(2);
+        if (selectedNetwork.value.key === "mantle") {
+        } else {
+          // fee.value.l1GasLimit = fee.value.l1GasLimit.mul(3).div(2);
+        }
 
-      if (params.tokenAddress === feeToken.value?.address) {
-        fee.value = await getEthTransactionFee();
-      } else {
-        fee.value = await getERC20TransactionFee();
+      }
+
+      if(fee.value){
+        if(signer._providerL2().isLineaChain()){
+          //TODO this is a temp fix, should config gas price multipler in network config @Sarah
+          fee.value.maxFeePerGas = fee.value.maxFeePerGas?.mul(2)
+          console.log("linea", fee.value.maxFeePerGas?.toString())
+        }
+        
       }
       /* It can be either maxFeePerGas or gasPrice */
       if (fee.value && !fee.value?.maxFeePerGas) {

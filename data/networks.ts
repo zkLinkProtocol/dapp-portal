@@ -9,6 +9,10 @@ import {
   linea,
   mantle,
   mantleTestnet,
+  zkSync,
+  arbitrum,
+  manta,
+  mantaTestnet
 } from "@wagmi/core/chains";
 
 import type { Token } from "@/types";
@@ -38,6 +42,10 @@ export const l1Networks = {
     ...mantle,
     name: "Mantle Mainnet",
   },
+  arbitrum: {
+    ...arbitrum,
+    name: "Arbitrum Mainnet",
+  },
   arbitrumSepolia: {
     ...arbitrumSepolia,
     name: "Arbitrum Sepolia Testnet",
@@ -52,6 +60,10 @@ export const l1Networks = {
     ...scrollSepolia,
     name: "Scroll Sepolia Testnet",
   },
+  zkSync: {
+    ...zkSync,
+    name: "zkSync Mainnet",
+  },
   zkSyncSepoliaTestnet: {
     ...zkSyncSepoliaTestnet,
     name: "zkSync Sepolia Testnet",
@@ -64,6 +76,14 @@ export const l1Networks = {
     ...mantleTestnet,
     name: "Mantle Goerli Testnet",
   },
+  mantaGoerliTestnet: {
+    ...mantaTestnet,
+    name: "Manta Goerli Testnet",
+  },
+  manta: {
+    ...manta,
+    name: "Manta Mainnet",  
+  }
 } as const;
 export type L1Network = Chain;
 export type ZkSyncNetwork = {
@@ -122,6 +142,38 @@ export const nexusNode: ZkSyncNetwork[] = [
   },
   {
     id: 810180,
+    key: "zksync",
+    name: "zkLink Nova",
+    rpcUrl: "https://rpc.zklink.io",
+    logoUrl: "/img/zksync.svg",
+    blockExplorerUrl: "https://explorer.zklink.io",
+    blockExplorerApi: "https://explorer-api.zklink.io",
+    withdrawalFinalizerApi: "https://withdrawal-api.zklink.io",
+    mainContract: "0xaFe8C7Cf33eD0fee179DFF20ae174C660883273A",
+    erc20BridgeL1: "0xaB3DDB86072a35d74beD49AA0f9210098ebf2D08",
+    erc20BridgeL2: "0x7187DB8AB8F65450a74dD40474bE778CF468C44a",
+    l1Gateway: "0xeCD189e0f390826E137496a4e4a23ACf76c942Ab",
+    isEthGasToken: true,
+    l1Network: l1Networks.zkSync,
+  },
+  {
+    id: 810180,
+    key: "arbitrum",
+    name: "zkLink Nova",
+    rpcUrl: "https://rpc.zklink.io",
+    logoUrl: "/img/arbitrum-arb-logo.svg",
+    blockExplorerUrl: "https://explorer.zklink.io",
+    blockExplorerApi: "https://explorer-api.zklink.io",
+    withdrawalFinalizerApi: "https://withdrawal-api.zklink.io",
+    mainContract: "0xFF73a1a1d27951A005eb23276dc99CB7F8d5420A",
+    erc20BridgeL1: "0xfB0Ad0B3C2605A7CA33d6badd0C685E11b8F5585",
+    erc20BridgeL2: "0x6B7551DBbaE2fb728cF851baee5c3A52DF6F60a4",
+    l1Gateway: "0x273D59aed2d793167c162E64b9162154B07583C0",
+    isEthGasToken: true,
+    l1Network: l1Networks.arbitrum,
+  },
+  {
+    id: 810180,
     key: "mantle",
     name: "zkLink Nova",
     rpcUrl: "https://rpc.zklink.io",
@@ -135,6 +187,22 @@ export const nexusNode: ZkSyncNetwork[] = [
     l1Gateway: "0xdE1Ce751405Fe6D836349226EEdCDFFE1C3BE269",
     isEthGasToken: false,
     l1Network: l1Networks.mantle,
+  },
+  {
+    id: 810180,
+    key: "manta",
+    name: "zkLink Nova",
+    rpcUrl: "https://rpc.zklink.io",
+    logoUrl: "/img/manta.jpg",
+    blockExplorerUrl: "https://explorer.zklink.io",
+    blockExplorerApi: "https://explorer-api.zklink.io",
+    withdrawalFinalizerApi: "https://withdrawal-api.zklink.io",
+    mainContract: "0xD784d7128B46B60Ca7d8BdC17dCEC94917455657",
+    erc20BridgeL1: "0x44a65dc12865A1e5249b45b4868f32b0E37168FF",
+    erc20BridgeL2: "0xa898E175CfDE9C6ABfCF5948eEfBA1B852eE5B09",
+    l1Gateway: "0x649Dfa2c4d09D877419fA1eDC4005BfbEF7CD82D",
+    isEthGasToken: true,
+    l1Network: l1Networks.manta,
   },
 ];
 
@@ -185,6 +253,22 @@ export const nexusGoerliNode: ZkSyncNetwork[] = [
     l1Gateway: "0x7bf83D15C8f5a491B36506652A26d4bA0b6cC289",
     isEthGasToken: false,
     l1Network: l1Networks.mantleGoerliTestnet,
+  },
+  {
+    id: 810182,
+    key: "manta",
+    name: "zkLink Nova Testnet",
+    rpcUrl: "https://goerli.rpc.zklink.io",
+    logoUrl: "/img/manta.jpg",
+    blockExplorerUrl: "https://goerli.explorer.zklink.io",
+    blockExplorerApi: "https://goerli.explorer-api.zklink.io",
+    withdrawalFinalizerApi: "https://goerli.withdrawal-api.zklink.io",
+    mainContract: "0x4Ba4e6Bd860dCDE11fabA9D36c9b03Ee89B0E8B6",
+    erc20BridgeL1: "0x91E20Cb04b20132eF5906b2Fd74859F089B61B2D",
+    erc20BridgeL2: "0xCDb194C84D5a456D5F155c7B99E71e3A446990d4",
+    l1Gateway: "0x296B386381e4EA49EE3cc77734C7c544B51a670C",
+    isEthGasToken: false,
+    l1Network: l1Networks.mantaGoerliTestnet,
   },
 ];
 

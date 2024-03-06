@@ -18,7 +18,7 @@
       :network-key="selectedNetwork.key"
       @update:network-key="fromNetworkSelected($event)"
     />
-  
+
     <CommonErrorBlock v-if="tokensRequestError" @try-again="fetchBalances">
       Getting tokens error: {{ tokensRequestError.message }}
     </CommonErrorBlock>
@@ -53,7 +53,7 @@
               @click="fromNetworkModalOpened = true"
             >
               <template #left-icon>
-                <img :src="selectedNetwork.logoUrl" class="h-full w-full" />
+                <img :src="selectedNetwork.logoUrl" class="h-full w-full rounded-full" />
               </template>
               <span>{{ selectedNetwork.l1Network?.name }}</span>
             </CommonButtonDropdown>
@@ -74,7 +74,7 @@
               style="cursor: default"
             >
               <template #left-icon>
-                <img :src="destination.iconUrl" class="h-full w-full" />
+                <img :src="destination.iconUrl" class="h-full w-full rounded-full" />
               </template>
               <span>{{ destination.label }}</span>
             </CommonButtonDropdown>
@@ -243,7 +243,7 @@
           </CommonCardWithLineButtons>
         </CommonHeightTransition>
 
-        <EthereumTransactionFooter>
+        <EthereumTransactionFooter :transaction="transactionHasGateway!">
           <template #after-checks>
             <template v-if="step === 'form'">
               <template v-if="!enoughAllowance && !continueButtonDisabled">
@@ -433,17 +433,17 @@ const selectedTokenAddress = ref<string | undefined>(
 );
 const selectedToken = computed<Token | undefined>(() => {
   if (!selectedTokenAddress.value) {
-    if(defaultToken.value?.address === ETH_ADDRESS){
+    if(!selectedNetwork.value.isEthGasToken && defaultToken.value?.address === ETH_ADDRESS){
       return availableTokens.value[1];
     }
     return defaultToken.value;
   }
-  const res = (
+  const res =
     availableTokens.value.find((e) => e.address === selectedTokenAddress.value) ||
     availableBalances.value.find((e) => e.address === selectedTokenAddress.value) ||
     defaultToken.value
-  );
-  if(res.address === ETH_ADDRESS){
+  
+  if(!selectedNetwork.value.isEthGasToken && res.address === ETH_ADDRESS) {
     return availableTokens.value[1];
   }
   return res;
@@ -594,6 +594,23 @@ const transaction = computed<
     },
   };
 });
+const transactionHasGateway = ref<TransactionInfo>();
+transactionHasGateway.value = {
+  type: "deposit",
+  transactionHash: "",
+  timestamp: new Date().toISOString(),
+  token: null,
+  from: "",
+  to: "",
+  fromChainKey: selectedNetwork.value.key,
+  gateway: selectedNetwork.value.l1Gateway,
+  info: {
+    expectedCompleteTimestamp: new Date(
+      new Date().getTime() + getEstmatdDepositDelay(eraNetwork.value.key)
+    ).toISOString(),
+    completed: false,
+  },
+};
 
 const feeLoading = computed(() => feeInProgress.value || (!fee.value && balanceInProgress.value));
 const estimate = async () => {
@@ -711,6 +728,7 @@ const makeTransaction = async () => {
         completed: false,
       },
     };
+
     saveTransaction(transactionInfo.value);
     silentRouterChange(
       router.resolve({

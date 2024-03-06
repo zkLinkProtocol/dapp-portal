@@ -66,10 +66,10 @@
               variant="light"
               class="overflow-hidden"
               :noChevron="true"
-              style="cursor: default;"
+              style="cursor: default"
             >
               <template #left-icon>
-                <img :src="destinations.nova.iconUrl" class="h-full w-full" />
+                <img :src="destinations.nova.iconUrl" class="h-full w-full rounded-full" />
               </template>
               <span class="truncate">{{ destinations.nova.label }}</span>
             </CommonButtonDropdown>
@@ -93,7 +93,7 @@
               @click="toNetworkModalOpened = true"
             >
               <template #left-icon>
-                <img :src="destination.iconUrl" class="h-full w-full" />
+                <img :src="destination.iconUrl" class="h-full w-full rounded-full" />
               </template>
               <span class="truncate">{{ destination.label }}</span>
             </CommonButtonDropdown>
@@ -441,11 +441,20 @@ const selectedToken = computed<Token | undefined>(() => {
   if (!tokens.value) {
     return undefined;
   }
-  return selectedTokenAddress.value
-    ? availableTokens.value.find((e) => e.address === selectedTokenAddress.value) ||
-        availableBalances.value.find((e) => e.address === selectedTokenAddress.value) ||
-        defaultToken.value
-    : defaultToken.value;
+  if (!selectedTokenAddress.value) {
+    if (!selectedNetwork.value.isEthGasToken) {
+      return availableTokens.value[1];
+    }
+    return defaultToken.value;
+  }
+  const res =
+    availableTokens.value.find((e) => e.address === selectedTokenAddress.value) ||
+    availableBalances.value.find((e) => e.address === selectedTokenAddress.value) ||
+    defaultToken.value;
+  if (!selectedNetwork.value.isEthGasToken) {
+    return availableTokens.value[1];
+  }
+  return res;
 });
 const tokenCustomBridge = computed(() => {
   if (props.type !== "withdrawal" && selectedToken.value) {
