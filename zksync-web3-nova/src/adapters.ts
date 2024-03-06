@@ -194,37 +194,36 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           const gasLimit = scaleGasLimit(baseGasLimit);
           depositTx.gasLimit = gasLimit;
         }
+        
         return await this._providerL2().getPriorityOpResponse(await this._signerL1().sendTransaction(depositTx));
       }
     }
 
-    async estimateGasDeposit(transaction: {
-      token: Address;
-      amount: BigNumberish;
-      to?: Address;
-      operatorTip?: BigNumberish;
-      bridgeAddress?: Address;
-      l2GasLimit?: BigNumberish;
-      gasPerPubdataByte?: BigNumberish;
-      overrides?: ethers.PayableOverrides;
-    }): Promise<ethers.BigNumber> {
-      const depositTx = await this.getDepositTx(transaction);
+    // async estimateGasDeposit(transaction: {
+    //   token: Address;
+    //   amount: BigNumberish;
+    //   to?: Address;
+    //   operatorTip?: BigNumberish;
+    //   bridgeAddress?: Address;
+    //   l2GasLimit?: BigNumberish;
+    //   gasPerPubdataByte?: BigNumberish;
+    //   overrides?: ethers.PayableOverrides;
+    // }): Promise<ethers.BigNumber> {
+    //   const depositTx = await this.getDepositTx(transaction);
 
-      let baseGasLimit: BigNumber;
-      depositTx.from = await this.getAddress();
-      if (transaction.token == ETH_ADDRESS) {
-        baseGasLimit = await this.estimateGasRequestExecute(depositTx);
-      } else {
-        baseGasLimit = await this._providerL1().estimateGas(depositTx);
-      }
+    //   let baseGasLimit: BigNumber;
+    //   depositTx.from = await this.getAddress();
+    //   if (transaction.token == ETH_ADDRESS) {
+    //     baseGasLimit = await this.estimateGasRequestExecute(depositTx);
+    //   } else {
+    //     baseGasLimit = await this._providerL1().estimateGas(depositTx);
+    //   }
 
-      return scaleGasLimit(baseGasLimit);
-    }
+    //   return scaleGasLimit(baseGasLimit);
+    // }
 
     //TODO unused
     async getDepositEstimateGasForUseFee(l2GasLimit: BigNumber, baseCost: BigNumber): Promise<ethers.BigNumber> {
-      
-
       const dummyAmount = 0; // must be 0, cause some secondary chain does not support deposit GAS Token, suck as Mantle
       let baseGasLimit: BigNumber;
       const face = new Interface([l1EthDepositAbi]);
@@ -265,7 +264,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       tx.operatorTip ??= BigNumber.from(0);
       tx.overrides ??= {};
       tx.gasPerPubdataByte ??= REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
-      tx.l2GasLimit ??= await estimateDefaultBridgeDepositL2Gas(
+      tx.l2GasLimit = await estimateDefaultBridgeDepositL2Gas(
         this._providerL1(),
         this._providerL2(),
         tx.token,
