@@ -202,6 +202,14 @@ export const useOnboardStore = defineStore("onboard", () => {
     }
   );
 
+  const {subscribe: subscribeOnNetworkChange, notify: notifyOnNetworkChange} = useObservable<number | undefined>();
+  watch(
+    () => network.value.chain?.id,
+    () => {
+      notifyOnNetworkChange(network.value.chain?.id);
+    }
+  )
+
   const getWallet = async (chainId: number | undefined = l1Network.value?.id) => {
     const client = await getWalletClient(chainId ? { chainId } : undefined);
     if (!client) throw new Error("Wallet is not available");
@@ -234,5 +242,6 @@ export const useOnboardStore = defineStore("onboard", () => {
     },
 
     subscribeOnAccountChange,
+    subscribeOnNetworkChange,
   };
 });

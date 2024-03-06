@@ -14,6 +14,7 @@ import { retry } from "@/utils/helpers";
 import { calculateFee } from "@/utils/helpers";
 import { useNetworkStore } from "@/store/network";
 import { suggestMaxPriorityFee } from "@rainbow-me/fee-suggestions";
+import { UsePromiseExecuteOptions } from "~/composables/usePromise";
 export type DepositFeeValues = {
   maxFeePerGas?: BigNumber;
   maxPriorityFeePerGas?: BigNumber;
@@ -26,7 +27,7 @@ export type DepositFeeValues = {
 export default (
   tokens: Ref<Token[]>,
   balances: Ref<TokenAmount[] | undefined>,
-  getL1VoidSigner: () => L1Signer,
+  getL1Signer: (options?: UsePromiseExecuteOptions) => Promise<L1Signer | undefined>,
   getPublicClient: () => PublicClient
 ) => {
   let params = {
@@ -135,13 +136,22 @@ export default (
     async () => {
       recommendedBalance.value = undefined;
       if (!feeToken.value) throw new Error("Fee tokens is not available");
-      const signer = getL1VoidSigner();
+      let signer;
+      try {
+        signer = await getL1Signer({ force: true });
+      } catch (err) {
+        if (err instanceof Error && err.message.indexOf("Incorrect wallet network selected") >= 0) {
+          console.log("Incorrect wallet network selected");
+          return;
+        }
+      }
+      if (!signer) {
+        throw new Error("Signer is not available");
+      }
       fee.value = await getEthTransactionFee(signer);
       if (params.tokenAddress !== feeToken.value?.address && fee.value && fee.value.l1GasLimit) {
-        // fee.value = await getERC20TransactionFee();
-        // ERC20
         //TODO this is a temp fix for mantel network;
-        fee.value.l1GasLimit = fee.value.l1GasLimit.mul(2);//maybe mul(3).div(2) is better
+        fee.value.l1GasLimit = fee.value.l1GasLimit.mul(2); //maybe mul(3).div(2) is better
         if (selectedNetwork.value.key === "mantle") {
         } else {
         }
@@ -167,6 +177,10 @@ export default (
     return executeEstimateFee();
   }, 1000 * 8);
 
+  const resetFeeImmediately = () => {
+    resetEstimateFee();
+    executeEstimateFee({ force: true });
+  };
   return {
     fee,
     result: totalFee,
@@ -184,6 +198,7 @@ export default (
       fee.value = undefined;
     },
 
+    resetFeeImmediately,
     feeToken,
     enoughBalanceToCoverFee,
   };
