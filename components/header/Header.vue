@@ -1,86 +1,89 @@
 <template>
-  <header class="header">
-    <HeaderMobileMainNavigation v-model:opened="mobileMainNavigationOpened" />
-    <HeaderMobileAccountNavigation v-model:opened="mobileAccountNavigationOpened" />
-    <div class="logo-container">
-      <NuxtLink to="https://zklink.io/" target="_blank">
-        <img v-if="selectedColorMode === 'dark'" src="/img/logo.png" alt="" class="logo-icon" />
-        <img v-else src="/img/logoWhite.png" alt="" class="logo-icon" />
-        <!-- <IconsZkSync class="logo-icon" /> -->
-      </NuxtLink>
-      <span class="beta-label" v-if="!isMainnet">Testnet</span>
-    </div>
-    <div class="links-container">
-      <NuxtLink
-        class="link-item"
-        :to="{ name: 'index' }"
-        :class="{ 'router-link-exact-active': routes.bridge.includes(route.name?.toString() || '') }"
-      >
-        <ArrowsUpDownIcon class="link-icon" aria-hidden="true" />
-        Deposit
-      </NuxtLink>
-      <NuxtLink
-        class="link-item"
-        :to="{ name: 'withdraw' }"
-        :class="{ 'router-link-exact-active': routes.withdraw.includes(route.name?.toString() || '') }"
-      >
-        <ArrowsUpDownIcon class="link-icon" aria-hidden="true" />
-        Withdraw
-      </NuxtLink>
-      <NuxtLink
-        v-if="isShowFaucet"
-        class="link-item"
-        :to="{ name: 'faucet' }"
-        :class="{ 'router-link-exact-active': routes.faucet.includes(route.name?.toString() || '') }"
-      >
-        <IconsFaucet class="link-icon" aria-hidden="true" />
-        Faucet
-      </NuxtLink>
-      <NuxtLink
-        class="link-item"
-        :to="{ name: 'assets' }"
-        :class="{ 'router-link-exact-active': routes.assets.includes(route.name?.toString() || '') }"
-      >
-        <WalletIcon class="link-icon" aria-hidden="true" />
-        Assets
-      </NuxtLink>
-      <NuxtLink class="link-item" :to="{ name: 'transfers' }">
-        <ArrowsRightLeftIcon class="link-icon" aria-hidden="true" />
-        History
-        <transition v-bind="TransitionOpacity()">
-          <CommonBadge v-if="withdrawalsAvailableForClaiming.length">
-            {{ withdrawalsAvailableForClaiming.length }}
-          </CommonBadge>
-        </transition>
-      </NuxtLink>
-    </div>
-    <div class="right-side">
-      <!-- <HeaderNetworkDropdown class="network-dropdown" /> -->
-      <CommonButton v-if="!isConnected" variant="primary" @click="onboardStore.openModal()">
-        <span class="whitespace-nowrap">Connect wallet</span>
-      </CommonButton>
-      <template v-else>
-        <div class="sm:hidden">
-          <HeaderAccountDropdownButton no-chevron @click="mobileAccountNavigationOpened = true" />
-        </div>
-        <div class="hidden sm:block">
-          <HeaderAccountDropdown />
-        </div>
-      </template>
-      <CommonButton class="color-mode-button" @click="switchColorMode()">
-        <SunIcon v-if="selectedColorMode === 'dark'" class="h-6 w-6" aria-hidden="true" />
-        <MoonIcon v-else class="h-6 w-6" aria-hidden="true" />
-      </CommonButton>
-      <CommonButton class="hamburger-icon" @click="mobileMainNavigationOpened = true">
-        <Bars3Icon class="h-6 w-6" aria-hidden="true" />
-        <transition v-bind="TransitionOpacity()">
-          <CommonBadge v-if="withdrawalsAvailableForClaiming.length" class="action-available-badge">
-            {{ withdrawalsAvailableForClaiming.length }}
-          </CommonBadge>
-        </transition>
-      </CommonButton>
-    </div>
-  </header>
+  <div>
+    <header class="header">
+      <HeaderMobileMainNavigation v-model:opened="mobileMainNavigationOpened" />
+      <HeaderMobileAccountNavigation v-model:opened="mobileAccountNavigationOpened" />
+      <div class="logo-container">
+        <NuxtLink to="https://zklink.io/" target="_blank">
+          <img v-if="selectedColorMode === 'dark'" src="/img/logo.png" alt="" class="logo-icon" />
+          <img v-else src="/img/logoWhite.png" alt="" class="logo-icon" />
+          <!-- <IconsZkSync class="logo-icon" /> -->
+        </NuxtLink>
+        <span class="beta-label" v-if="!isMainnet">Testnet</span>
+      </div>
+      <div class="links-container">
+        <NuxtLink
+          class="link-item"
+          :to="{ name: 'index' }"
+          :class="{ 'router-link-exact-active': routes.bridge.includes(route.name?.toString() || '') }"
+        >
+          <ArrowsUpDownIcon class="link-icon" aria-hidden="true" />
+          Deposit
+        </NuxtLink>
+        <NuxtLink
+          class="link-item disabled"
+          v-tooltip="'Withdrawal from Nova will be enable in April.'"
+          :class="{ 'router-link-exact-active': routes.withdraw.includes(route.name?.toString() || '') }"
+        >
+          <ArrowsUpDownIcon class="link-icon" aria-hidden="true" />
+          Withdraw
+        </NuxtLink>
+        <NuxtLink
+          v-if="isShowFaucet"
+          class="link-item"
+          :to="{ name: 'faucet' }"
+          :class="{ 'router-link-exact-active': routes.faucet.includes(route.name?.toString() || '') }"
+        >
+          <IconsFaucet class="link-icon" aria-hidden="true" />
+          Faucet
+        </NuxtLink>
+        <NuxtLink
+          class="link-item"
+          :to="{ name: 'assets' }"
+          :class="{ 'router-link-exact-active': routes.assets.includes(route.name?.toString() || '') }"
+        >
+          <WalletIcon class="link-icon" aria-hidden="true" />
+          Assets
+        </NuxtLink>
+        <NuxtLink class="link-item" :to="{ name: 'transfers' }">
+          <ArrowsRightLeftIcon class="link-icon" aria-hidden="true" />
+          History
+          <transition v-bind="TransitionOpacity()">
+            <CommonBadge v-if="withdrawalsAvailableForClaiming.length">
+              {{ withdrawalsAvailableForClaiming.length }}
+            </CommonBadge>
+          </transition>
+        </NuxtLink>
+      </div>
+      <div class="right-side">
+        <!-- <HeaderNetworkDropdown class="network-dropdown" /> -->
+        <CommonButton v-if="!isConnected" variant="primary" @click="onboardStore.openModal()">
+          <span class="whitespace-nowrap">Connect wallet</span>
+        </CommonButton>
+        <template v-else>
+          <div class="sm:hidden">
+            <HeaderAccountDropdownButton no-chevron @click="mobileAccountNavigationOpened = true" />
+          </div>
+          <div class="hidden sm:block">
+            <HeaderAccountDropdown />
+          </div>
+        </template>
+        <CommonButton class="color-mode-button" @click="switchColorMode()">
+          <SunIcon v-if="selectedColorMode === 'dark'" class="h-6 w-6" aria-hidden="true" />
+          <MoonIcon v-else class="h-6 w-6" aria-hidden="true" />
+        </CommonButton>
+        <CommonButton class="hamburger-icon" @click="mobileMainNavigationOpened = true">
+          <Bars3Icon class="h-6 w-6" aria-hidden="true" />
+          <transition v-bind="TransitionOpacity()">
+            <CommonBadge v-if="withdrawalsAvailableForClaiming.length" class="action-available-badge">
+              {{ withdrawalsAvailableForClaiming.length }}
+            </CommonBadge>
+          </transition>
+        </CommonButton>
+      </div>
+    </header>
+    <div class="warning-dec">Note: You will be able to withdraw your assets no later than 04/13/2024</div>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -105,6 +108,7 @@ import useNetworks from "@/composables/useNetworks";
 const { defaultNetwork, isMainnet } = useNetworks();
 
 const route = useRoute();
+
 const routes = {
   bridge: ["index"],
   withdraw: ["withdraw"],
@@ -148,6 +152,9 @@ const isShowFaucet = computed(() => defaultNetwork.id === 810182);
           @apply text-black dark:text-white;
         }
       }
+      &.disabled {
+        @apply cursor-not-allowed opacity-75;
+      }
 
       .link-icon {
         @apply h-6 w-6 text-neutral-400 dark:text-neutral-500;
@@ -169,5 +176,11 @@ const isShowFaucet = computed(() => defaultNetwork.id === 810182);
       }
     }
   }
+}
+.warning-dec {
+  @apply w-full p-2 text-center text-white;
+  font-size: 16px;
+  background: #262b33;
+  padding: 10px;
 }
 </style>
