@@ -66,7 +66,7 @@ export default (tokens: Ref<Token[]>, balances: Ref<TokenAmount[] | undefined>) 
           to: params.to,
         });
       } catch (err) {
-        if (err instanceof Error && err.message.startsWith("Not enough balance for deposit.")) {
+        if (err instanceof Error && err.message.startsWith("Not enough balance for deposit!")) {
           const match = err.message.match(/([\d\\.]+) ETH/);
           if (feeToken.value && match?.length) {
             const ethAmount = match[1].split(" ")?.[0];
