@@ -518,7 +518,8 @@ const {
   enoughBalanceToCoverFee,
   estimateFee,
   resetFee,
-} = useFee(availableTokens, balance, eraWalletStore.getL1VoidSigner, onboardStore.getPublicClient);
+  resetFeeImmediately,
+} = useFee(availableTokens, balance, eraWalletStore.getL1Signer, onboardStore.getPublicClient);
 
 const queryAddress = useRouteQuery<string | undefined>("address", undefined, {
   transform: String,
@@ -617,7 +618,6 @@ const estimate = async () => {
   if (!transaction.value?.from.address || !transaction.value?.to.address || !selectedToken.value) {
     return;
   }
-
   await estimateFee(transaction.value.to.address, selectedToken.value.address);
 };
 watch(
@@ -775,8 +775,9 @@ const fetchBalances = async (force = false) => {
 };
 fetchBalances();
 
-const unsubscribeFetchBalance = onboardStore.subscribeOnAccountChange((newAddress) => {
+const unsubscribeFetchBalance = onboardStore.subscribeOnAccountChange((newAddress:any) => {
   if (!newAddress) return;
+  estimate();
   fetchBalances();
 });
 
@@ -784,6 +785,12 @@ onBeforeUnmount(() => {
   unsubscribe();
   unsubscribeFetchBalance();
 });
+
+onboardStore.subscribeOnNetworkChange((newchainId) => {
+  if(!newchainId) return;
+  resetFeeImmediately();
+});
+
 </script>
 
 <style lang="scss" scoped></style>

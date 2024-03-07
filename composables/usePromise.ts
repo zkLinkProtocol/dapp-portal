@@ -12,7 +12,7 @@ const defaultExecuteOptions: {
 } = {
   force: false,
 };
-type UsePromiseExecuteOptions = typeof defaultExecuteOptions;
+export type UsePromiseExecuteOptions = typeof defaultExecuteOptions;
 
 export default <ResultType, ErrorType = Error>(fn: () => Promise<ResultType>, options?: UsePromiseOptions) => {
   const opts = Object.assign({}, defaultExecuteOptions, options);
