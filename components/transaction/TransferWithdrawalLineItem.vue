@@ -122,7 +122,7 @@ const timeAgo = useTimeAgo(props.transfer.timestamp);
     }
 
     .withdrawal-line-top {
-      @apply flex w-full items-center gap-4;
+      @apply grid w-full grid-cols-[1fr_max-content] items-center sm:gap-4;
 
       .line-button-with-img-body {
         @apply w-full overflow-hidden;
