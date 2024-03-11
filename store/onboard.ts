@@ -126,7 +126,7 @@ export const useOnboardStore = defineStore("onboard", () => {
       // "1ae92b26df02f0abca6304df07debccd18262fdf5fe82daa81593582dac9a369",rainbow
       "971e689d0a5be527bac79629b4ee9b925e82208e5168b733496a09c0faed0709", // okx wallet 
       "8a0ee50d1f22f6651afcae7eb4253e52a3310b90af5daef78a8c4929a9bb99d4", // binance web3 wallet
-
+      "c7708575a2c3c9e6a8ab493d56cdcc56748f03956051d021b8cd8d697d9a3fd2", // fox wallet
       // "38f5d18bd8522c244bdd70cb4a68e0e718865155811c043f052fb9f1c51de662",//bitget
     ],
     // termsConditionsUrl: "https://zksync.io/terms",
@@ -202,6 +202,14 @@ export const useOnboardStore = defineStore("onboard", () => {
     }
   );
 
+  const {subscribe: subscribeOnNetworkChange, notify: notifyOnNetworkChange} = useObservable<number | undefined>();
+  watch(
+    () => network.value.chain?.id,
+    () => {
+      notifyOnNetworkChange(network.value.chain?.id);
+    }
+  )
+
   const getWallet = async (chainId: number | undefined = l1Network.value?.id) => {
     const client = await getWalletClient(chainId ? { chainId } : undefined);
     if (!client) throw new Error("Wallet is not available");
@@ -228,11 +236,12 @@ export const useOnboardStore = defineStore("onboard", () => {
     switchNetworkById,
 
     getWallet,
-    getPublicClient: () => {
+    getPublicClient: (chainId:any = '') => {
       if (!l1Network.value) throw new Error(`L1 network is not available on ${selectedNetwork.value.name}`);
-      return getPublicClient({ chainId: l1Network.value?.id });
+      return getPublicClient({ chainId: chainId || l1Network.value?.id });
     },
 
     subscribeOnAccountChange,
+    subscribeOnNetworkChange,
   };
 });
