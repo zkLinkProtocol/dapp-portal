@@ -26,7 +26,7 @@
               </DestinationIconContainer>
             </template>
           </DestinationItem>
-          <DestinationItem label="Withdraw" as="RouterLink" :to="{ name: 'withdraw' }" size="sm">
+          <DestinationItem label="Withdraw" as="RouterLink" :to="{ name: '' }" size="sm">
             <template #image>
               <DestinationIconContainer>
                 <ArrowsUpDownIcon aria-hidden="true" />
@@ -142,7 +142,9 @@ const TabsTransition = computed(() =>
 const openedTab = ref<"main" | "network">("main");
 const modalOpened = computed({
   get: () => props.opened,
-  set: (value) => {emit("update:opened", value)},
+  set: (value) => {
+    emit("update:opened", value);
+  },
 });
 watch(
   () => props.opened,
