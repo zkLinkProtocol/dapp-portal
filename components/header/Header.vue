@@ -100,7 +100,7 @@
           />
         </svg>
       </span>
-      <div>Note: You will be able to withdraw your assets no later than 04/13/2024</div>
+      <div>Note: Withdrawals will be enabled before 04/13/2024</div>
     </div>
   </div>
 </template>
