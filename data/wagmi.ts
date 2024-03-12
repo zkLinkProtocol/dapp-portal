@@ -1,7 +1,5 @@
-import { type Chain, zkSync, zkSyncSepoliaTestnet, zkSyncTestnet } from "@wagmi/core/chains";
+import { type Chain, zkSync, zkSyncSepoliaTestnet } from "@wagmi/core/chains";
 import { defaultWagmiConfig } from "@web3modal/wagmi";
-
-import type { Token } from "@/types";
 import { chainList, type ZkSyncNetwork } from "./networks";
 
 const metadata = {
@@ -16,7 +14,7 @@ if (!process.env.WALLET_CONNECT_PROJECT_ID) {
 }
 
 const useExistingEraChain = (network: ZkSyncNetwork) => {
-  const existingNetworks = [zkSync, zkSyncSepoliaTestnet, zkSyncTestnet];
+  const existingNetworks = [zkSync, zkSyncSepoliaTestnet];
   return existingNetworks.find((existingNetwork) => existingNetwork.id === network.id);
 };
 const createEraChain = (network: ZkSyncNetwork) => {

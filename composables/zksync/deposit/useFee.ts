@@ -146,7 +146,8 @@ export default (
         }
       }
       if (!signer) {
-        throw new Error("Signer is not available");
+        setTimeout(resetFeeImmediately, 500);
+        return;
       }
       fee.value = await getEthTransactionFee(signer);
       if (params.tokenAddress !== feeToken.value?.address && fee.value && fee.value.l1GasLimit) {
