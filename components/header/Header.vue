@@ -136,7 +136,6 @@ import useNetworks from "@/composables/useNetworks";
 const { defaultNetwork, isMainnet } = useNetworks();
 
 const route = useRoute();
-console.log(route);
 
 const routes = {
   bridge: ["index"],

@@ -216,7 +216,6 @@ const request = () => {
     provider = new Provider(eraNetwork.rpcUrl);
   }
   //if provider.networkKey != eraNetwork.key
-  console.log(eraNetwork.key);
   provider.setContractAddresses(eraNetwork.key, {
     mainContract: eraNetwork.mainContract,
     erc20BridgeL1: eraNetwork.erc20BridgeL1,
@@ -263,7 +262,6 @@ const getTransfers = async () => {
   transfers.map((i:any)=>{
     flag = true;
   })
-  console.log(11111)
   if (flag) {
     if (finalizeTransactionStatus.value === "done" && flag) {
       transactionStatusStore.updateTransactionData(props.transaction.transactionHash, {
@@ -283,10 +281,8 @@ const getTransfers = async () => {
 }
 const buttonContinue = async () => {
   if (continueButtonDisabled.value) return;
-  console.log(flag)
   await commitTransaction();
   if ( withdrawalFinalizationAvailable && props.transaction?.gateway && fee) {
-    // console.log(props.transaction.transactionHash)
     await getTransfers();
   }
 };
