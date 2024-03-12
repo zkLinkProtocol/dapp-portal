@@ -15,7 +15,7 @@ import { formatError } from "@/utils/formatters";
 import useNetworks from "@/composables/useNetworks";
 import { Provider } from "@/zksync-web3-nova/src";
 import { useNetworkStore } from "@/store/network";
-import { getNetwork, watchNetwork } from "@wagmi/core";
+
 
 export default (transactionInfo: ComputedRef<TransactionInfo>) => {
   const status = ref<"not-started" | "processing" | "waiting-for-signature" | "sending" | "done">("not-started");
@@ -160,12 +160,11 @@ export default (transactionInfo: ComputedRef<TransactionInfo>) => {
 
   const commitTransaction = async () => {
     try {
-      const network = ref(getNetwork());
+      const network = onboardStore.network;
       error.value = undefined;
 
       status.value = "processing";
-      if (!(network.value.chain?.id === getNetworkInfo().l1Network?.id)) {
-        debugger;
+      if (!(network.chain?.id === getNetworkInfo().l1Network?.id)) {
         await onboardStore.setCorrectNetwork(getNetworkInfo().l1Network?.id);
       }
       const wallet = await onboardStore.getWallet(getNetworkInfo().l1Network?.id);

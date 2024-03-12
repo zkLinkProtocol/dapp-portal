@@ -156,10 +156,11 @@ import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
-import {
-  getNetwork,watchNetwork
-} from "@wagmi/core";
+
 import useNetworks from "@/composables/useNetworks";
+
+
+const onboardStore = useOnboardStore();
 
 const props = defineProps({
   transaction: {
@@ -172,11 +173,12 @@ const props = defineProps({
   },
 });
 
-const network = ref(getNetwork());
+// const network = ref(getNetwork());
 
-watchNetwork((updatedNetwork) => {
-  network.value = updatedNetwork;
-});
+// watchNetwork((updatedNetwork) => {
+//   network.value = updatedNetwork;
+// });
+const { network } = storeToRefs(onboardStore);
 const { primaryNetwork, zkSyncNetworks } = useNetworks();
 
 const { selectedNetwork, l1Network,l1BlockExplorerUrl } = storeToRefs(useNetworkStore());
@@ -188,7 +190,7 @@ const getNetworkInfo = () => {
   return props.transaction? (newNetwork ?? primaryNetwork): obj;
 };
 const l1BlockExplorerUrls = getNetworkInfo().l1Network?.blockExplorers?.default.url;
-const onboardStore = useOnboardStore();
+
 const transactionStatusStore = useZkSyncTransactionStatusStore();
 const { eraNetwork, blockExplorerUrl } = storeToRefs(useZkSyncProviderStore());
 const { connectorName, isCorrectNetworkSet } = storeToRefs(onboardStore);

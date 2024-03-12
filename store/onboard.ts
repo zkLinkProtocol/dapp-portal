@@ -1,15 +1,12 @@
 import {
-  configureChains,
-  createConfig,
   getAccount,
   // getNetwork,
   getPublicClient,
   getWalletClient,
-  InjectedConnector,
+  reconnect,
   switchChain as switchWalletNetwork,
   disconnect as walletDisconnect,
   watchAccount,
-  watchNetwork,
 } from "@wagmi/core";
 import { zkSync, zkSyncSepoliaTestnet, zkSyncTestnet } from "@wagmi/core/chains";
 // import { WalletConnectConnector } from "@wagmi/core/connectors/walletConnect";
@@ -45,6 +42,7 @@ export const useOnboardStore = defineStore("onboard", () => {
         default: { http: [network.rpcUrl] },
         public: { http: [network.rpcUrl] },
       },
+      blockExplorers: { default: { url: network.blockExplorerUrl } },
     };
   };
   const getAllChains = () => {
@@ -90,19 +88,14 @@ export const useOnboardStore = defineStore("onboard", () => {
   // });
 
   const wagmiConfig = defaultWagmiConfig({
-    chains: extendedChains,
+    chains: extendedChains as any,
     projectId: env.walletConnectProjectID,
-    metadata: {
-      name: "zkLink Nova Portal",
-      description: "zkLink Nova Portal - view balances, transfer and bridge tokens",
-      url: "https://portal.zklink.io",
-      icons: ["../public/img/icon.png"],
-    },
+    metadata: metadata,
   });
-
+  reconnect(wagmiConfig);
   const account = ref(getAccount(wagmiConfig));
-  const { chainId } = getAccount(wagmiConfig);
-  const network = ref(chainId);
+  const network = ref(account);
+
   const connectingWalletError = ref<string | undefined>();
   const connectorName = ref(wagmiConfig.connector?.name);
   const walletName = ref<string | undefined>();
@@ -178,17 +171,20 @@ export const useOnboardStore = defineStore("onboard", () => {
 
   const openModal = () => web3modal.open();
   const disconnect = () => {
-    walletDisconnect(wagmiConfig);
+    const { connector } = getAccount(wagmiConfig);
+    if (!connector) return;
+    walletDisconnect(wagmiConfig, { connector });
   };
 
   const isCorrectNetworkSet = computed(() => {
-    const walletNetworkId = network.value;
+    const walletNetworkId = network.value.chain?.id;
     return walletNetworkId === l1Network.value?.id;
   });
   const switchNetworkById = async (chainId: number, networkName?: string) => {
     try {
       return await switchWalletNetwork(wagmiConfig, { chainId });
     } catch (err) {
+      console.log(err);
       if (err instanceof Error && err.message.includes("does not support programmatic chain switching")) {
         throw new Error(`Please switch network manually to "${networkName}" in your ${walletName.value} wallet`);
       }
@@ -220,9 +216,9 @@ export const useOnboardStore = defineStore("onboard", () => {
 
   const { subscribe: subscribeOnNetworkChange, notify: notifyOnNetworkChange } = useObservable<number | undefined>();
   watch(
-    () => network.value,
+    () => account.value.chainId,
     () => {
-      notifyOnNetworkChange(network.value);
+      notifyOnNetworkChange(network.value.chainId);
     }
   );
 

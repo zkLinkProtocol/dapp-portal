@@ -1,5 +1,5 @@
-import { Address, fetchBalance } from "@wagmi/core";
-
+import { fetchBalance } from "@wagmi/core";
+import type { Address } from "viem";
 import type { Hash, TokenAmount } from "@/types";
 
 import { l1Networks } from "@/data/networks";
@@ -54,7 +54,7 @@ export const useZkSyncEthereumBalanceStore = defineStore("zkSyncEthereumBalances
     );
     return await Promise.all([
       ...filterL1tokens.map(async (token) => {
-        const amount = await fetchBalance({
+        const amount = await fetchBalance(onboardStore.wagmiConfig, {
           address: account.value.address!,
           chainId: l1Network.value!.id,
           token: token.address === ETH_TOKEN.l1Address ? undefined : (token.address! as Hash),
@@ -67,7 +67,7 @@ export const useZkSyncEthereumBalanceStore = defineStore("zkSyncEthereumBalances
       ...(searchTokenBalance.value ?? [])
         .filter((token) => !Object.values(l1Tokens.value ?? []).find((e) => e.address === token.address))
         .map(async (e) => {
-          const amount = await fetchBalance({
+          const amount = await fetchBalance(onboardStore.wagmiConfig, {
             address: account.value.address!,
             chainId: l1Network.value!.id,
             token: e.address === ETH_TOKEN.l1Address ? undefined : (e.address! as Hash),
