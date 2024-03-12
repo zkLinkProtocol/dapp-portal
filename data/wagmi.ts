@@ -5,10 +5,10 @@ import type { Token } from "@/types";
 import { chainList, type ZkSyncNetwork } from "./networks";
 
 const metadata = {
-  name: "zkSync Portal",
-  description: "zkSync Portal - view balances, transfer and bridge tokens",
-  url: "https://portal.zksync.io",
-  icons: ["https://portal.zksync.io/icon.png"],
+  name: "zkLink Nova Portal",
+  description: "zkLink Nova Portal - view balances, transfer and bridge tokens",
+  url: "https://portal.zklink.io",
+  icons: ["../public/img/icon.png"],
 };
 
 if (!process.env.WALLET_CONNECT_PROJECT_ID) {
