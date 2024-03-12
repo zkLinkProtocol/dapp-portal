@@ -19,62 +19,23 @@ import useColorMode from "@/composables/useColorMode";
 import useNetworks from "@/composables/useNetworks";
 import useObservable from "@/composables/useObservable";
 
-import type { ZkSyncNetwork } from "@/data/networks";
+import { chainList } from "@/data/networks";
 import type { Chain } from "viem";
 
 import { useRuntimeConfig } from "#imports";
+import { getWagmiConfig } from "@/data/wagmi";
 import { confirmedSupportedWallets, disabledWallets } from "@/data/wallets";
 import { useNetworkStore } from "@/store/network";
 
 export const useOnboardStore = defineStore("onboard", () => {
   const { zkSyncNetworks } = useNetworks();
-  const useExistingEraChain = (network: ZkSyncNetwork) => {
-    const existingNetworks = [zkSync, zkSyncSepoliaTestnet, zkSyncTestnet];
-    return existingNetworks.find((existingNetwork) => existingNetwork.id === network.id);
-  };
-  const createEraChain = (network: ZkSyncNetwork) => {
-    return {
-      id: network.id,
-      name: network.name,
-      network: network.key,
-      nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
-      rpcUrls: {
-        default: { http: [network.rpcUrl] },
-        public: { http: [network.rpcUrl] },
-      },
-      blockExplorers: { default: { url: network.blockExplorerUrl } },
-    };
-  };
-  const getAllChains = () => {
-    const chains: Chain[] = [];
-    const addUniqueChain = (chain: Chain) => {
-      if (!chains.find((existingChain) => existingChain.id === chain.id)) {
-        chains.push(chain);
-      }
-    };
-    for (const network of zkSyncNetworks) {
-      if (network.l1Network) {
-        addUniqueChain(network.l1Network);
-      }
-      addUniqueChain(useExistingEraChain(network) ?? createEraChain(network));
-    }
-
-    return chains;
-  };
-
-  const extendedChains = [...getAllChains()];
 
   const { public: env } = useRuntimeConfig();
   const { selectedColorMode } = useColorMode();
   const { selectedNetwork, l1Network } = storeToRefs(useNetworkStore());
 
   // const { publicClient } = configureChains(extendedChains, [publicProvider()]);
-  const metadata = {
-    name: "zkLink Nova Portal",
-    description: "zkLink Nova Portal - view balances, transfer and bridge tokens",
-    url: "https://portal.zklink.io",
-    icons: ["../public/img/icon.png"],
-  };
+
   // const wagmiConfig = createConfig({
   //   autoConnect: true,
   //   connectors: [
@@ -87,11 +48,7 @@ export const useOnboardStore = defineStore("onboard", () => {
   //   publicClient,
   // });
 
-  const wagmiConfig = defaultWagmiConfig({
-    chains: extendedChains as any,
-    projectId: env.walletConnectProjectID,
-    metadata: metadata,
-  });
+  const wagmiConfig = getWagmiConfig();
   reconnect(wagmiConfig);
   const account = ref(getAccount(wagmiConfig));
   const network = ref(account);

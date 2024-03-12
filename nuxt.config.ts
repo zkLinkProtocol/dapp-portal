@@ -87,6 +87,11 @@ export default defineNuxtConfig({
     ],
   },
   vite: {
+    define: {
+      // make these env available even outside of the Nuxt context
+      "process.env.NODE_TYPE": JSON.stringify(process.env.NODE_TYPE),
+      "process.env.WALLET_CONNECT_PROJECT_ID": JSON.stringify(process.env.WALLET_CONNECT_PROJECT_ID),
+    },
     css: {
       preprocessorOptions: {
         scss: {

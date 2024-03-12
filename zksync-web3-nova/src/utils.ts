@@ -556,10 +556,13 @@ export function scaleGasLimit(gasLimit: BigNumber): BigNumber {
 
 export async function fetchErc20(
   contractAddress: Address,
-  chainId: number,
+  publicClient: any,
   userAddress: Address | undefined
 ): Promise<TokenAmount | undefined> {
-  const web3Provider = new ethers.providers.Web3Provider(getPublicClient({ chainId: chainId }) as any, "any");
+  const web3Provider = new ethers.providers.Web3Provider(
+    publicClient,
+    "any"
+  );
   const erc20Contract = new Contract(contractAddress, erc20Abi, web3Provider);
   let name, symbol, balance, decimals;
   try {
