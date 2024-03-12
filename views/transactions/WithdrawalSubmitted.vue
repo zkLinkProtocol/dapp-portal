@@ -263,7 +263,6 @@ const getTransfers = async () => {
   transfers.map((i:any)=>{
     flag = true;
   })
-  console.log(11111)
   if (flag) {
     if (finalizeTransactionStatus.value === "done" && flag) {
       transactionStatusStore.updateTransactionData(props.transaction.transactionHash, {
