@@ -102,6 +102,15 @@
       </span>
       <div>Note: Withdrawals will be enabled before 04/13/2024</div>
     </div>
+    <!-- <div className="banner">
+      <a href="https://app.zklink.io/" target="\_blank">
+        <img
+          src="/img/banner.svg"
+          alt=""
+          className="bannerImg"
+        />
+      </a>
+    </div> -->
   </div>
 </template>
 
@@ -202,6 +211,21 @@ const isShowFaucet = computed(() => defaultNetwork.id === 810182);
   .warning-ico {
     width: 18px;
     height: 18px;
+  }
+}
+.banner{
+  width: 100%;
+  text-align: center;
+  a{
+    display: inline-block;
+    width: 100%;
+    min-width: 0px;
+    max-width: 700px;
+  }
+  .bannerImg{
+    display: inline-block;
+    width: 100%;
+    height: 80px;
   }
 }
 </style>

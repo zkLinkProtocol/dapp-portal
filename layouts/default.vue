@@ -1,7 +1,7 @@
 <template>
   <LoadersConnecting />
   <ModalConnectingWalletError />
-  <ModalNetworkChangedWarning v-if="!isConnectingWallet" />
+  <!-- <ModalNetworkChangedWarning v-if="!isConnectingWallet" /> -->
   <ModalLegalNotice />
 
   <div class="app-layout">
