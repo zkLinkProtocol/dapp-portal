@@ -393,7 +393,6 @@ export const zkSyncNetworks: ZkSyncNetwork[] = [
 const determineChainList = (): ZkSyncNetwork[] => {
   const zkSyncNetworks: ZkSyncNetwork[] = [];
   const nodeType = process.env.NODE_TYPE || "nexus-goerli";
-  console.log(process.env);
   // if (!nodeType) {
   //   throw new Error("NODE_TYPE is not set. ");
   // }

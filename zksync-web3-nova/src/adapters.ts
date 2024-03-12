@@ -256,7 +256,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         ]),
       }
       if (this._providerL2().isZkSyncChain()) {
-        const fee =  await zkSyncProvider.attachEstimateFee()({
+        const fee = await zkSyncProvider.attachEstimateFee()({
           ...estimateTx,
           value: estimateTx.value.toHexString(),
         });
@@ -305,7 +305,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const { to, token, amount, operatorTip, overrides } = tx;
 
       if (!this._providerL2().isZkSyncChain()) {
-        await insertGasPrice(this._providerL1(), overrides);
+        await insertGasPrice(this._providerL1(), this._providerL2(), overrides);
       }
 
       const gasPriceForEstimation = overrides.maxFeePerGas || overrides.gasPrice;
@@ -354,13 +354,14 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       overrides?: ethers.PayableOverrides;
     }): Promise<FullDepositFee> {
       // It is assumed that the L2 fee for the transaction does not depend on its value.
-      // const dummyAmount = "1";
 
       const { ...tx } = transaction;
       // const zksyncContract = await this.getMainContract();
 
       tx.overrides ??= {};
-      await insertGasPrice(this._providerL1(), tx.overrides);
+      if (!this._providerL2().isZkSyncChain()) {
+        await insertGasPrice(this._providerL1(), this._providerL2(), tx.overrides);
+      }
       // const gasPriceForMessages = (await tx.overrides.maxFeePerGas) || (await tx.overrides.gasPrice);
 
       // tx.to ??= await this.getAddress();
@@ -692,7 +693,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         refundRecipient,
       } = tx;
 
-      await insertGasPrice(this._providerL1(), overrides);
+      if (!this._providerL2().isZkSyncChain()) {
+        await insertGasPrice(this._providerL1(), this._providerL2(), overrides);
+      }
       const gasPriceForEstimation = overrides.maxFeePerGas || overrides.gasPrice;
 
       const baseCost = await this.getBaseCost({
@@ -783,8 +786,25 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
 
 /// @dev This method checks if the overrides contain a gasPrice (or maxFeePerGas), if not it will insert
 /// the maxFeePerGas
-async function insertGasPrice(l1Provider: ethers.providers.Provider, overrides: ethers.PayableOverrides) {
+async function insertGasPrice(
+  l1Provider: ethers.providers.Provider,
+  l2Provider: Provider,
+  overrides: ethers.PayableOverrides
+) {
   if (!overrides.gasPrice && !overrides.maxFeePerGas) {
+    if (l2Provider.isArbitrumChain()) {
+      //if arbitrum
+      console.log("arbitrum chain")
+      overrides.gasPrice = await l1Provider.getGasPrice();
+      return;
+    }
+
+    if (l2Provider.isZkSyncChain()) {
+      throw new Error("not support zkSyncChain");
+    }
+
+    //non-arbitrum and non-zksync
+
     const l1FeeData = await l1Provider.getFeeData();
 
     // Sometimes baseFeePerGas is not available, so we use gasPrice instead.

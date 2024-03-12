@@ -310,6 +310,9 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   isZkSyncChain(): boolean {
     return this.networkKey === "zksync";
   }
+  isArbitrumChain(): boolean {
+    return this.networkKey === "arbitrum";
+  }
   isEthGasToken(): boolean {
     return this._isEthGasToken;
   }
