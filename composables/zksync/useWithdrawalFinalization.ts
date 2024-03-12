@@ -15,10 +15,7 @@ import { formatError } from "@/utils/formatters";
 import useNetworks from "@/composables/useNetworks";
 import { Provider } from "@/zksync-web3-nova/src";
 import { useNetworkStore } from "@/store/network";
-import {
-  getNetwork,
-  watchNetwork
-} from "@wagmi/core";
+import { getNetwork, watchNetwork } from "@wagmi/core";
 
 export default (transactionInfo: ComputedRef<TransactionInfo>) => {
   const status = ref<"not-started" | "processing" | "waiting-for-signature" | "sending" | "done">("not-started");
@@ -30,7 +27,7 @@ export default (transactionInfo: ComputedRef<TransactionInfo>) => {
   const { isCorrectNetworkSet } = storeToRefs(onboardStore);
   const { tokens } = storeToRefs(tokensStore);
   const { primaryNetwork, zkSyncNetworks } = useNetworks();
-    
+
   const getNetworkInfo = () => {
     const newNetwork = zkSyncNetworks.find(
       (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === transactionInfo.value.gateway?.toLowerCase()
@@ -57,7 +54,7 @@ export default (transactionInfo: ComputedRef<TransactionInfo>) => {
     return provider;
   };
   const retrieveBridgeAddress = useMemoize(() =>
-  request()
+    request()
       .getDefaultBridgeAddresses()
       .then((e) => e.erc20L1)
   );
@@ -168,6 +165,7 @@ export default (transactionInfo: ComputedRef<TransactionInfo>) => {
 
       status.value = "processing";
       if (!(network.value.chain?.id === getNetworkInfo().l1Network?.id)) {
+        debugger;
         await onboardStore.setCorrectNetwork(getNetworkInfo().l1Network?.id);
       }
       const wallet = await onboardStore.getWallet(getNetworkInfo().l1Network?.id);

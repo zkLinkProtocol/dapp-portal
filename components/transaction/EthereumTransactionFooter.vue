@@ -60,10 +60,10 @@ import { useOnboardStore } from "@/store/onboard";
 import { TransitionAlertScaleInOutTransition } from "@/utils/transitions";
 import type { TransactionInfo } from "@/store/zksync/transactionStatus";
 import useNetworks from "@/composables/useNetworks";
-import {
-  getNetwork,
-  watchNetwork
-} from "@wagmi/core";
+// import {
+//   getAccount,
+//   watchNetwork
+// } from "@wagmi/core";
 
 const props = defineProps({
   transaction: {
@@ -95,15 +95,15 @@ const getNetworkInfo = () => {
   return props.transaction? (newNetwork ?? primaryNetwork): obj;
 };
 
-const network = ref(getNetwork());
+// const network = ref(getNetwork());
 
-watchNetwork((updatedNetwork) => {
-  network.value = updatedNetwork;
-});
+// watchNetwork((updatedNetwork) => {
+//   network.value = updatedNetwork;
+// });
 const buttonStep = computed(() => {
   if (!account.value.address || isConnectingWallet.value) {
     return "connect";
-  } else if (!(network.value.chain?.id === getNetworkInfo().l1Network?.id)) {
+  } else if (!(account.value.chainId === getNetworkInfo().l1Network?.id)) {
     return "network";
   } else {
     return "continue";

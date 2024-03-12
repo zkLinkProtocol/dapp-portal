@@ -46,20 +46,7 @@ export const getEstmatdDepositDelay = (networkKey: string): number => {
   }
 };
 export const WITHDRAWAL_DELAY = 7 * 24 * 60 * 60 * 1000; // 7 * 24 hours
-export type Address = Hash;
-export type ForwardL2Request = {
-  gateway: Address;
-  isContractCall: boolean;
-  sender: Address;
-  txId: BigNumberish;
-  contractAddressL2: Address;
-  l2Value: BigNumberish;
-  l2CallData: BytesLike;
-  l2GasLimit: BigNumberish;
-  l2GasPricePerPubdata: BigNumberish;
-  factoryDeps: BytesLike[];
-  refundRecipient: Address;
-};
+secondaryAbi;
 
 export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionStatus", () => {
   const onboardStore = useOnboardStore();
@@ -185,7 +172,7 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
     return transaction;
   };
   const { primaryNetwork, zkSyncNetworks } = useNetworks();
-  const getNetworkInfo = (gateway:any) => {
+  const getNetworkInfo = (gateway: any) => {
     const newNetwork = zkSyncNetworks.find(
       (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === gateway?.toLowerCase()
     );
@@ -194,7 +181,7 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
 
   const { selectedNetwork } = storeToRefs(useNetworkStore());
   let provider: Provider | undefined;
-  const request = (gateway:any) => {
+  const request = (gateway: any) => {
     const eraNetwork = getNetworkInfo(gateway) || selectedNetwork.value;
     if (!provider) {
       provider = new Provider(eraNetwork.rpcUrl);
@@ -211,10 +198,8 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
     return provider;
   };
   const getWithdrawalStatus = async (transaction: TransactionInfo) => {
-   
     if (!transaction.info.withdrawalFinalizationAvailable) {
-      const transactionDetails = await request(transaction.gateway)
-        .getTransactionDetails(transaction.transactionHash);
+      const transactionDetails = await request(transaction.gateway).getTransactionDetails(transaction.transactionHash);
       if (transactionDetails.status !== "verified") {
         return transaction;
       }
