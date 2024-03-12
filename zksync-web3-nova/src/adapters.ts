@@ -222,7 +222,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     //   return scaleGasLimit(baseGasLimit);
     // }
 
-    //TODO unused
     async getDepositEstimateGasForUseFee(l2GasLimit: BigNumber, baseCost: BigNumber): Promise<ethers.BigNumber> {
       const dummyAmount = 0; // must be 0, cause some secondary chain does not support deposit GAS Token, suck as Mantle
       let baseGasLimit: BigNumber;

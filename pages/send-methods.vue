@@ -11,7 +11,7 @@
           :to="{ name: 'send', query: $route.query }"
         />
       </CommonCardWithLineButtons>
-      <CommonCardWithLineButtons>
+      <!-- <CommonCardWithLineButtons>
         <DestinationItem
           v-if="eraNetwork.l1Network"
           v-bind="destinations.arbitrum"
@@ -19,8 +19,8 @@
           as="RouterLink"
           :to="{ name: 'withdraw', query: $route.query }"
         />
-      </CommonCardWithLineButtons>
-      <CommonCardWithLineButtons>
+      </CommonCardWithLineButtons> -->
+      <!-- <CommonCardWithLineButtons>
         <DestinationItem
           v-if="eraNetwork.displaySettings?.showPartnerLinks"
           :label="`Bridge to other networks`"
@@ -36,7 +36,7 @@
             </DestinationIconContainer>
           </template>
         </DestinationItem>
-      </CommonCardWithLineButtons>
+      </CommonCardWithLineButtons> -->
     </div>
   </div>
 </template>
