@@ -150,11 +150,12 @@ export default (
       }
       fee.value = await getEthTransactionFee(signer);
       if (params.tokenAddress !== feeToken.value?.address && fee.value && fee.value.l1GasLimit) {
-        //TODO this is a temp fix for mantel network;
+        //for ERC20 gasLimit mul 2
         fee.value.l1GasLimit = fee.value.l1GasLimit.mul(2); //maybe mul(3).div(2) is better
-        if (selectedNetwork.value.key === "mantle") {
-        } else {
-        }
+        // //TODO this is a temp fix for mantel network;
+        // if (selectedNetwork.value.key === "mantle") {
+        // } else {
+        // }
       }
 
       if (fee.value) {

@@ -28,6 +28,7 @@ import { Hash } from "~/types";
 import { Interface } from "ethers/lib/utils";
 import { abi as primaryGetterAbi } from "../abi/GettersFacet.json";
 import { l1EthDepositAbi } from "./abi";
+import { Fee, zkSyncProvider } from "./zkSyncProvider";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -194,7 +195,21 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           const gasLimit = scaleGasLimit(baseGasLimit);
           depositTx.gasLimit = gasLimit;
         }
-        
+
+        if (this._providerL2().isZkSyncChain()) {
+          const fee = await zkSyncProvider.attachEstimateFee()({
+            from: depositTx.from,
+            to: depositTx.to,
+            value: depositTx.value?.toHexString() ?? "0x",
+            data: depositTx.data,
+          });
+          console.log("zksync chain fee", fee);
+
+          depositTx.maxFeePerGas = fee.maxFeePerGas;
+          depositTx.maxPriorityFeePerGas = fee.maxPriorityFeePerGas;
+          depositTx.gasLimit = fee.gasLimit;
+        }
+
         return await this._providerL2().getPriorityOpResponse(await this._signerL1().sendTransaction(depositTx));
       }
     }
@@ -222,11 +237,11 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     //   return scaleGasLimit(baseGasLimit);
     // }
 
-    async getDepositEstimateGasForUseFee(l2GasLimit: BigNumber, baseCost: BigNumber): Promise<ethers.BigNumber> {
+    async getDepositEstimateGasForUseFee(l2GasLimit: BigNumber, baseCost: BigNumber): Promise<Fee> {
       const dummyAmount = 0; // must be 0, cause some secondary chain does not support deposit GAS Token, suck as Mantle
       let baseGasLimit: BigNumber;
       const face = new Interface([l1EthDepositAbi]);
-      baseGasLimit = await this._providerL1().estimateGas({
+      const estimateTx = {
         from: await this.getAddress(),
         to: await this._providerL2().getMainContractAddress(),
         value: baseCost.add(dummyAmount),
@@ -239,8 +254,22 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           [],
           await this.getAddress(),
         ]),
-      });
-      return scaleGasLimit(baseGasLimit);
+      }
+      if (this._providerL2().isZkSyncChain()) {
+        const fee =  await zkSyncProvider.attachEstimateFee()({
+          ...estimateTx,
+          value: estimateTx.value.toHexString(),
+        });
+
+        return fee
+      }
+      baseGasLimit = await this._providerL1().estimateGas(estimateTx);
+      return {
+        gasLimit: scaleGasLimit(baseGasLimit),
+        gasPerPubdataLimit: BigNumber.from(0),
+        maxPriorityFeePerGas: BigNumber.from(0),
+        maxFeePerGas: BigNumber.from(0),
+      };
     }
 
     async getDepositTx(transaction: {
@@ -275,7 +304,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
       const { to, token, amount, operatorTip, overrides } = tx;
 
-      await insertGasPrice(this._providerL1(), overrides);
+      if (!this._providerL2().isZkSyncChain()) {
+        await insertGasPrice(this._providerL1(), overrides);
+      }
+
       const gasPriceForEstimation = overrides.maxFeePerGas || overrides.gasPrice;
 
       const zksyncContract = await this.getMainContract();
@@ -418,7 +450,13 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         //   overrides: estimationOverrides,
         //   l2GasLimit,
         // });
-        l1GasLimit = await this.getDepositEstimateGasForUseFee(l2GasLimit, baseCost);
+        const fee = await this.getDepositEstimateGasForUseFee(l2GasLimit, baseCost);
+        l1GasLimit = fee.gasLimit;
+        if (this._providerL2().isZkSyncChain()) {
+          tx.overrides.maxFeePerGas = fee.maxFeePerGas;
+          tx.overrides.maxPriorityFeePerGas = fee.maxPriorityFeePerGas;
+          tx.overrides.gasLimit = fee.gasLimit;
+        }
       }
 
       console.log("l1GasLimit", l1GasLimit.toString());
@@ -582,6 +620,21 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       overrides?: ethers.PayableOverrides;
     }): Promise<PriorityOpResponse> {
       const requestExecuteTx = await this.getRequestExecuteTx(transaction);
+
+      if (this._providerL2().isZkSyncChain()) {
+        const fee = await zkSyncProvider.attachEstimateFee()({
+          from: requestExecuteTx.from,
+          to: requestExecuteTx.to,
+          value: requestExecuteTx.value?.toHexString() ?? "0x",
+          data: requestExecuteTx.data,
+        });
+        console.log("zksync chain fee", fee);
+
+        requestExecuteTx.maxFeePerGas = fee.maxFeePerGas;
+        requestExecuteTx.maxPriorityFeePerGas = fee.maxPriorityFeePerGas;
+        requestExecuteTx.gasLimit = fee.gasLimit;
+      }
+
       return this._providerL2().getPriorityOpResponse(await this._signerL1().sendTransaction(requestExecuteTx));
     }
 

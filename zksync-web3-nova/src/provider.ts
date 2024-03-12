@@ -307,6 +307,9 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   isLineaChain(): boolean {
     return this.isPrimaryChain()
   }
+  isZkSyncChain(): boolean {
+    return this.networkKey === "zksync";
+  }
   isEthGasToken(): boolean {
     return this._isEthGasToken;
   }
