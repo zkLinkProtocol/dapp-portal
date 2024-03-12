@@ -144,7 +144,7 @@ const filterTokens = (tokens: Token[]) => {
     }
 
     showLoading.value = true;
-    fetchErc20(contractAddress as Address, selectedNetwork.value.l1Network?.id!, account.value.address)
+    fetchErc20(contractAddress as Address, onboardStore.getPublicClient(), account.value.address)
       .then((token) => {
         if (token) {
           searchtokenStore.saveSearchToken(token);
