@@ -60,7 +60,7 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
     };
 
     const web3Provider = new ethers.providers.Web3Provider(
-      getPublicClient({ chainId: getNetworkInfo().l1Network?.id }) as any,
+      onboardStore.getPublicClient(primaryNetwork.l1Network?.id) as any,
       "any"
     );
     const wallet = new Wallet(

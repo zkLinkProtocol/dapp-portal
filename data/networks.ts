@@ -12,13 +12,14 @@ import {
   zkSync,
   arbitrum,
   manta,
-  mantaTestnet
+  mantaTestnet,
 } from "@wagmi/core/chains";
 
 import type { Token } from "@/types";
 import type { Chain } from "@wagmi/core/chains";
 import { PRIMARY_CHAIN_KEY } from "@/zksync-web3-nova/src/utils";
 import { Address } from "@wagmi/core";
+import Hyperchains from "@/hyperchains/config.json";
 
 export const l1Networks = {
   mainnet: {
@@ -82,8 +83,8 @@ export const l1Networks = {
   },
   manta: {
     ...manta,
-    name: "Manta Mainnet",  
-  }
+    name: "Manta Mainnet",
+  },
 } as const;
 export type L1Network = Chain;
 export type ZkSyncNetwork = {
@@ -388,3 +389,31 @@ export const zkSyncNetworks: ZkSyncNetwork[] = [
     hidden: true,
   },
 ];
+
+const determineChainList = (): ZkSyncNetwork[] => {
+  const zkSyncNetworks: ZkSyncNetwork[] = [];
+  const nodeType = process.env.NODE_TYPE || "nexus-goerli";
+  console.log(process.env);
+  // if (!nodeType) {
+  //   throw new Error("NODE_TYPE is not set. ");
+  // }
+  if (nodeType === "nexus") {
+    zkSyncNetworks.push(...nexusNode);
+  } else if (nodeType === "nexus-goerli") {
+    zkSyncNetworks.push(...nexusGoerliNode);
+  } else if (nodeType === "nexus-sepolia") {
+    zkSyncNetworks.push(...nexusSepoliaNode);
+  } else if (nodeType === "hyperchain") {
+    zkSyncNetworks.push(
+      ...(Hyperchains as unknown as Array<{ network: ZkSyncNetwork; tokens: Token[] }>).map((e) => ({
+        ...e.network,
+        getTokens: () => e.tokens,
+      }))
+    );
+  } else {
+    zkSyncNetworks.push(...zkSyncNetworks);
+  }
+  return zkSyncNetworks;
+};
+
+export const chainList: ZkSyncNetwork[] = determineChainList();
