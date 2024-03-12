@@ -1,18 +1,18 @@
+import { getPublicClient } from "@wagmi/core";
 import { BigNumber, ethers, VoidSigner } from "ethers";
 import { $fetch } from "ofetch";
-import { L1Signer, L1VoidSigner, Web3Provider } from "@/zksync-web3-nova/src";
 
+import useNetworks from "@/composables/useNetworks";
 import useScreening from "@/composables/useScreening";
 
 import type { Api, TokenAmount } from "@/types";
 import type { BigNumberish } from "ethers";
+import type { ContractAddresses } from "~/zksync-web3-nova/src/provider";
 
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncTokensStore } from "@/store/zksync/tokens";
-import useNetworks from "@/composables/useNetworks";
-import { getPublicClient } from "@wagmi/core";
-import { ContractAddresses } from "~/zksync-web3-nova/src/provider";
+import { L1Signer, L1VoidSigner, Web3Provider } from "@/zksync-web3-nova/src";
 export const useZkSyncWalletStore = defineStore("zkSyncWallet", () => {
   const onboardStore = useOnboardStore();
   const providerStore = useZkSyncProviderStore();
@@ -56,7 +56,7 @@ export const useZkSyncWalletStore = defineStore("zkSyncWallet", () => {
     const eraL1Signer = L1Signer.from(web3Provider.getSigner(), providerStore.requestProvider());
     return eraL1Signer;
   });
-  const getL1VoidSigner = (anyAddress = false,chainId = '',provider:any = null) => {
+  const getL1VoidSigner = (anyAddress = false, chainId = "", provider: any = null) => {
     if (!account.value.address && !anyAddress) throw new Error("Address is not available");
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
