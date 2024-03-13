@@ -28,7 +28,7 @@ import { Hash } from "~/types";
 import { Interface } from "ethers/lib/utils";
 import { abi as primaryGetterAbi } from "../abi/GettersFacet.json";
 import { l1EthDepositAbi } from "./abi";
-import { Fee, zkSyncProvider } from "./zkSyncProvider";
+import { Fee, LineaProvider, zkSyncProvider } from "./zkSyncProvider"; //TODO the filename is not accurate
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -203,10 +203,22 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             value: depositTx.value?.toHexString() ?? "0x",
             data: depositTx.data,
           });
-          console.log("zksync chain fee", fee);
+          console.log("zksync chain fee for ERC20", fee);
 
           depositTx.maxFeePerGas = fee.maxFeePerGas;
           depositTx.maxPriorityFeePerGas = fee.maxPriorityFeePerGas;
+          depositTx.gasLimit = fee.gasLimit;
+        }
+
+        if (this._providerL2().isLineaChain()) {
+          const fee = await LineaProvider.attachEstimateFee()({
+            from: depositTx.from,
+            to: depositTx.to,
+            value: depositTx.value?.toHexString() ?? "0x",
+            data: depositTx.data,
+          });
+          console.log("linea fee for ERC20", fee);
+          // TODO will use the gas price data from @rainbow-me/fee-suggestions
           depositTx.gasLimit = fee.gasLimit;
         }
 
@@ -241,34 +253,43 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const dummyAmount = 0; // must be 0, cause some secondary chain does not support deposit GAS Token, suck as Mantle
       let baseGasLimit: BigNumber;
       const face = new Interface([l1EthDepositAbi]);
+      const calldata = face.encodeFunctionData("requestL2Transaction", [
+        await this.getAddress(),
+        dummyAmount,
+        "0x",
+        l2GasLimit,
+        REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
+        [],
+        await this.getAddress(),
+      ]);
       const estimateTx = {
         from: await this.getAddress(),
         to: await this._providerL2().getMainContractAddress(),
         value: baseCost.add(dummyAmount),
-        data: face.encodeFunctionData("requestL2Transaction", [
-          await this.getAddress(),
-          dummyAmount,
-          "0x",
-          l2GasLimit,
-          REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
-          [],
-          await this.getAddress(),
-        ]),
-      }
+        data: calldata,
+      };
       if (this._providerL2().isZkSyncChain()) {
         const fee = await zkSyncProvider.attachEstimateFee()({
           ...estimateTx,
           value: estimateTx.value.toHexString(),
         });
-
-        return fee
+        return fee;
       }
+      if (this._providerL2().isLineaChain()) {
+        const fee = await LineaProvider.attachEstimateFee()({
+          ...estimateTx,
+          value: estimateTx.value.toHexString(),
+        });
+        return fee;
+      }
+
       baseGasLimit = await this._providerL1().estimateGas(estimateTx);
       return {
         gasLimit: scaleGasLimit(baseGasLimit),
         gasPerPubdataLimit: BigNumber.from(0),
         maxPriorityFeePerGas: BigNumber.from(0),
         maxFeePerGas: BigNumber.from(0),
+        L1Fee: await this.getL1FeeForOp(calldata), // only for mantle and manta
       };
     }
 
@@ -359,7 +380,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       // const zksyncContract = await this.getMainContract();
 
       tx.overrides ??= {};
-      if (!this._providerL2().isZkSyncChain()) {
+      if (!this._providerL2().isZkSyncChain() && !this._providerL2().isLineaChain()) {
         await insertGasPrice(this._providerL1(), this._providerL2(), tx.overrides);
       }
       // const gasPriceForMessages = (await tx.overrides.maxFeePerGas) || (await tx.overrides.gasPrice);
@@ -429,7 +450,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       delete estimationOverrides.maxFeePerGas;
       delete estimationOverrides.maxPriorityFeePerGas;
 
-      let l1GasLimit;
+      let l1GasLimit,
+        extraCost = BigNumber.from(0);
 
       if (this._providerL2().isEthereumChain()) {
         if (isETH(tx.token)) {
@@ -452,22 +474,22 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         //   l2GasLimit,
         // });
         const fee = await this.getDepositEstimateGasForUseFee(l2GasLimit, baseCost);
+        extraCost = fee.L1Fee;
         l1GasLimit = fee.gasLimit;
-        if (this._providerL2().isZkSyncChain()) {
-          tx.overrides.maxFeePerGas = fee.maxFeePerGas;
-          tx.overrides.maxPriorityFeePerGas = fee.maxPriorityFeePerGas;
+        if (this._providerL2().isZkSyncChain() || this._providerL2().isLineaChain()) {
+          tx.overrides.maxFeePerGas = fee.maxFeePerGas; //if Linea, will be rewrite by @rainbow-me/fee-suggestions in useFee.ts
+          tx.overrides.maxPriorityFeePerGas = fee.maxPriorityFeePerGas; // if Linea, will be rewrite by @rainbow-me/fee-suggestions in useFee.ts
           tx.overrides.gasLimit = fee.gasLimit;
         }
       }
-
-      console.log("l1GasLimit", l1GasLimit.toString());
 
       const fullCost: FullDepositFee = {
         baseCost,
         l1GasLimit,
         l2GasLimit,
+        extraCost, // only for manta and mantle
       };
-      console.log("tx.overrides", tx.overrides);
+      console.log("tx.overrides", tx.overrides.maxFeePerGas?.toString(), tx.overrides.gasLimit?.toString());
       if (tx.overrides.gasPrice) {
         fullCost.gasPrice = BigNumber.from(await tx.overrides.gasPrice);
       } else {
@@ -491,6 +513,25 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         log,
         l1BatchTxId: receipt.l1BatchTxIndex,
       };
+    }
+
+    //for mantle and manta
+    async getL1FeeForOp(calldata: string): Promise<BigNumber> {
+      if (!this._providerL2().isMantleChain() && !this._providerL2().isMantaChain()) {
+        return BigNumber.from(0);
+      }
+      const abi = [
+        {
+          type: "function",
+          stateMutability: "view",
+          outputs: [{ type: "uint256", name: "", internalType: "uint256" }],
+          name: "getL1Fee",
+          inputs: [{ type: "bytes", name: "_data", internalType: "bytes" }],
+        },
+      ];
+      const contract = new ethers.Contract("0x420000000000000000000000000000000000000F", abi, this._providerL1());
+      const l1Fee = await contract.getL1Fee(calldata);
+      return BigNumber.from(l1Fee);
     }
 
     async _getWithdrawalL2ToL1Log(withdrawalHash: BytesLike, index: number = 0) {
@@ -609,6 +650,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       );
     }
 
+    //only for eth
     async requestExecute(transaction: {
       contractAddress: Address;
       calldata: BytesLike;
@@ -633,6 +675,18 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
         requestExecuteTx.maxFeePerGas = fee.maxFeePerGas;
         requestExecuteTx.maxPriorityFeePerGas = fee.maxPriorityFeePerGas;
+        requestExecuteTx.gasLimit = fee.gasLimit;
+      }
+
+      if (this._providerL2().isLineaChain()) {
+        const fee = await LineaProvider.attachEstimateFee()({
+          from: requestExecuteTx.from,
+          to: requestExecuteTx.to,
+          value: requestExecuteTx.value?.toHexString() ?? "0x",
+          data: requestExecuteTx.data,
+        });
+        console.log("linea fee", fee);
+        // TODO will use the gas price data from @rainbow-me/fee-suggestions
         requestExecuteTx.gasLimit = fee.gasLimit;
       }
 
@@ -792,18 +846,19 @@ async function insertGasPrice(
   overrides: ethers.PayableOverrides
 ) {
   if (!overrides.gasPrice && !overrides.maxFeePerGas) {
-    if (l2Provider.isArbitrumChain()) {
+    if (l2Provider.isArbitrumChain() || l2Provider.isMantaChain() || l2Provider.isMantleChain()) {
       //if arbitrum
-      console.log("arbitrum chain")
+      console.log("arbitrum chain");
+      console.log("manta chain, mantle chain, arbitrum chain, only support gasPrice");
       overrides.gasPrice = await l1Provider.getGasPrice();
       return;
     }
 
-    if (l2Provider.isZkSyncChain()) {
-      throw new Error("not support zkSyncChain");
+    if (l2Provider.isZkSyncChain() || l2Provider.isLineaChain()) {
+      throw new Error("not support zkSync Era and Linea");
     }
 
-    //non-arbitrum and non-zksync
+    //only for Ethereum
 
     const l1FeeData = await l1Provider.getFeeData();
 

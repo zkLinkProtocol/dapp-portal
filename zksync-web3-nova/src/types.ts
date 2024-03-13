@@ -208,4 +208,5 @@ export interface FullDepositFee {
     baseCost: BigNumber;
     l1GasLimit: BigNumber;
     l2GasLimit: BigNumber;
+    extraCost: BigNumber;
 }
