@@ -82,7 +82,7 @@
         </CommonButton>
       </div>
     </header>
-    <div v-if="route.name === 'index'" class="warning-dec">
+    <!-- <div v-if="route.name === 'index'" class="warning-dec">
       <span>
         <svg
           class="warning-ico"
@@ -101,8 +101,8 @@
         </svg>
       </span>
       <div>Note: Withdrawals will be enabled before 04/13/2024</div>
-    </div>
-    <!-- <div className="banner">
+    </div> -->
+    <div className="banner">
       <a href="https://app.zklink.io/" target="\_blank">
         <img
           src="/img/banner.svg"
@@ -110,7 +110,7 @@
           className="bannerImg"
         />
       </a>
-    </div> -->
+    </div>
   </div>
 </template>
 

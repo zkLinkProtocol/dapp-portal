@@ -11,7 +11,12 @@
     >
       Confirm transaction
     </PageTitle>
-
+    
+    <div class="flex warnBox">
+      <div>
+        Note: Your funds will be locked for a max of 30days during the campaign
+      </div>
+    </div>
     <NetworkSelectModal
       v-model:opened="fromNetworkModalOpened"
       title="From"
@@ -793,4 +798,30 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
 
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.warnBox1{
+  display: flex;
+  a{
+    color: #0BC48F;
+  }
+}
+.warnBox{
+  display: inline-flex;
+  padding: 0 0 16px 0;
+  justify-content: center;
+  color: #F29914;
+  font-family: "Space Mono";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  img{
+    width: 21px;
+    height: 21px;
+    margin-right: 5px;
+  }
+  a{
+    color: #0BC48F;
+  }
+}
+</style>
