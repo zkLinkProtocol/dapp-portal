@@ -14,7 +14,7 @@
     
     <div class="flex warnBox">
       <div>
-        Please note that if you haven't participated in the Nova Aggregation Parade before, you can only join the campaign by depositing through the <a href="https://app.zklink.io/" target="_blank">app.zklink.io</a>. For those who have previously participated, deposits made through the bridge page will also be counted towards Nova Points.
+        Note: Your funds will be locked for a max of 30days during the campaign
       </div>
     </div>
     <NetworkSelectModal
@@ -809,7 +809,7 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
   display: inline-flex;
   padding: 0 0 16px 0;
   justify-content: center;
-  color: #fff;
+  color: #F29914;
   font-family: "Space Mono";
   font-size: 14px;
   font-style: normal;
