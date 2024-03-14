@@ -6,7 +6,7 @@ const metadata = {
   name: "zkLink Nova Portal",
   description: "zkLink Nova Portal - view balances, transfer and bridge tokens",
   url: "https://portal.zklink.io",
-  icons: ["../public/img/icon.png"],
+  icons: ["../public/img/favicon.png"],
 };
 
 if (!process.env.WALLET_CONNECT_PROJECT_ID) {
