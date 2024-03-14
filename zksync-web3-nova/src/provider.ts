@@ -307,6 +307,9 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   isMantaChain(): boolean {
     return this.networkKey === "manta";
   }
+  isBlastChain(): boolean {
+    return this.networkKey === "blast";
+  }
   isLineaChain(): boolean {
     return this.isPrimaryChain()
   }
