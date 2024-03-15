@@ -14,7 +14,7 @@
     
     <div class="flex warnBox">
       <div>
-        Note: Your funds will be locked for a max of 30days during the campaign
+        Note: Your funds will be locked for a max of 30 days during the campaign
       </div>
     </div>
     <NetworkSelectModal
