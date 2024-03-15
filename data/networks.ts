@@ -28,6 +28,7 @@ export type ZkSyncNetwork = {
   name: string;
   rpcUrl: string;
   hidden?: boolean; // If set to true, the network will not be shown in the network selector
+  deprecated?: boolean;
   l1Network?: L1Network;
   blockExplorerUrl?: string;
   blockExplorerApi?: string;
@@ -97,6 +98,7 @@ const publicChains: ZkSyncNetwork[] = [
     rpcUrl: "https://testnet.era.zksync.dev",
     blockExplorerUrl: "https://goerli.explorer.zksync.io",
     blockExplorerApi: "https://block-explorer-api.testnets.zksync.dev",
+    deprecated: true,
     displaySettings: {
       showPartnerLinks: true,
     },

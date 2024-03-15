@@ -1,5 +1,6 @@
 <template>
   <div>
+    <NetworkDeprecationAlert />
     <PageTitle>Assets</PageTitle>
 
     <template v-if="!isConnected">

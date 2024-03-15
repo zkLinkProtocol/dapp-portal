@@ -1,5 +1,6 @@
 <template>
   <div>
+    <NetworkDeprecationAlert v-if="step === 'form'" />
     <PageTitle v-if="step === 'form'">Bridge</PageTitle>
     <PageTitle v-else-if="step === 'wallet-warning'">Wallet warning</PageTitle>
     <PageTitle

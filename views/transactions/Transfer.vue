@@ -1,5 +1,6 @@
 <template>
   <div>
+    <NetworkDeprecationAlert v-if="step === 'form'" />
     <slot v-if="step === 'form'" name="title" />
     <PageTitle
       v-else-if="step === 'withdrawal-finalization-warning'"

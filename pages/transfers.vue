@@ -1,5 +1,6 @@
 <template>
   <div>
+    <NetworkDeprecationAlert />
     <PageTitle>Transfers</PageTitle>
 
     <template v-if="!isConnected">
