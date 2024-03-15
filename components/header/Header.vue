@@ -109,6 +109,11 @@
           alt=""
           className="bannerImg"
         />
+        <img
+          src="/img/mobile.svg"
+          alt=""
+          className="mobileImg"
+        />
       </a>
     </div>
   </div>
@@ -225,6 +230,20 @@ const isShowFaucet = computed(() => defaultNetwork.id === 810182);
     display: inline-block;
     width: 100%;
     height: 80px;
+  }
+  .mobileImg{
+    display: none;
+  }
+  @media screen and (max-width: 640px) {
+    .bannerImg{
+      display: none;
+    }
+    .mobileImg{
+      display: none;
+      display: inline-block;
+      width: 100%;
+      height: 80px;
+    }
   }
 }
 </style>
