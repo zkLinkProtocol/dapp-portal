@@ -94,7 +94,7 @@
             </div>
           </template>
         </CommonInputTransactionAddress>
-        <div class="waitTime">~15 minutes</div>
+        <div class="waitTime">~ {{timer}} minutes</div>
         <CommonButton
           v-if="tokenCustomBridge"
           type="submit"
@@ -405,7 +405,29 @@ const fromNetworkSelected = (networkKey?: string) => {
 
 const step = ref<"form" | "confirm" | "submitted">("form");
 const destination = computed(() => destinations.value.nova);
-
+const timer = computed(() => {
+  const name = eraNetwork.value.l1Network?.name
+  if (name?.includes('Ethereum')) {
+    return 12.8;
+  }
+  if (name?.includes('Linea')) {
+    return 1;
+  }
+  if (name?.includes('zkSync')) {
+    return 1;
+  }if (name?.includes('Arbitrum')) {
+    return '小于1';
+  }
+  if (name?.includes('Mantle')) {
+    return '小于1';
+  }
+  if (name?.includes('Manta')) {
+    return 1;
+  }
+  if (name?.includes('Blast')) {
+    return 1;
+  }
+});
 const availableTokens = computed<Token[]>(() => {
   if (balance.value) return balance.value;
 
