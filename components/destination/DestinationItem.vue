@@ -1,5 +1,5 @@
 <template>
-  <CommonButtonLineWithImg :as="as" :icon="icon" class="destination-item" :class="{ 'disable': disabled }" v-tooltip="'Withdrawal from Nova will be enable in April.'">
+  <CommonButtonLineWithImg :as="as" :icon="icon" class="destination-item" :class="{ 'disable': disabled }" v-tooltip="disabled&&'Withdrawal from Nova will be enable in April.'">
     <template #image>
       <slot name="image">
         <CommonImageLoader class="destination-item-icon" :src="iconUrl" />
