@@ -416,10 +416,10 @@ const timer = computed(() => {
   if (name?.includes('zkSync')) {
     return 1;
   }if (name?.includes('Arbitrum')) {
-    return '小于1';
+    return 'Less than 1';
   }
   if (name?.includes('Mantle')) {
-    return '小于1';
+    return 'Less than 1';
   }
   if (name?.includes('Manta')) {
     return 1;
