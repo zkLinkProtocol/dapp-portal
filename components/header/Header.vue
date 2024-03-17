@@ -49,7 +49,7 @@
           <ArrowsRightLeftIcon class="link-icon" aria-hidden="true" />
           History
           <transition v-bind="TransitionOpacity()">
-            <CommonBadge v-if="withdrawalsAvailableForClaiming.length">
+            <CommonBadge v-if="withdrawalsAvailableForClaiming && withdrawalsAvailableForClaiming.length">
               {{ withdrawalsAvailableForClaiming.length }}
             </CommonBadge>
           </transition>
@@ -75,7 +75,7 @@
         <CommonButton class="hamburger-icon" @click="mobileMainNavigationOpened = true">
           <Bars3Icon class="h-6 w-6" aria-hidden="true" />
           <transition v-bind="TransitionOpacity()">
-            <CommonBadge v-if="withdrawalsAvailableForClaiming.length" class="action-available-badge">
+            <CommonBadge v-if="withdrawalsAvailableForClaiming && withdrawalsAvailableForClaiming.length" class="action-available-badge">
               {{ withdrawalsAvailableForClaiming.length }}
             </CommonBadge>
           </transition>

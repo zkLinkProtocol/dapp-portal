@@ -156,16 +156,10 @@ import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
-
-import { Provider } from "@/zksync-web3-nova/src";
-import useNetworks from "@/composables/useNetworks";
-import { $fetch } from "ofetch";
 import {
- mantleTestnet,
-} from "@wagmi/core/chains";
-
-
-const onboardStore = useOnboardStore();
+  getNetwork,watchNetwork
+} from "@wagmi/core";
+import useNetworks from "@/composables/useNetworks";
 
 const props = defineProps({
   transaction: {
@@ -178,12 +172,11 @@ const props = defineProps({
   },
 });
 
-// const network = ref(getNetwork());
+const network = ref(getNetwork());
 
-// watchNetwork((updatedNetwork) => {
-//   network.value = updatedNetwork;
-// });
-const { network } = storeToRefs(onboardStore);
+watchNetwork((updatedNetwork) => {
+  network.value = updatedNetwork;
+});
 const { primaryNetwork, zkSyncNetworks } = useNetworks();
 
 const { selectedNetwork, l1Network,l1BlockExplorerUrl } = storeToRefs(useNetworkStore());
@@ -195,7 +188,7 @@ const getNetworkInfo = () => {
   return props.transaction? (newNetwork ?? primaryNetwork): obj;
 };
 const l1BlockExplorerUrls = getNetworkInfo().l1Network?.blockExplorers?.default.url;
-
+const onboardStore = useOnboardStore();
 const transactionStatusStore = useZkSyncTransactionStatusStore();
 const { eraNetwork, blockExplorerUrl } = storeToRefs(useZkSyncProviderStore());
 const { connectorName, isCorrectNetworkSet } = storeToRefs(onboardStore);
@@ -209,22 +202,7 @@ const withdrawalManualFinalizationRequired = computed(() => {
 const withdrawalFinalizationAvailable = computed(() => {
   return withdrawalManualFinalizationRequired.value && props.transaction.info.withdrawalFinalizationAvailable;
 });
-  let provider: Provider | undefined;
-const request = () => {
-  const eraNetwork = getNetworkInfo();
-  if (!provider) {
-    provider = new Provider(eraNetwork.rpcUrl);
-  }
-  //if provider.networkKey != eraNetwork.key
-  provider.setContractAddresses(eraNetwork.key, {
-    mainContract: eraNetwork.mainContract,
-    erc20BridgeL1: eraNetwork.erc20BridgeL1,
-    erc20BridgeL2: eraNetwork.erc20BridgeL2,
-    l1Gateway: eraNetwork.l1Gateway,
-  });
-  provider.setIsEthGasToken(eraNetwork.isEthGasToken ?? true);
-  return provider;
-};
+
 const {
   feeToken,
   totalFee: fee,
@@ -252,38 +230,19 @@ const continueButtonDisabled = computed(() => {
   if (props.transaction.info.toTransactionHash) return true;
   return false;
 });
-let flag = false;
-const getTransfers = async () => {
-  const obj = await request().getTransaction(props.transaction.transactionHash).then((res) => {return res})
-
-  const transfers = await $fetch(
-    `https://explorer-api.zklink.io/batches/batchroot/${obj.l1BatchNumber}`
-  );
-  transfers.map((i:any)=>{
-    flag = true;
-  })
-  if (flag) {
-    if (finalizeTransactionStatus.value === "done" && flag) {
-      transactionStatusStore.updateTransactionData(props.transaction.transactionHash, {
-        ...props.transaction,
-        info: {
-          ...props.transaction.info,
-          completed: true,
-          toTransactionHash: finalizeTransactionHash.value! as string,
-        },
-      });
-    }
-  } else {
-    setTimeout(()=>{
-      getTransfers()
-    }, 2000)
-  }
-}
 const buttonContinue = async () => {
   if (continueButtonDisabled.value) return;
   await commitTransaction();
-  if ( withdrawalFinalizationAvailable && props.transaction?.gateway && fee) {
-    await getTransfers();
+
+  if (finalizeTransactionStatus.value === "done") {
+    transactionStatusStore.updateTransactionData(props.transaction.transactionHash, {
+      ...props.transaction,
+      info: {
+        ...props.transaction.info,
+        completed: true,
+        toTransactionHash: finalizeTransactionHash.value! as string,
+      },
+    });
   }
 };
 </script>

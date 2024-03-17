@@ -46,7 +46,20 @@ export const getEstmatdDepositDelay = (networkKey: string): number => {
   }
 };
 export const WITHDRAWAL_DELAY = 7 * 24 * 60 * 60 * 1000; // 7 * 24 hours
-secondaryAbi;
+export type Address = Hash;
+export type ForwardL2Request = {
+  gateway: Address;
+  isContractCall: boolean;
+  sender: Address;
+  txId: BigNumberish;
+  contractAddressL2: Address;
+  l2Value: BigNumberish;
+  l2CallData: BytesLike;
+  l2GasLimit: BigNumberish;
+  l2GasPricePerPubdata: BigNumberish;
+  factoryDeps: BytesLike[];
+  refundRecipient: Address;
+};
 
 export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionStatus", () => {
   const onboardStore = useOnboardStore();

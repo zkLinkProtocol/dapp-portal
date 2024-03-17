@@ -20,8 +20,7 @@ export * from "./paymaster-utils";
 export const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
 import { abi as IZkSync_abi } from "../abi/IZkSync.json";
 import { TokenAmount } from "~/types";
-import {  getPublicClient } from "@wagmi/core";
-import {erc20Abi} from 'viem'
+import { erc20ABI, getPublicClient } from "@wagmi/core";
 
 export const ZKSYNC_MAIN_ABI = new utils.Interface(IZkSync_abi);
 export const CONTRACT_DEPLOYER = new utils.Interface((await import("../abi/ContractDeployer.json")).abi);
@@ -563,7 +562,7 @@ export async function fetchErc20(
     publicClient,
     "any"
   );
-  const erc20Contract = new Contract(contractAddress, erc20Abi, web3Provider);
+  const erc20Contract = new Contract(contractAddress, erc20ABI, web3Provider);
   let name, symbol, balance, decimals;
   try {
     name = await erc20Contract.name();
