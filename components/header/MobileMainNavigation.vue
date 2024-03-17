@@ -2,7 +2,7 @@
   <HeaderMobileNavigation v-model:opened="modalOpened" title="Menu">
     <transition v-bind="TabsTransition" mode="out-in">
       <div v-if="openedTab === 'main'">
-        <TypographyCategoryLabel size="sm" :padded="false" class="mb-4">Network</TypographyCategoryLabel>
+        <!-- <TypographyCategoryLabel size="sm" :padded="false" class="mb-4">Network</TypographyCategoryLabel>
         <CommonCardWithLineButtons>
           <DestinationItem
             :label="selectedNetwork.name"
@@ -16,8 +16,8 @@
               </DestinationIconContainer>
             </template>
           </DestinationItem>
-        </CommonCardWithLineButtons>
-        <TypographyCategoryLabel size="sm">Portal</TypographyCategoryLabel>
+        </CommonCardWithLineButtons> -->
+        <TypographyCategoryLabel size="sm" :padded="false" class="mb-4">Portal</TypographyCategoryLabel>
         <CommonCardWithLineButtons>
           <DestinationItem label="Deposit" as="RouterLink" :to="{ name: 'index' }" size="sm">
             <template #image>
@@ -26,7 +26,7 @@
               </DestinationIconContainer>
             </template>
           </DestinationItem>
-          <DestinationItem label="Withdraw" as="RouterLink" :to="{ name: '' }" size="sm">
+          <DestinationItem label="Withdraw" as="RouterLink" :to="{ name: '' }" size="sm" :disabled="true">
             <template #image>
               <DestinationIconContainer>
                 <ArrowsUpDownIcon aria-hidden="true" />

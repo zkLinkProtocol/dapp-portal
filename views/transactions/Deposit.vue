@@ -14,7 +14,7 @@
     
     <div class="flex warnBox">
       <div>
-        Note: Your funds will be locked for a max of 30days during the campaign
+        Note: Your funds will be locked for a max of 30 days during the campaign
       </div>
     </div>
     <NetworkSelectModal
@@ -94,6 +94,7 @@
             </div>
           </template>
         </CommonInputTransactionAddress>
+        <div class="waitTime">~15 minutes</div>
         <CommonButton
           v-if="tokenCustomBridge"
           type="submit"
@@ -823,5 +824,11 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
   a{
     color: #0BC48F;
   }
+}
+.waitTime{
+  width: 100%;
+  text-align: right;
+  padding: 20px 20px 0 0;
+  color: #555;
 }
 </style>

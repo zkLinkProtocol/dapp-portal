@@ -12,22 +12,22 @@
           <MagnifyingGlassIcon aria-hidden="true" />
         </template>
       </CommonInputSearch> -->
-      <div class="-mx-block-padding-1/2 h-full overflow-auto px-block-padding-1/2">
-        <div v-for="(group, groupIndex) in arr" :key="groupIndex" class="category">
-          <!-- <TypographyCategoryLabel size="sm" variant="darker" class="group-category-label">
-            {{ group.title }}
-          </TypographyCategoryLabel> -->
-          <div class="-mx-block-padding-1/4 sm:-mx-block-padding-1/2">
-            <DestinationItem
-              v-bind="group"
-              :key="groupIndex"
-              :icon="group.key === selectedNetworkKey ? CheckIcon : undefined"
-              variant="light"
-              size="sm"
-              @click="buttonClicked(zkSyncNetwork[groupIndex]);selectedNetworkKey = group.key!"
-            />
+      <div class="-mx-block-padding-1/2 over overflow-auto px-block-padding-1/2">
+          <div v-for="(group, groupIndex) in arr" :key="groupIndex" class="category">
+            <!-- <TypographyCategoryLabel size="sm" variant="darker" class="group-category-label">
+              {{ group.title }}
+            </TypographyCategoryLabel> -->
+            <div class="-mx-block-padding-1/4 sm:-mx-block-padding-1/2">
+              <DestinationItem
+                v-bind="group"
+                :key="groupIndex"
+                :icon="group.key === selectedNetworkKey ? CheckIcon : undefined"
+                variant="light"
+                size="sm"
+                @click="buttonClicked(zkSyncNetwork[groupIndex]);selectedNetworkKey = group.key!"
+              />
+            </div>
           </div>
-        </div>
         <p v-if="search && !arr.length" class="mt-block-padding-1/2 text-center">
           No chains found for "{{ search }}"
         </p>
@@ -138,10 +138,13 @@ const closeModal = () => {
 <style lang="scss">
 .network-select-modal {
   .modal-card {
-    @apply grid h-full grid-rows-[max-content_max-content_1fr];
+    @apply h-full;
   }
   .category:first-child .group-category-label {
     @apply pt-0;
   }
+}
+.over{
+  height: calc(100% - 50px);
 }
 </style>
