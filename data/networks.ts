@@ -13,7 +13,6 @@ import {
   arbitrum,
   manta,
   mantaTestnet,
-  blast,
 } from "@wagmi/core/chains";
 
 import type { Token } from "@/types";
@@ -21,6 +20,32 @@ import type { Chain } from "@wagmi/core/chains";
 import { PRIMARY_CHAIN_KEY } from "@/zksync-web3-nova/src/utils";
 import { Address } from "@wagmi/core";
 import Hyperchains from "@/hyperchains/config.json";
+import { defineChain } from "viem";
+
+export const blast = /*#__PURE__*/ defineChain({
+  id: 81457,
+  name: 'Blast Mainnet',
+  network: 'blast',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'ETH',
+    symbol: 'ETH',
+  },
+  rpcUrls: {
+    default: { http: ['https://rpc.blast.io'] },
+    public: { http: ['https://rpc.blast.io'] },
+  },
+  blockExplorers: {
+    etherscan: {
+      name: 'Blast Explorer',
+      url: 'https://blastscan.io/',
+    },
+    default: {
+      name: 'Blast Explorer',
+      url: 'https://blastscan.io/',
+    },
+  }
+})
 
 export const l1Networks = {
   mainnet: {

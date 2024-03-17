@@ -78,7 +78,7 @@ import type { Token, TokenAmount } from "@/types";
 import type { PropType } from "vue";
 
 import { groupBalancesByAmount } from "@/utils/mappers";
-import { Address } from "viem";
+import { Address } from "@wagmi/core";
 import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
 import { useSearchtokenStore } from "@/store/searchToken";
