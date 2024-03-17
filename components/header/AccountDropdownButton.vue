@@ -3,7 +3,7 @@
     <template #left-icon>
       <AddressAvatar :address="account.address!" class="h-full w-full" />
     </template>
-    <span ref="addressEl">{{ shortenAddress(account.address!) }}</span>
+    <span ref="addressEl">{{ walletName }}-{{ shortenAddress(account.address!) }}</span>
   </CommonButtonDropdown>
 </template>
 
@@ -13,5 +13,5 @@ import { storeToRefs } from "pinia";
 import { useOnboardStore } from "@/store/onboard";
 
 const onboardStore = useOnboardStore();
-const { account } = storeToRefs(onboardStore);
+const { account,walletName } = storeToRefs(onboardStore);
 </script>

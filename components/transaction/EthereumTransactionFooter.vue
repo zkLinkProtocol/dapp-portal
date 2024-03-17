@@ -30,6 +30,18 @@
             Change wallet network to {{ l1Network.name }}
           </slot>
         </CommonButton>
+        <!--//TODO not only Binance Web3-->
+        <CommonButton v-else-if="walletName === 'Binance Web3'" disabled variant="primary" class="w-full">
+          <slot v-bind="{ l1Network, walletName }" name="change-network-manual">
+            The current version of your {{ walletName }} wallet may not support {{ l1Network.name }}
+          </slot>
+        </CommonButton>
+        <CommonButton v-else-if="walletName === 'OKX'" disabled variant="primary" class="w-full">
+          <slot v-bind="{ l1Network, walletName }" name="change-network-manual">
+            Switching chain through WalletConnect failed. Please refresh the page and try again.
+          </slot>
+        </CommonButton>
+        <!--//TODO metamask wallect connect cannot work, add manually switch network-->
         <CommonButton v-else disabled variant="primary" class="w-full">
           <slot v-bind="{ l1Network, walletName }" name="change-network-manual">
             Change network manually to {{ l1Network.name }} in your {{ walletName }} wallet
@@ -101,6 +113,8 @@ watchNetwork((updatedNetwork) => {
   network.value = updatedNetwork;
 });
 const buttonStep = computed(() => {
+  console.log("buttonStep getNetworkInfo().l1Network?.id", getNetworkInfo().l1Network?.id);
+  console.log("buttonStep network.value.chain?.id", network.value.chain?.id);
   if (!account.value.address || isConnectingWallet.value) {
     return "connect";
   } else if (!(network.value.chain?.id === getNetworkInfo().l1Network?.id)) {
