@@ -94,7 +94,6 @@
             </div>
           </template>
         </CommonInputTransactionAddress>
-        <div class="waitTime">~ {{timer}} minutes</div>
         <CommonButton
           v-if="tokenCustomBridge"
           type="submit"
@@ -145,7 +144,7 @@
               :loading="feeLoading"
             />
           </transition>
-          <CommonButtonLabel as="span" v-if="!isCustomNode" class="ml-auto text-right">~15 minutes</CommonButtonLabel>
+          <CommonButtonLabel as="span" v-if="!isCustomNode" class="ml-auto text-right">~ {{timer}} minutes</CommonButtonLabel>
         </div>
         <transition v-bind="TransitionAlertScaleInOutTransition">
           <CommonAlert v-if="!enoughBalanceToCoverFee" class="mt-4" variant="error" :icon="ExclamationTriangleIcon">
@@ -852,5 +851,8 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
   text-align: right;
   padding: 20px 20px 0 0;
   color: #555;
+  position: absolute;
+  right: 10px;
+  top: -30px;
 }
 </style>
