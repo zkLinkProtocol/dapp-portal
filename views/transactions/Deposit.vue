@@ -144,7 +144,7 @@
               :loading="feeLoading"
             />
           </transition>
-          <CommonButtonLabel as="span" v-if="!isCustomNode" class="ml-auto text-right">~ {{timer}} minutes</CommonButtonLabel>
+          <CommonButtonLabel as="span" class="ml-auto text-right">~ {{timer}} minutes</CommonButtonLabel>
         </div>
         <transition v-bind="TransitionAlertScaleInOutTransition">
           <CommonAlert v-if="!enoughBalanceToCoverFee" class="mt-4" variant="error" :icon="ExclamationTriangleIcon">
@@ -376,7 +376,23 @@ import { checksumAddress, decimalToBigNumber, formatRawTokenPrice, parseTokenAmo
 import { silentRouterChange } from "@/utils/helpers";
 import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/transitions";
 import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
-import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
+import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";import {
+  goerli,
+  mainnet,
+  sepolia,
+  arbitrumSepolia,
+  scrollSepolia,
+  zkSyncSepoliaTestnet,
+  lineaTestnet,
+  linea,
+  mantle,
+  mantleTestnet,
+  zkSync,
+  arbitrum,
+  manta,
+  mantaTestnet,
+} from "@wagmi/core/chains";
+import { blast } from "@/data/networks";
 
 const route = useRoute();
 const router = useRouter();
@@ -405,25 +421,26 @@ const fromNetworkSelected = (networkKey?: string) => {
 const step = ref<"form" | "confirm" | "submitted">("form");
 const destination = computed(() => destinations.value.nova);
 const timer = computed(() => {
-  const name = eraNetwork.value.l1Network?.name
-  if (name?.includes('Ethereum')) {
+  const chainId = eraNetwork.value.l1Network?.id
+  if (chainId === mainnet.id) {
     return 12.8;
   }
-  if (name?.includes('Linea')) {
+  if (chainId === linea.id) {
     return 1;
   }
-  if (name?.includes('zkSync')) {
+  if (chainId === zkSync.id) {
     return 1;
-  }if (name?.includes('Arbitrum')) {
+  }
+  if (chainId === arbitrum.id) {
     return 'Less than 1';
   }
-  if (name?.includes('Mantle')) {
+  if (chainId === mantle.id) {
     return 'Less than 1';
   }
-  if (name?.includes('Manta')) {
+  if (chainId === manta.id) {
     return 1;
   }
-  if (name?.includes('Blast')) {
+  if (chainId === blast.id) {
     return 1;
   }
 });
