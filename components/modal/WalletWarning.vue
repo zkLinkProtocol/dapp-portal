@@ -41,6 +41,7 @@ watch(
     if (!notSupported) {
       walletWarningModal.value = false;
     } else {
+      console.log("walletWarningModal.value", walletWarningModal.value);
       walletWarningModal.value = true;
     }
   },
