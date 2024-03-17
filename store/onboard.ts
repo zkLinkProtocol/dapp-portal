@@ -11,7 +11,6 @@ import {
   watchAccount,
   watchNetwork,
 } from "@wagmi/core";
-import { zkSync, zkSyncSepoliaTestnet, zkSyncTestnet } from "@wagmi/core/chains";
 import { WalletConnectConnector } from "@wagmi/core/connectors/walletConnect";
 import { publicProvider } from "@wagmi/core/providers/public";
 import { createWeb3Modal } from "@web3modal/wagmi";
@@ -20,7 +19,6 @@ import useColorMode from "@/composables/useColorMode";
 import useNetworks from "@/composables/useNetworks";
 import useObservable from "@/composables/useObservable";
 
-import type { ZkSyncNetwork } from "@/data/networks";
 import type { Chain } from "@wagmi/core";
 
 import { useRuntimeConfig } from "#imports";
@@ -29,22 +27,6 @@ import { useNetworkStore } from "@/store/network";
 
 export const useOnboardStore = defineStore("onboard", () => {
   const { zkSyncNetworks } = useNetworks();
-  const useExistingEraChain = (network: ZkSyncNetwork) => {
-    const existingNetworks = [zkSync, zkSyncSepoliaTestnet, zkSyncTestnet];
-    return existingNetworks.find((existingNetwork) => existingNetwork.id === network.id);
-  };
-  const createEraChain = (network: ZkSyncNetwork) => {
-    return {
-      id: network.id,
-      name: network.name,
-      network: network.key,
-      nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
-      rpcUrls: {
-        default: { http: [network.rpcUrl] },
-        public: { http: [network.rpcUrl] },
-      },
-    };
-  };
   const getAllChains = () => {
     const chains: Chain[] = [];
     const addUniqueChain = (chain: Chain) => {
@@ -56,7 +38,7 @@ export const useOnboardStore = defineStore("onboard", () => {
       if (network.l1Network) {
         addUniqueChain(network.l1Network);
       }
-      addUniqueChain(useExistingEraChain(network) ?? createEraChain(network));
+      // addUniqueChain(useExistingEraChain(network) ?? createEraChain(network));
     }
 
     return chains;
@@ -75,12 +57,16 @@ export const useOnboardStore = defineStore("onboard", () => {
     url: "https://portal.zklink.io",
     icons: ["../public/img/favicon.png"],
   };
+  console.log("extendedChains", extendedChains);
+  console.log("selectedNetwork", selectedNetwork.value);
+  const walletConnectChains = extendedChains.find((chain) => chain.id === selectedNetwork.value?.l1Network?.id);
+  // console.log("walletConnectChains", walletConnectChains); // maybe more than one chain
   const wagmiConfig = createConfig({
     autoConnect: true,
     connectors: [
       new WalletConnectConnector({
-        chains: extendedChains,
-        options: { projectId: env.walletConnectProjectID, showQrModal: false, metadata },
+        chains: extendedChains,//[walletConnectChains!],
+        options: { projectId: env.walletConnectProjectID, showQrModal: true, metadata },
       }),
       new InjectedConnector({ chains: extendedChains, options: { shimDisconnect: true } }),
     ],
@@ -94,9 +80,13 @@ export const useOnboardStore = defineStore("onboard", () => {
   const walletName = ref<string | undefined>();
   const walletNotSupported = computed(() => {
     if (!walletName.value || !wagmiConfig.connector) return false;
+    console.log("walletName.value", walletName.value);
+    console.log("wagmiConfig.connector", wagmiConfig.connector);
+    console.log("confirmedSupportedWallets", confirmedSupportedWallets);
     const isWalletNotSupported = !confirmedSupportedWallets.find(
       (wallet) => wallet.walletName === walletName.value && wallet.type === wagmiConfig.connector?.id
     );
+    console.log("isWalletNotSupported", isWalletNotSupported);
     return isWalletNotSupported;
   });
   const identifyWalletName = async () => {
@@ -154,6 +144,12 @@ export const useOnboardStore = defineStore("onboard", () => {
     }
   });
   watchNetwork((updatedNetwork) => {
+    console.log("updatedNetwork", updatedNetwork.chain?.id);
+    const currentSelectChain = updatedNetwork.chains.find((chain) => chain.id === selectedNetwork.value.l1Network?.id)
+    if (currentSelectChain && wagmiConfig.connector?.id === "walletConnect") {
+      console.log("currentSelectChain", currentSelectChain.id);
+      updatedNetwork.chain = currentSelectChain;
+    }
     network.value = updatedNetwork;
   });
   watch(selectedColorMode, (colorMode) => {

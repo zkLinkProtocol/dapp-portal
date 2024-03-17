@@ -45,6 +45,8 @@ export const useZkSyncWalletStore = defineStore("zkSyncWallet", () => {
     if (!eraNetwork.value.l1Network) throw new Error(`L1 network is not available on ${eraNetwork.value.name}`);
 
     const walletNetworkId = network.value.chain?.id;
+    console.log("walletNetworkId", network.value);
+    console.log("eraNetwork.value.l1Network.id", eraNetwork.value.l1Network.id);
     if (walletNetworkId !== eraNetwork.value.l1Network.id) {
       throw new Error(
         `Incorrect wallet network selected: #${walletNetworkId} (expected: ${eraNetwork.value.l1Network.name} #${eraNetwork.value.l1Network.id})`
