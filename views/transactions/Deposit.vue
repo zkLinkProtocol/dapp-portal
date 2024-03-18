@@ -549,6 +549,31 @@ const setTokenAllowance = async () => {
   await fetchBalances(true);
 };
 
+const getWaitTime = (id:any) => {
+  if (id === (nodeType === "nexus"?mainnet.id: goerli.id)) {
+    return 12.8;
+  }
+  if (id === (nodeType === "nexus"?linea.id: lineaTestnet.id)) {
+    return 1;
+  }
+  if (id === (nodeType === "nexus"?zkSync.id: zkSyncSepoliaTestnet.id)) {
+    return 1;
+  }
+  if (id === (nodeType === "nexus"?arbitrum.id: arbitrumSepolia.id)) {
+    return 1;
+  }
+  if (id === (nodeType === "nexus"?mantle.id: mantleTestnet.id)) {
+    return 1;
+  }
+  if (id === (nodeType === "nexus"?manta.id: mantaTestnet.id)) {
+    return 1;
+  }
+  if (id === blast.id) {
+    return 1;
+  }
+  return 1;
+};
+
 const unsubscribe = onboardStore.subscribeOnAccountChange(() => {
   step.value = "form";
 });
@@ -652,7 +677,7 @@ transactionHasGateway.value = {
   gateway: selectedNetwork.value.l1Gateway,
   info: {
     expectedCompleteTimestamp: new Date(
-      new Date().getTime() + getEstmatdDepositDelay(eraNetwork.value.key)
+      new Date().getTime() + getWaitTime(eraNetwork.value.l1Network?.id)
     ).toISOString(),
     completed: false,
   },
@@ -768,7 +793,7 @@ const makeTransaction = async () => {
       gateway: selectedNetwork.value.l1Gateway,
       info: {
         expectedCompleteTimestamp: new Date(
-          new Date().getTime() + getEstmatdDepositDelay(eraNetwork.value.key)
+          new Date().getTime() + getWaitTime(eraNetwork.value.l1Network?.id)
         ).toISOString(),
         completed: false,
       },
