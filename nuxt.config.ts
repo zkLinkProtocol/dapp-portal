@@ -58,7 +58,7 @@ export default defineNuxtConfig({
     },
     manifest: {
       name: portalMeta.title,
-      short_name: "Portal",
+      short_name: "Nova Portal",
       description: portalMeta.description,
       start_url: '/',
       display: 'standalone',
