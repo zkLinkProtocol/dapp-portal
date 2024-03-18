@@ -10,6 +10,12 @@ export const confirmedSupportedWallets: WalletEntry[] = [
 
   { walletName: "MetaMask", type: "walletConnect" },
   { walletName: "imToken", type: "walletConnect" },
+  { walletName: "OKX", type: "walletConnect" },
+  { walletName: "Binance Web3", type: "walletConnect" },
+  { walletName: "Bitget", type: "walletConnect" },
+  { walletName: "Trust", type: "walletConnect" },
+  { walletName: "TokenPocket", type: "walletConnect" }
+
 ];
 
 export const disabledWallets: WalletEntry[] = [

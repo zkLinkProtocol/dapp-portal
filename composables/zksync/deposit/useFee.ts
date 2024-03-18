@@ -129,6 +129,8 @@ export default (
       .mul(110)
       .div(100);
   };
+  //TODO temp fix for high frequency reset fee
+  let totalResetFeeImmediately = 0;
   const {
     inProgress,
     error,
@@ -142,14 +144,25 @@ export default (
       try {
         signer = await getL1Signer({ force: true });
       } catch (err) {
+        console.log(err)
         if (err instanceof Error && err.message.indexOf("Incorrect wallet network selected") >= 0) {
           console.log("Incorrect wallet network selected");
+
           return;
+        }
+        if (err instanceof Error && err.message.indexOf("switch chain") >= 0) {
+          console.error("switch chain error");
+          throw new Error("Wallet connection error. Please reconnect your wallet.");
         }
       }
       if (!signer) {
-        setTimeout(resetFeeImmediately, 500);
-        return;
+        if(totalResetFeeImmediately < 2){
+          totalResetFeeImmediately++;
+          setTimeout(resetFeeImmediately, 1000);
+          return;
+        }
+
+        throw new Error("Please refresh the page.");
       }
       fee.value = await getEthTransactionFee(signer);
       if (params.tokenAddress !== feeToken.value?.address && fee.value && fee.value.l1GasLimit) {
