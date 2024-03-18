@@ -376,7 +376,8 @@ import { checksumAddress, decimalToBigNumber, formatRawTokenPrice, parseTokenAmo
 import { silentRouterChange } from "@/utils/helpers";
 import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/transitions";
 import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
-import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";import {
+import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
+import {
   goerli,
   mainnet,
   sepolia,
@@ -551,27 +552,27 @@ const setTokenAllowance = async () => {
 
 const getWaitTime = (id:any) => {
   if (id === (nodeType === "nexus"?mainnet.id: goerli.id)) {
-    return 12.8;
+    return 12.8 * 60 * 1000;
   }
   if (id === (nodeType === "nexus"?linea.id: lineaTestnet.id)) {
-    return 1;
+    return 1 * 60 * 1000;
   }
   if (id === (nodeType === "nexus"?zkSync.id: zkSyncSepoliaTestnet.id)) {
-    return 1;
+    return 1 * 60 * 1000;
   }
   if (id === (nodeType === "nexus"?arbitrum.id: arbitrumSepolia.id)) {
-    return 1;
+    return 1 * 60 * 1000;
   }
   if (id === (nodeType === "nexus"?mantle.id: mantleTestnet.id)) {
-    return 1;
+    return 1 * 60 * 1000;
   }
   if (id === (nodeType === "nexus"?manta.id: mantaTestnet.id)) {
-    return 1;
+    return 1 * 60 * 1000;
   }
   if (id === blast.id) {
-    return 1;
+    return 1 * 60 * 1000;
   }
-  return 1;
+  return 2 * 60 * 1000;
 };
 
 const unsubscribe = onboardStore.subscribeOnAccountChange(() => {
