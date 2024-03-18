@@ -76,7 +76,7 @@ export const useOnboardStore = defineStore("onboard", () => {
   console.log("extendedChains", extendedChains);
   console.log("selectedNetwork", selectedNetwork.value);
   const wagmiConfig = createConfig({
-    autoConnect: true,
+    autoConnect: false,
     connectors: [
       new SafeConnector({
         chains: extendedChains,
