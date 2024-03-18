@@ -11,6 +11,7 @@ import {
   watchAccount,
   watchNetwork,
 } from "@wagmi/core";
+import { SafeConnector } from "@wagmi/connectors/safe";
 import { WalletConnectConnector } from "@wagmi/core/connectors/walletConnect";
 import { publicProvider } from "@wagmi/core/providers/public";
 import { createWeb3Modal } from "@web3modal/wagmi";
@@ -77,6 +78,13 @@ export const useOnboardStore = defineStore("onboard", () => {
   const wagmiConfig = createConfig({
     autoConnect: true,
     connectors: [
+      new SafeConnector({
+        chains: extendedChains,
+        options: {
+          allowedDomains: [/app.safe.global$/],
+          debug: true,
+        },
+      }),
       new WalletConnectConnector({
         chains: extendedChains,
         options: { projectId: env.walletConnectProjectID, showQrModal: false, metadata },
