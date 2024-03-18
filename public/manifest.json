@@ -1,0 +1,18 @@
+{
+  "name": "zkLink Nova Portal | View balances, transfer and bridge tokens",
+  "short_name": "Portal",
+  "description": "zkLink Nova Portal allows you to view your balances, transfer tokens and bridge assets between zkLink Nova and Ethereum",
+  "lang": "en",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "180",
+      "type": "image/png"
+    }
+  ],
+  "iconPath": "icon.png"
+}
