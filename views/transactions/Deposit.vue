@@ -420,24 +420,25 @@ const fromNetworkSelected = (networkKey?: string) => {
 
 const step = ref<"form" | "confirm" | "submitted">("form");
 const destination = computed(() => destinations.value.nova);
+const nodeType = process.env.NODE_TYPE;
 const timer = computed(() => {
   const chainId = eraNetwork.value.l1Network?.id
-  if (chainId === mainnet.id) {
+  if (chainId === (nodeType === "nexus"?mainnet.id: goerli.id)) {
     return 12.8;
   }
-  if (chainId === linea.id) {
+  if (chainId === (nodeType === "nexus"?linea.id: lineaTestnet.id)) {
     return 1;
   }
-  if (chainId === zkSync.id) {
+  if (chainId === (nodeType === "nexus"?zkSync.id: zkSyncSepoliaTestnet.id)) {
     return 1;
   }
-  if (chainId === arbitrum.id) {
+  if (chainId === (nodeType === "nexus"?arbitrum.id: arbitrumSepolia.id)) {
     return 'Less than 1';
   }
-  if (chainId === mantle.id) {
+  if (chainId === (nodeType === "nexus"?mantle.id: mantleTestnet.id)) {
     return 'Less than 1';
   }
-  if (chainId === manta.id) {
+  if (chainId === (nodeType === "nexus"?manta.id: mantaTestnet.id)) {
     return 1;
   }
   if (chainId === blast.id) {
