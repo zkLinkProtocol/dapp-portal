@@ -28,7 +28,8 @@
             <span v-else class="break-all">{{ parseTokenAmount(feeAmount, feeToken.decimals) }}</span>
           </transition>
           &nbsp;
-          <span class="font-medium">{{ feeToken.symbol }}</span>
+          <span v-if="canDisplayFeeAsFiat && displayFeeAsFiat">USD</span>
+          <span v-else class="font-medium">{{ feeToken.symbol }}</span>
           &nbsp;
           <TokenImage class="h-5 w-5" v-bind="feeToken" />
         </component>
