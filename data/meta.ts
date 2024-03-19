@@ -12,7 +12,7 @@ export const bridge = {
   description:
     "With the zkLink Nova Bridge you can easily deposit tokens to zkLink Nova. Enjoy faster, cheaper and more efficient transactions with the future proof zkEVM scaling Ethereum's security and values.",
   previewImg: {
-    src: "/img/preview.png",
+    src: "https://portal.zklink.io/preview.png",
     alt: "zkLink Nova Bridge",
   },
 };
