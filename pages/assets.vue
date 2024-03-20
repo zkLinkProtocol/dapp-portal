@@ -90,7 +90,7 @@
         </TypographyCategoryLabel>
 
         <div class="flex flex-col gap-block-gap">
-          <BridgeFromEthereumButton v-if="eraNetwork.l1Network" />
+          <!-- <BridgeFromEthereumButton v-if="eraNetwork.l1Network" /> -->
 
           <CommonCardWithLineButtons v-for="(item, index) in depositMethods" :key="index">
             <DestinationItem v-bind="item.props">
@@ -185,11 +185,7 @@ const depositMethods = computed(() => {
         href: `/?network=${i.key}`,
       },
     };
-    if (noBalances.value) {
-      (i.key !== "primary") && methods.push(obj);
-    } else {
-      methods.push(obj);
-    }
+    methods.push(obj);
   });
 
   // const isMainnet = eraNetwork.value.l1Network?.id === mainnet.id;
