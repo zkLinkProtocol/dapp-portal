@@ -130,7 +130,6 @@ const searchtokenStore = useSearchtokenStore();
 
 const filterTokens = (tokens: Token[]) => {
   const lowercaseSearch = search.value.toLowerCase();
-  console.log(tokens)
   let newTokens = tokens.filter(({ address, name, symbol }) =>
     Object.values({ address, name, symbol })
       .filter((e) => typeof e === "string")

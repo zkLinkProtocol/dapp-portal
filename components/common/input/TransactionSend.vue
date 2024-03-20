@@ -1,6 +1,6 @@
 <template>
   <div>
-    <TokenSelectModalFree
+    <TokenSelectModalSend
       v-model:opened="selectTokenModalOpened"
       v-model:token-address="selectedTokenAddress"
       :loading="loading"
@@ -10,7 +10,7 @@
       <template #body-bottom v-if="$slots['token-dropdown-bottom']">
         <slot name="token-dropdown-bottom" />
       </template>
-    </TokenSelectModalFree>
+    </TokenSelectModalSend>
     <CommonContentBlock for="transaction-amount-input" as="label">
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-2 overflow-hidden">

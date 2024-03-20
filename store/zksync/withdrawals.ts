@@ -67,9 +67,7 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
     );
     const isFinalized = await wallet.isWithdrawalFinalized(obj.transactionHash)
     .catch(() => false);
-    console.log(isFinalized)
     obj.status = isFinalized? 'Finalized':''
-
   }
   const updateWithdrawals = async () => {
     if (!isConnected.value) throw new Error("Account is not available");
