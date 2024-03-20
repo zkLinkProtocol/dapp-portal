@@ -727,7 +727,7 @@ const makeTransaction = async () => {
       gateway: selectedNetwork.value.l1Gateway,
       info: {
         expectedCompleteTimestamp: new Date(
-          new Date().getTime() + getWaitTime(eraNetwork.value.l1Network?.id)
+          new Date().getTime() + getWaitTime(eraNetwork.value.l1Network?.id)[0]
         ).toISOString(),
         completed: false,
       },
