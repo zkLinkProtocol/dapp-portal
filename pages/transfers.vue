@@ -99,23 +99,7 @@ import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { WITHDRAWAL_DELAY, getEstmatdDepositDelay } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransfersHistoryStore } from "@/store/zksync/transfersHistory";
-import {
-  goerli,
-  mainnet,
-  sepolia,
-  arbitrumSepolia,
-  scrollSepolia,
-  zkSyncSepoliaTestnet,
-  lineaTestnet,
-  linea,
-  mantle,
-  mantleTestnet,
-  zkSync,
-  arbitrum,
-  manta,
-  mantaTestnet,
-} from "@wagmi/core/chains";
-import { blast } from "@/data/networks";
+import { getWaitTime } from "@/data/networks";
 
 const onboardStore = useOnboardStore();
 const { eraNetwork } = storeToRefs(useZkSyncProviderStore());
@@ -136,38 +120,13 @@ type RecentBridgeOperation = Transfer & {
   completed: boolean;
   finalizationAvailable?: boolean;
 };
-const nodeType = process.env.NODE_TYPE;
-const getWaitTime = (id:any) => {
-  if (id === (nodeType === "nexus"?mainnet.id: goerli.id)) {
-    return 12.8 * 60 * 1000;
-  }
-  if (id === (nodeType === "nexus"?linea.id: lineaTestnet.id)) {
-    return 1 * 60 * 1000;
-  }
-  if (id === (nodeType === "nexus"?zkSync.id: zkSyncSepoliaTestnet.id)) {
-    return 1 * 60 * 1000;
-  }
-  if (id === (nodeType === "nexus"?arbitrum.id: arbitrumSepolia.id)) {
-    return 1 * 60 * 1000;
-  }
-  if (id === (nodeType === "nexus"?mantle.id: mantleTestnet.id)) {
-    return 1 * 60 * 1000;
-  }
-  if (id === (nodeType === "nexus"?manta.id: mantaTestnet.id)) {
-    return 1 * 60 * 1000;
-  }
-  if (id === blast.id) {
-    return 1 * 60 * 1000;
-  }
-  return 2 * 60 * 1000;
-};
 const recentBridgeOperations = computed<RecentBridgeOperation[]>(() => {
   const recent = userTransactions.value.filter(
     (tx) =>
       (tx.type === "withdrawal" &&
         (!tx.info.completed || new Date(tx.timestamp).getTime() + WITHDRAWAL_DELAY * 2 > new Date().getTime())) ||
       (tx.type === "deposit" &&
-        new Date(tx.timestamp).getTime() + getWaitTime(eraNetwork.value.l1Network?.id) * 2 > new Date().getTime())
+        new Date(tx.timestamp).getTime() + getWaitTime(eraNetwork.value.l1Network?.id)[0] > new Date().getTime())
   );
 
   return [

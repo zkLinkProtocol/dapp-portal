@@ -144,7 +144,7 @@
               :loading="feeLoading"
             />
           </transition>
-          <CommonButtonLabel as="span" class="ml-auto text-right">~ {{timer}} minutes</CommonButtonLabel>
+          <CommonButtonLabel as="span" class="ml-auto text-right">~ {{getWaitTime(eraNetwork.l1Network?.id)[1]}} minutes</CommonButtonLabel>
         </div>
         <transition v-bind="TransitionAlertScaleInOutTransition">
           <CommonAlert v-if="!enoughBalanceToCoverFee" class="mt-4" variant="error" :icon="ExclamationTriangleIcon">
@@ -377,23 +377,7 @@ import { silentRouterChange } from "@/utils/helpers";
 import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/transitions";
 import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
-import {
-  goerli,
-  mainnet,
-  sepolia,
-  arbitrumSepolia,
-  scrollSepolia,
-  zkSyncSepoliaTestnet,
-  lineaTestnet,
-  linea,
-  mantle,
-  mantleTestnet,
-  zkSync,
-  arbitrum,
-  manta,
-  mantaTestnet,
-} from "@wagmi/core/chains";
-import { blast } from "@/data/networks";
+import { getWaitTime } from "@/data/networks";
 
 const route = useRoute();
 const router = useRouter();
@@ -421,31 +405,6 @@ const fromNetworkSelected = (networkKey?: string) => {
 
 const step = ref<"form" | "confirm" | "submitted">("form");
 const destination = computed(() => destinations.value.nova);
-const nodeType = process.env.NODE_TYPE;
-const timer = computed(() => {
-  const chainId = eraNetwork.value.l1Network?.id
-  if (chainId === (nodeType === "nexus"?mainnet.id: goerli.id)) {
-    return 12.8;
-  }
-  if (chainId === (nodeType === "nexus"?linea.id: lineaTestnet.id)) {
-    return 1;
-  }
-  if (chainId === (nodeType === "nexus"?zkSync.id: zkSyncSepoliaTestnet.id)) {
-    return 1;
-  }
-  if (chainId === (nodeType === "nexus"?arbitrum.id: arbitrumSepolia.id)) {
-    return 'Less than 1';
-  }
-  if (chainId === (nodeType === "nexus"?mantle.id: mantleTestnet.id)) {
-    return 'Less than 1';
-  }
-  if (chainId === (nodeType === "nexus"?manta.id: mantaTestnet.id)) {
-    return 1;
-  }
-  if (chainId === blast.id) {
-    return 1;
-  }
-});
 const availableTokens = computed<Token[]>(() => {
   if (balance.value) return balance.value;
 
@@ -549,32 +508,6 @@ const setTokenAllowance = async () => {
   await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for balances to be updated on API side
   await fetchBalances(true);
 };
-
-const getWaitTime = (id:any) => {
-  if (id === (nodeType === "nexus"?mainnet.id: goerli.id)) {
-    return 12.8 * 60 * 1000;
-  }
-  if (id === (nodeType === "nexus"?linea.id: lineaTestnet.id)) {
-    return 1 * 60 * 1000;
-  }
-  if (id === (nodeType === "nexus"?zkSync.id: zkSyncSepoliaTestnet.id)) {
-    return 1 * 60 * 1000;
-  }
-  if (id === (nodeType === "nexus"?arbitrum.id: arbitrumSepolia.id)) {
-    return 1 * 60 * 1000;
-  }
-  if (id === (nodeType === "nexus"?mantle.id: mantleTestnet.id)) {
-    return 1 * 60 * 1000;
-  }
-  if (id === (nodeType === "nexus"?manta.id: mantaTestnet.id)) {
-    return 1 * 60 * 1000;
-  }
-  if (id === blast.id) {
-    return 1 * 60 * 1000;
-  }
-  return 2 * 60 * 1000;
-};
-
 const unsubscribe = onboardStore.subscribeOnAccountChange(() => {
   step.value = "form";
 });
@@ -678,7 +611,7 @@ transactionHasGateway.value = {
   gateway: selectedNetwork.value.l1Gateway,
   info: {
     expectedCompleteTimestamp: new Date(
-      new Date().getTime() + getWaitTime(eraNetwork.value.l1Network?.id)
+      new Date().getTime() + getWaitTime(eraNetwork.value.l1Network?.id)[0]
     ).toISOString(),
     completed: false,
   },

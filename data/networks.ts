@@ -435,7 +435,32 @@ export const zkSyncNetworks: ZkSyncNetwork[] = [
     hidden: true,
   },
 ];
-
+export const getWaitTime = (id: any) => {
+  const nodeType = process.env.NODE_TYPE;
+  const responseTime = 2
+  if (id === (nodeType === "nexus"?mainnet.id: goerli.id)) {
+    return [((12.8 + responseTime) * 60 * 1000 + responseTime), (12.8 + responseTime)];
+  }
+  if (id === (nodeType === "nexus"?linea.id: lineaTestnet.id)) {
+    return [(1 * 60 * 1000), 1];
+  }
+  if (id === (nodeType === "nexus"?zkSync.id: zkSyncSepoliaTestnet.id)) {
+    return [((1 + responseTime) * 60 * 1000), (1 + responseTime)];
+  }
+  if (id === (nodeType === "nexus"?arbitrum.id: arbitrumSepolia.id)) {
+    return [((1 + responseTime) * 60 * 1000), (1 + responseTime)];
+  }
+  if (id === (nodeType === "nexus"?mantle.id: mantleTestnet.id)) {
+    return [((1 + responseTime) * 60 * 1000), (1 + responseTime)];
+  }
+  if (id === (nodeType === "nexus"?manta.id: mantaTestnet.id)) {
+    return [((1 + responseTime) * 60 * 1000), (1 + responseTime)];
+  }
+  if (id === blast.id) {
+    return [((1 + responseTime) * 60 * 1000), (1 + responseTime)];
+  }
+  return [((2 + responseTime) * 60 * 1000), (2 + responseTime)];
+}
 const determineChainList = (): ZkSyncNetwork[] => {
   const zkSyncNetworks: ZkSyncNetwork[] = [];
   const nodeType = process.env.NODE_TYPE || "nexus-goerli";
