@@ -28,8 +28,7 @@
             <span v-else class="break-all">{{ parseTokenAmount(feeAmount, feeToken.decimals) }}</span>
           </transition>
           &nbsp;
-          <span v-if="canDisplayFeeAsFiat && displayFeeAsFiat">USD</span>
-          <span v-else class="font-medium">{{ feeToken.symbol }}</span>
+          <span class="font-medium">{{ feeToken.symbol }}</span>
           &nbsp;
           <TokenImage class="h-5 w-5" v-bind="feeToken" />
         </component>
@@ -66,7 +65,7 @@ const props = defineProps({
   },
 });
 
-const displayFeeAsFiat = ref(true);
+const displayFeeAsFiat = ref(false);
 const canDisplayFeeAsFiat = computed(() => (props.feeToken?.price ? true : false));
 
 const totalPrice = computed(() => {
