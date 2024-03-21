@@ -385,6 +385,17 @@ const chainList = [
     "url": "https://symbiosis.finance/",
     "tiwwerUrl": "https://twitter.com/symbiosis_fi",
     "discordUrl": "https://discord.com/invite/YHgDSJ42eG"
+  },
+  {
+    "name": "Owlto Finance",
+    "description": "https://owlto.finance/",
+    "logo": "owlto.svg",
+    "bannerImg": "owlto.jpeg",
+    "type": "Infra",
+    "url": "https://owlto.finance/",
+    "tiwwerUrl": "https://twitter.com/Owlto_Finance",
+    "discordUrl": "https://discord.com/invite/owlto",
+    "status": "Live"
   }
 ]
 const thirdChainMethods = computed(() => {
@@ -858,7 +869,6 @@ onBeforeUnmount(() => {
   padding: 0 0 16px 0;
   justify-content: center;
   color: #F29914;
-  font-family: "Space Mono";
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
