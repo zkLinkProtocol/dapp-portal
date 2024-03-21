@@ -21,8 +21,8 @@
           Deposit
         </NuxtLink>
         <NuxtLink
-          class="link-item disabled"
-          v-tooltip="'Withdrawal from Nova will be enable in April.'"
+          class="link-item"
+          :to="{ name: 'withdraw' }"
           :class="{ 'router-link-exact-active': routes.withdraw.includes(route.name?.toString() || '') }"
         >
           <ArrowsUpDownIcon class="link-icon" aria-hidden="true" />

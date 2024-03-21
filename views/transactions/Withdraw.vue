@@ -22,7 +22,12 @@
       Confirm transaction
     </PageTitle>
 
-    <NetworkSelectModal
+    <div class="flex warnBox">
+      <div>
+        Note: Withdrawal will be open for a max of 30 days during the campaign, during these period, you can use third party bridge withdraw your fund
+      </div>
+    </div>
+    <!-- <NetworkSelectModal
       v-model:opened="fromNetworkModalOpened"
       title="From"
       :network-key="destinations.era.key"
@@ -129,7 +134,7 @@
             {{ eraNetwork.l1Network?.name }}, you will need to manually claim your funds which requires paying another
             transaction fee on {{ eraNetwork.l1Network?.name }}.
           </p>
-        </CommonAlert>
+        </CommonAlert> -->
         <!--         //TODO forced manual withdraw
         <CommonAlert variant="warning" :icon="ExclamationTriangleIcon" class="mb-block-padding-1/2 sm:mb-block-gap">
           <p>
@@ -162,7 +167,7 @@
           <ArrowTopRightOnSquareIcon class="h-6 w-6" aria-hidden="true" />
         </CommonButton> -->
 
-        <CommonButton size="sm" class="mx-auto mt-block-gap w-max" @click="buttonContinue()">
+        <!-- <CommonButton size="sm" class="mx-auto mt-block-gap w-max" @click="buttonContinue()">
           I understand, proceed to withdrawal
         </CommonButton>
       </template>
@@ -298,7 +303,19 @@
           </template>
         </TransactionFooter>
       </template>
-    </form>
+    </form> -->
+    <div class="flex flex-col gap-block-gap">
+      <CommonCardWithLineButtons v-for="(item, index) in depositMethods" :key="index" class="relative">
+        <DestinationItem v-bind="item.props">
+          <template #image v-if="item.icon">
+            <DestinationIconContainer>
+              <component :is="item.icon" aria-hidden="true" />
+            </DestinationIconContainer>
+          </template>
+        </DestinationItem>
+        <ArrowTopRightOnSquareIcon class="transaction-hash-button-icon w-6 absolute top-11 right-8 text-slate-400" aria-hidden="true" />
+      </CommonCardWithLineButtons>
+    </div>
   </div>
 </template>
 
@@ -344,7 +361,45 @@ import TransferSubmitted from "@/views/transactions/TransferSubmitted.vue";
 import WithdrawalSubmitted from "@/views/transactions/WithdrawalSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 import { useNetworkStore } from "@/store/network";
-
+import type { FunctionalComponent } from "vue";
+const chainList = [
+  {
+    "name": "Meson Finance",
+    "description": "https://meson.fi/",
+    "logo": "Meson.svg",
+    "bannerImg": "Meson.jpg",
+    "type": "Infra",
+    "url": "https://meson.fi/",
+    "tiwwerUrl": "https://twitter.com/mesonfi",
+    "discordUrl": "https://discord.com/invite/meson"
+  },
+  {
+    "name": "Symbiosis",
+    "description": "https://symbiosis.finance/",
+    "logo": "Symbiosys.svg",
+    "bannerImg": "Symbiosys.jpg",
+    "type": "Defi",
+    "url": "https://symbiosis.finance/",
+    "tiwwerUrl": "https://twitter.com/symbiosis_fi",
+    "discordUrl": "https://discord.com/invite/YHgDSJ42eG"
+  }
+]
+const depositMethods = computed(() => {
+  const methods: { props: Record<string, unknown>; icon?: FunctionalComponent }[] = [];
+    chainList.map((i) => {
+    const obj = {
+      props: {
+        iconUrl: `/img/${i.logo}`,
+        label: i.name,
+        description: i.description,
+        as: "a",
+        href: i.url,
+      },
+    };
+    methods.push(obj);
+  });
+return methods;
+});
 const props = defineProps({
   type: {
     type: String as PropType<FeeEstimationParams["type"]>,
@@ -786,4 +841,31 @@ onBeforeUnmount(() => {
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+
+.warnBox1{
+  display: flex;
+  a{
+    color: #0BC48F;
+  }
+}
+.warnBox{
+  display: inline-flex;
+  padding: 0 0 16px 0;
+  justify-content: center;
+  color: #F29914;
+  font-family: "Space Mono";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  img{
+    width: 21px;
+    height: 21px;
+    margin-right: 5px;
+  }
+  a{
+    color: #0BC48F;
+  }
+}
+</style>
