@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts" setup>
-import TransferView from "@/views/transactions/Transfer.vue";
+import TransferView from "@/views/transactions/Withdraw.vue";
 </script>
 
 <style lang="scss" scoped></style>

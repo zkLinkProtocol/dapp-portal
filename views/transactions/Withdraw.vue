@@ -22,283 +22,302 @@
       Confirm transaction
     </PageTitle>
 
-    <NetworkSelectModal
-      v-model:opened="fromNetworkModalOpened"
-      title="From"
-      :network-key="destinations.era.key"
-      @update:network-key="fromNetworkSelected($event)"
-    />
-    <NetworkSelectModal
-      v-model:opened="toNetworkModalOpened"
-      title="To"
-      :network-key="selectedNetwork.key"
-      @update:network-key="toNetworkSelected($event)"
-    />
+    <div class="flex warnBox">
+      <div>
+        Note: Withdrawal will be open for a max of 30 days during the campaign, during these period, you can use third party bridge withdraw your fund
+      </div>
+    </div>
+    <div v-if="showBridge">
+      <NetworkSelectModal
+        v-model:opened="fromNetworkModalOpened"
+        title="From"
+        :network-key="destinations.era.key"
+        @update:network-key="fromNetworkSelected($event)"
+      />
+      <NetworkSelectModal
+        v-model:opened="toNetworkModalOpened"
+        title="To"
+        :network-key="selectedNetwork.key"
+        @update:network-key="toNetworkSelected($event)"
+      />
 
-    <CommonErrorBlock v-if="tokensRequestError" @try-again="fetchBalances">
-      Getting tokens error: {{ tokensRequestError.message }}
-    </CommonErrorBlock>
-    <CommonErrorBlock v-else-if="balanceError" @try-again="fetchBalances">
-      Getting balances error: {{ balanceError.message }}
-    </CommonErrorBlock>
-    <form v-else @submit.prevent="">
-      <template v-if="step === 'form'">
-        <TransactionWithdrawalsAvailableForClaimAlert />
-        <CommonInputTransactionAmount
-          v-model="amount"
-          v-model:error="amountError"
-          v-model:token-address="amountInputTokenAddress"
-          :label="type === 'withdrawal' ? 'From' : undefined"
-          :tokens="availableTokens"
-          :balances="availableBalances"
-          :max-amount="maxAmount"
-          :loading="tokensRequestInProgress || balanceInProgress"
-        >
-          <template #token-dropdown-bottom v-if="type === 'withdrawal' && account.address">
-            <CommonAlert class="sticky bottom-0 mt-3" variant="neutral" :icon="InformationCircleIcon">
-              <p>Only tokens available for withdrawal are displayed</p>
-            </CommonAlert>
-          </template>
-          <template #dropdown v-if="type === 'withdrawal'">
-            <CommonButtonDropdown
-              :toggled="fromNetworkModalOpened"
-              size="xs"
-              variant="light"
-              class="overflow-hidden"
-              :noChevron="true"
-              style="cursor: default"
-            >
-              <template #left-icon>
-                <img :src="destinations.nova.iconUrl" class="h-full w-full rounded-full" />
-              </template>
-              <span class="truncate">{{ destinations.nova.label }}</span>
-            </CommonButtonDropdown>
-          </template>
-        </CommonInputTransactionAmount>
-
-        <CommonInputTransactionAddress
-          v-if="type === 'withdrawal'"
-          v-model="address"
-          label="To"
-          :default-label="`To your account ${account.address ? shortenAddress(account.address) : ''}`"
-          :address-input-hidden="!!tokenCustomBridge"
-          class="mt-6"
-        >
-          <template #dropdown>
-            <CommonButtonDropdown
-              :toggled="toNetworkModalOpened"
-              size="xs"
-              variant="light"
-              class="overflow-hidden"
-              @click="toNetworkModalOpened = true"
-            >
-              <template #left-icon>
-                <img :src="destination.iconUrl" class="h-full w-full rounded-full" />
-              </template>
-              <span class="truncate">{{ destination.label }}</span>
-            </CommonButtonDropdown>
-          </template>
-          <template #input-body v-if="tokenCustomBridge">
-            <div class="mt-4">
-              Bridging {{ tokenCustomBridge.symbol }} token to {{ destination.label }} requires custom bridge. Please
-              use
-              <a :href="tokenCustomBridge.bridgeUrlWithdraw" target="_blank" class="underline underline-offset-2">
-                {{ tokenCustomBridge.bridgeName }} </a
-              >.
-            </div>
-          </template>
-        </CommonInputTransactionAddress>
-        <CommonInputTransactionAddress v-else v-model="address" class="mt-6" />
-        <CommonButton
-          v-if="tokenCustomBridge"
-          type="submit"
-          as="a"
-          target="_blank"
-          :href="tokenCustomBridge?.bridgeUrlDeposit"
-          variant="primary"
-          class="mt-4 w-full gap-1"
-        >
-          Open {{ tokenCustomBridge?.bridgeName }}
-          <ArrowTopRightOnSquareIcon class="h-6 w-6" aria-hidden="true" />
-        </CommonButton>
-      </template>
-      <template v-else-if="step === 'withdrawal-finalization-warning'">
-        <CommonAlert variant="warning" :icon="ExclamationTriangleIcon" class="mb-block-padding-1/2 sm:mb-block-gap">
-          <p>
-            Once your withdrawal is processed and available on
-            {{ eraNetwork.l1Network?.name }}, you will need to manually claim your funds which requires paying another
-            transaction fee on {{ eraNetwork.l1Network?.name }}.
-          </p>
-        </CommonAlert>
-        <!--         //TODO forced manual withdraw
-        <CommonAlert variant="warning" :icon="ExclamationTriangleIcon" class="mb-block-padding-1/2 sm:mb-block-gap">
-          <p>
-            You are withdrawing less than 0.01 ETH. Once your withdrawal is processed and available on
-            {{ eraNetwork.l1Network?.name }}, you will need to manually claim your funds which requires paying another
-            transaction fee on {{ eraNetwork.l1Network?.name }}. Transactions of 0.01 ETH or more are finalized
-            automatically.
-            <br />
-            <br />
-            To withdraw smaller amounts you can use
-            <span class="inline-flex items-center gap-1">
-              <a
-                href="https://zksync.dappradar.com/ecosystem?category-de=bridges"
-                target="_blank"
-                class="underline underline-offset-2"
-                >third-party bridges</a
-              >
-            </span>
-          </p>
-        </CommonAlert>
-        <CommonButton
-          as="a"
-          href="https://zksync.dappradar.com/ecosystem?category-de=bridges"
-          target="_blank"
-          type="submit"
-          variant="primary"
-          class="mt-block-gap w-full gap-1"
-        >
-          See third-party bridges
-          <ArrowTopRightOnSquareIcon class="h-6 w-6" aria-hidden="true" />
-        </CommonButton> -->
-
-        <CommonButton size="sm" class="mx-auto mt-block-gap w-max" @click="buttonContinue()">
-          I understand, proceed to withdrawal
-        </CommonButton>
-      </template>
-      <template v-else-if="step === 'confirm'">
-        <CommonAlert
-          v-if="type === 'withdrawal'"
-          variant="warning"
-          :icon="ExclamationTriangleIcon"
-          class="mb-block-padding-1/2 sm:mb-block-gap"
-        >
-          <p v-if="withdrawalManualFinalizationRequired">
-            You will be able to claim your withdrawal only after a 7-day withdrawal delay.
-            <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">Learn more</a>
-          </p>
-          <p v-else>
-            You will receive funds only after a 7-day withdrawal delay.
-            <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">Learn more</a>
-          </p>
-        </CommonAlert>
-
-        <CommonCardWithLineButtons>
-          <TransactionSummaryTokenEntry label="You send" :token="transaction!.token" />
-          <TransactionSummaryAddressEntry
-            label="From"
-            :address="transaction!.from.address"
-            :destination="transaction!.from.destination"
-          />
-          <TransactionSummaryAddressEntry
-            label="To"
-            :address="transaction!.to.address"
-            :destination="transaction!.to.destination"
-          />
-        </CommonCardWithLineButtons>
-
-        <CommonErrorBlock v-if="transactionError" :retry-button="false" class="mt-4">
-          {{ transactionError.message }}
-        </CommonErrorBlock>
-      </template>
-      <template v-else-if="step === 'submitted'">
-        <TransferSubmitted
-          v-if="transactionInfo!.type === 'transfer'"
-          :transaction="transactionInfo!"
-          :make-another-transaction="resetForm"
-        />
-        <WithdrawalSubmitted
-          v-else-if="transactionInfo!.type === 'withdrawal'"
-          :transaction="transactionInfo!"
-          :make-another-transaction="resetForm"
-        />
-      </template>
-
-      <template v-if="!tokenCustomBridge && (step === 'form' || step === 'confirm')">
-        <CommonErrorBlock v-if="feeError" class="mt-2" @try-again="estimate">
-          Fee estimation error: {{ feeError.message }}
-        </CommonErrorBlock>
-        <div class="mt-4 flex items-center gap-4">
-          <transition v-bind="TransitionOpacity()">
-            <TransactionFeeDetails
-              v-if="!feeError && (fee || feeLoading)"
-              label="Fee:"
-              :fee-token="feeToken"
-              :fee-amount="fee"
-              :loading="feeLoading"
-            />
-          </transition>
-          <CommonButtonLabel
-            v-if="type === 'withdrawal' && !isCustomNode"
-            as="a"
-            :href="ZKSYNC_WITHDRAWAL_DELAY"
-            target="_blank"
-            class="ml-auto text-right"
+      <CommonErrorBlock v-if="tokensRequestError" @try-again="fetchBalances">
+        Getting tokens error: {{ tokensRequestError.message }}
+      </CommonErrorBlock>
+      <CommonErrorBlock v-else-if="balanceError" @try-again="fetchBalances">
+        Getting balances error: {{ balanceError.message }}
+      </CommonErrorBlock>
+      <form v-else @submit.prevent="">
+        <template v-if="step === 'form'">
+          <TransactionWithdrawalsAvailableForClaimAlert />
+          <CommonInputTransactionWithdraw
+            v-model="amount"
+            v-model:error="amountError"
+            v-model:token-address="amountInputTokenAddress"
+            :label="type === 'withdrawal' ? 'From' : undefined"
+            :tokens="availableTokens"
+            :balances="availableBalances"
+            :max-amount="maxAmount"
+            :loading="tokensRequestInProgress || balanceInProgress"
           >
-            Up to 24 hours
-          </CommonButtonLabel>
-          <CommonButtonLabel v-else-if="type === 'transfer'" as="span" class="ml-auto text-right">
-            Almost instant
-          </CommonButtonLabel>
-        </div>
-        <transition v-bind="TransitionAlertScaleInOutTransition">
-          <CommonAlert v-if="!enoughBalanceToCoverFee" class="mt-4" variant="error" :icon="ExclamationTriangleIcon">
-            <p>
-              Insufficient <span class="font-medium">{{ feeToken?.symbol }}</span> balance on
-              {{ destinations.era.label }} to cover the fee
-            </p>
-            <NuxtLink :to="{ name: 'receive-methods' }" class="alert-link">Receive funds</NuxtLink>
-          </CommonAlert>
-        </transition>
+            <template #token-dropdown-bottom v-if="type === 'withdrawal' && account.address">
+              <CommonAlert class="sticky bottom-0 mt-3" variant="neutral" :icon="InformationCircleIcon">
+                <p>Only tokens available for withdrawal are displayed</p>
+              </CommonAlert>
+            </template>
+            <template #dropdown v-if="type === 'withdrawal'">
+              <CommonButtonDropdown
+                :toggled="fromNetworkModalOpened"
+                size="xs"
+                variant="light"
+                class="overflow-hidden"
+                :noChevron="true"
+                style="cursor: default"
+              >
+                <template #left-icon>
+                  <img :src="destinations.nova.iconUrl" class="h-full w-full rounded-full" />
+                </template>
+                <span class="truncate">{{ destinations.nova.label }}</span>
+              </CommonButtonDropdown>
+            </template>
+          </CommonInputTransactionWithdraw>
 
-        <TransactionFooter>
-          <template #after-checks>
-            <CommonButton
-              v-if="step === 'form'"
-              type="submit"
-              :disabled="continueButtonDisabled"
-              variant="primary"
-              class="w-full"
-              @click="buttonContinue()"
+          <CommonInputTransactionAddress
+            v-if="type === 'withdrawal'"
+            v-model="address"
+            label="To"
+            :default-label="`To your account ${account.address ? shortenAddress(account.address) : ''}`"
+            :address-input-hidden="!!tokenCustomBridge"
+            class="mt-6"
+          >
+            <template #dropdown>
+              <CommonButtonDropdown
+                :toggled="toNetworkModalOpened"
+                size="xs"
+                variant="light"
+                class="overflow-hidden"
+                @click="toNetworkModalOpened = true"
+              >
+                <template #left-icon>
+                  <img :src="destination.iconUrl" class="h-full w-full rounded-full" />
+                </template>
+                <span class="truncate">{{ destination.label }}</span>
+              </CommonButtonDropdown>
+            </template>
+            <template #input-body v-if="tokenCustomBridge">
+              <div class="mt-4">
+                Bridging {{ tokenCustomBridge.symbol }} token to {{ destination.label }} requires custom bridge. Please
+                use
+                <a :href="tokenCustomBridge.bridgeUrlWithdraw" target="_blank" class="underline underline-offset-2">
+                  {{ tokenCustomBridge.bridgeName }} </a
+                >.
+              </div>
+            </template>
+          </CommonInputTransactionAddress>
+          <CommonInputTransactionAddress v-else v-model="address" class="mt-6" />
+          <CommonButton
+            v-if="tokenCustomBridge"
+            type="submit"
+            as="a"
+            target="_blank"
+            :href="tokenCustomBridge?.bridgeUrlDeposit"
+            variant="primary"
+            class="mt-4 w-full gap-1"
+          >
+            Open {{ tokenCustomBridge?.bridgeName }}
+            <ArrowTopRightOnSquareIcon class="h-6 w-6" aria-hidden="true" />
+          </CommonButton>
+        </template>
+        <template v-else-if="step === 'withdrawal-finalization-warning'">
+          <CommonAlert variant="warning" :icon="ExclamationTriangleIcon" class="mb-block-padding-1/2 sm:mb-block-gap">
+            <p>
+              Once your withdrawal is processed and available on
+              {{ eraNetwork.l1Network?.name }}, you will need to manually claim your funds which requires paying another
+              transaction fee on {{ eraNetwork.l1Network?.name }}.
+            </p>
+          </CommonAlert>
+          <!--         //TODO forced manual withdraw
+          <CommonAlert variant="warning" :icon="ExclamationTriangleIcon" class="mb-block-padding-1/2 sm:mb-block-gap">
+            <p>
+              You are withdrawing less than 0.01 ETH. Once your withdrawal is processed and available on
+              {{ eraNetwork.l1Network?.name }}, you will need to manually claim your funds which requires paying another
+              transaction fee on {{ eraNetwork.l1Network?.name }}. Transactions of 0.01 ETH or more are finalized
+              automatically.
+              <br />
+              <br />
+              To withdraw smaller amounts you can use
+              <span class="inline-flex items-center gap-1">
+                <a
+                  href="https://zksync.dappradar.com/ecosystem?category-de=bridges"
+                  target="_blank"
+                  class="underline underline-offset-2"
+                  >third-party bridges</a
+                >
+              </span>
+            </p>
+          </CommonAlert>
+          <CommonButton
+            as="a"
+            href="https://zksync.dappradar.com/ecosystem?category-de=bridges"
+            target="_blank"
+            type="submit"
+            variant="primary"
+            class="mt-block-gap w-full gap-1"
+          >
+            See third-party bridges
+            <ArrowTopRightOnSquareIcon class="h-6 w-6" aria-hidden="true" />
+          </CommonButton> -->
+
+          <CommonButton size="sm" class="mx-auto mt-block-gap w-max" @click="buttonContinue()">
+            I understand, proceed to withdrawal
+          </CommonButton>
+        </template>
+        <template v-else-if="step === 'confirm'">
+          <CommonAlert
+            v-if="type === 'withdrawal'"
+            variant="warning"
+            :icon="ExclamationTriangleIcon"
+            class="mb-block-padding-1/2 sm:mb-block-gap"
+          >
+            <p v-if="withdrawalManualFinalizationRequired">
+              You will be able to claim your withdrawal only after a 7-day withdrawal delay.
+              <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">Learn more</a>
+            </p>
+            <p v-else>
+              You will receive funds only after a 7-day withdrawal delay.
+              <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">Learn more</a>
+            </p>
+          </CommonAlert>
+
+          <CommonCardWithLineButtons>
+            <TransactionSummaryTokenEntry label="You send" :token="transaction!.token" />
+            <TransactionSummaryAddressEntry
+              label="From"
+              :address="transaction!.from.address"
+              :destination="transaction!.from.destination"
+            />
+            <TransactionSummaryAddressEntry
+              label="To"
+              :address="transaction!.to.address"
+              :destination="transaction!.to.destination"
+            />
+          </CommonCardWithLineButtons>
+
+          <CommonErrorBlock v-if="transactionError" :retry-button="false" class="mt-4">
+            {{ transactionError.message }}
+          </CommonErrorBlock>
+        </template>
+        <template v-else-if="step === 'submitted'">
+          <TransferSubmitted
+            v-if="transactionInfo!.type === 'transfer'"
+            :transaction="transactionInfo!"
+            :make-another-transaction="resetForm"
+          />
+          <WithdrawalSubmitted
+            v-else-if="transactionInfo!.type === 'withdrawal'"
+            :transaction="transactionInfo!"
+            :make-another-transaction="resetForm"
+          />
+        </template>
+
+        <template v-if="!tokenCustomBridge && (step === 'form' || step === 'confirm')">
+          <CommonErrorBlock v-if="feeError" class="mt-2" @try-again="estimate">
+            Fee estimation error: {{ feeError.message }}
+          </CommonErrorBlock>
+          <div class="mt-4 flex items-center gap-4">
+            <transition v-bind="TransitionOpacity()">
+              <TransactionFeeDetails
+                v-if="!feeError && (fee || feeLoading)"
+                label="Fee:"
+                :fee-token="feeToken"
+                :fee-amount="fee"
+                :loading="feeLoading"
+              />
+            </transition>
+            <CommonButtonLabel
+              v-if="type === 'withdrawal' && !isCustomNode"
+              as="a"
+              :href="ZKSYNC_WITHDRAWAL_DELAY"
+              target="_blank"
+              class="ml-auto text-right"
             >
-              Continue
-            </CommonButton>
-            <template v-else-if="step === 'confirm'">
-              <transition v-bind="TransitionAlertScaleInOutTransition">
-                <div v-if="!enoughBalanceForTransaction" class="mb-4">
-                  <CommonAlert variant="error" :icon="ExclamationTriangleIcon">
-                    <p>
-                      {{
-                        selectedToken?.address === ETH_TOKEN.address
-                          ? "The fee has changed since the last estimation. "
-                          : ""
-                      }}Insufficient <span class="font-medium">{{ selectedToken?.symbol }}</span> balance to pay for
-                      transaction. Please go back and adjust the amount to proceed.
-                    </p>
-                    <button type="button" class="alert-link" @click="step = 'form'">Go back</button>
-                  </CommonAlert>
-                </div>
-              </transition>
+              Up to 24 hours
+            </CommonButtonLabel>
+            <CommonButtonLabel v-else-if="type === 'transfer'" as="span" class="ml-auto text-right">
+              Almost instant
+            </CommonButtonLabel>
+          </div>
+          <transition v-bind="TransitionAlertScaleInOutTransition">
+            <CommonAlert v-if="!enoughBalanceToCoverFee" class="mt-4" variant="error" :icon="ExclamationTriangleIcon">
+              <p>
+                Insufficient <span class="font-medium">{{ feeToken?.symbol }}</span> balance on
+                {{ destinations.era.label }} to cover the fee
+              </p>
+              <NuxtLink :to="{ name: 'receive-methods' }" class="alert-link">Receive funds</NuxtLink>
+            </CommonAlert>
+          </transition>
+
+          <TransactionFooter>
+            <template #after-checks>
               <CommonButton
-                :disabled="continueButtonDisabled || transactionStatus !== 'not-started'"
-                class="w-full"
+                v-if="step === 'form'"
+                type="submit"
+                :disabled="continueButtonDisabled"
                 variant="primary"
+                class="w-full"
                 @click="buttonContinue()"
               >
-                <transition v-bind="TransitionPrimaryButtonText" mode="out-in">
-                  <span v-if="transactionStatus === 'processing'">Processing...</span>
-                  <span v-else-if="transactionStatus === 'waiting-for-signature'">Waiting for confirmation</span>
-                  <span v-else>
-                    {{ type === "withdrawal" ? "Bridge now" : "Send now" }}
-                  </span>
-                </transition>
+                Continue
               </CommonButton>
-              <TransactionButtonUnderlineConfirmTransaction :opened="transactionStatus === 'waiting-for-signature'" />
+              <template v-else-if="step === 'confirm'">
+                <transition v-bind="TransitionAlertScaleInOutTransition">
+                  <div v-if="!enoughBalanceForTransaction" class="mb-4">
+                    <CommonAlert variant="error" :icon="ExclamationTriangleIcon">
+                      <p>
+                        {{
+                          selectedToken?.address === ETH_TOKEN.address
+                            ? "The fee has changed since the last estimation. "
+                            : ""
+                        }}Insufficient <span class="font-medium">{{ selectedToken?.symbol }}</span> balance to pay for
+                        transaction. Please go back and adjust the amount to proceed.
+                      </p>
+                      <button type="button" class="alert-link" @click="step = 'form'">Go back</button>
+                    </CommonAlert>
+                  </div>
+                </transition>
+                <CommonButton
+                  :disabled="continueButtonDisabled || transactionStatus !== 'not-started'"
+                  class="w-full"
+                  variant="primary"
+                  @click="buttonContinue()"
+                >
+                  <transition v-bind="TransitionPrimaryButtonText" mode="out-in">
+                    <span v-if="transactionStatus === 'processing'">Processing...</span>
+                    <span v-else-if="transactionStatus === 'waiting-for-signature'">Waiting for confirmation</span>
+                    <span v-else>
+                      {{ type === "withdrawal" ? "Bridge now" : "Send now" }}
+                    </span>
+                  </transition>
+                </CommonButton>
+                <TransactionButtonUnderlineConfirmTransaction :opened="transactionStatus === 'waiting-for-signature'" />
+              </template>
             </template>
+          </TransactionFooter>
+        </template>
+      </form>
+    </div>
+    <div class="flex flex-col gap-block-gap" v-else>
+      <CommonCardWithLineButtons v-for="(item, index) in thirdChainMethods" :key="index" class="relative">
+        <DestinationItem v-bind="item.props">
+          <template #image v-if="item.icon">
+            <DestinationIconContainer>
+              <component :is="item.icon" aria-hidden="true" />
+            </DestinationIconContainer>
           </template>
-        </TransactionFooter>
-      </template>
-    </form>
+        </DestinationItem>
+        <ArrowTopRightOnSquareIcon class="transaction-hash-button-icon w-6 absolute top-11 right-8 text-slate-400" aria-hidden="true" />
+      </CommonCardWithLineButtons>
+    </div>
   </div>
 </template>
 
@@ -344,7 +363,47 @@ import TransferSubmitted from "@/views/transactions/TransferSubmitted.vue";
 import WithdrawalSubmitted from "@/views/transactions/WithdrawalSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 import { useNetworkStore } from "@/store/network";
-
+import type { FunctionalComponent } from "vue";
+const showBridge = false;
+const chainList = [
+  {
+    "name": "Meson Finance",
+    "description": "https://meson.fi/",
+    "logo": "Meson.svg",
+    "bannerImg": "Meson.jpg",
+    "type": "Infra",
+    "url": "https://meson.fi/",
+    "tiwwerUrl": "https://twitter.com/mesonfi",
+    "discordUrl": "https://discord.com/invite/meson"
+  },
+  {
+    "name": "Symbiosis",
+    "description": "https://symbiosis.finance/",
+    "logo": "Symbiosys.svg",
+    "bannerImg": "Symbiosys.jpg",
+    "type": "Defi",
+    "url": "https://symbiosis.finance/",
+    "tiwwerUrl": "https://twitter.com/symbiosis_fi",
+    "discordUrl": "https://discord.com/invite/YHgDSJ42eG"
+  }
+]
+const thirdChainMethods = computed(() => {
+  const methods: { props: Record<string, unknown>; icon?: FunctionalComponent }[] = [];
+    chainList.map((i) => {
+    const obj = {
+      props: {
+        iconUrl: `/img/${i.logo}`,
+        label: i.name,
+        description: i.description,
+        as: "a",
+        target: "_blank",
+        href: i.url,
+      },
+    };
+    methods.push(obj);
+  });
+return methods;
+});
 const props = defineProps({
   type: {
     type: String as PropType<FeeEstimationParams["type"]>,
@@ -786,4 +845,31 @@ onBeforeUnmount(() => {
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+
+.warnBox1{
+  display: flex;
+  a{
+    color: #0BC48F;
+  }
+}
+.warnBox{
+  display: inline-flex;
+  padding: 0 0 16px 0;
+  justify-content: center;
+  color: #F29914;
+  font-family: "Space Mono";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  img{
+    width: 21px;
+    height: 21px;
+    margin-right: 5px;
+  }
+  a{
+    color: #0BC48F;
+  }
+}
+</style>

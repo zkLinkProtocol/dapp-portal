@@ -171,8 +171,8 @@ const getl1NetworkName = () => {
       };
     } else {
       return {
-        from: primaryNetwork.l1Network?.name,
-        to: primaryNetwork.l1Network?.name,
+        from: getNetworkInfo().l1Network?.name,
+        to: getNetworkInfo().l1Network?.name,
       };
     }
   }
