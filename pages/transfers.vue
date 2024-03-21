@@ -99,6 +99,7 @@ import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { WITHDRAWAL_DELAY, getEstmatdDepositDelay } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransfersHistoryStore } from "@/store/zksync/transfersHistory";
+import { getWaitTime } from "@/data/networks";
 
 const onboardStore = useOnboardStore();
 const { eraNetwork } = storeToRefs(useZkSyncProviderStore());
@@ -125,7 +126,7 @@ const recentBridgeOperations = computed<RecentBridgeOperation[]>(() => {
       (tx.type === "withdrawal" &&
         (!tx.info.completed || new Date(tx.timestamp).getTime() + WITHDRAWAL_DELAY * 2 > new Date().getTime())) ||
       (tx.type === "deposit" &&
-        new Date(tx.timestamp).getTime() + getEstmatdDepositDelay(eraNetwork.value.key) * 2 > new Date().getTime())
+        new Date(tx.timestamp).getTime() + getWaitTime(eraNetwork.value.l1Network?.id)[0] > new Date().getTime())
   );
 
   return [

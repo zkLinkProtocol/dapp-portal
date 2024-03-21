@@ -94,7 +94,6 @@
             </div>
           </template>
         </CommonInputTransactionAddress>
-        <div class="waitTime">~15 minutes</div>
         <CommonButton
           v-if="tokenCustomBridge"
           type="submit"
@@ -145,7 +144,7 @@
               :loading="feeLoading"
             />
           </transition>
-          <CommonButtonLabel as="span" v-if="!isCustomNode" class="ml-auto text-right">~15 minutes</CommonButtonLabel>
+          <CommonButtonLabel as="span" class="ml-auto text-right">~ {{getWaitTime(eraNetwork.l1Network?.id)[1]}} minutes</CommonButtonLabel>
         </div>
         <transition v-bind="TransitionAlertScaleInOutTransition">
           <CommonAlert v-if="!enoughBalanceToCoverFee" class="mt-4" variant="error" :icon="ExclamationTriangleIcon">
@@ -378,6 +377,7 @@ import { silentRouterChange } from "@/utils/helpers";
 import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/transitions";
 import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
+import { getWaitTime } from "@/data/networks";
 
 const route = useRoute();
 const router = useRouter();
@@ -405,7 +405,6 @@ const fromNetworkSelected = (networkKey?: string) => {
 
 const step = ref<"form" | "confirm" | "submitted">("form");
 const destination = computed(() => destinations.value.nova);
-
 const availableTokens = computed<Token[]>(() => {
   if (balance.value) return balance.value;
 
@@ -509,7 +508,6 @@ const setTokenAllowance = async () => {
   await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for balances to be updated on API side
   await fetchBalances(true);
 };
-
 const unsubscribe = onboardStore.subscribeOnAccountChange(() => {
   step.value = "form";
 });
@@ -613,7 +611,7 @@ transactionHasGateway.value = {
   gateway: selectedNetwork.value.l1Gateway,
   info: {
     expectedCompleteTimestamp: new Date(
-      new Date().getTime() + getEstmatdDepositDelay(eraNetwork.value.key)
+      new Date().getTime() + getWaitTime(eraNetwork.value.l1Network?.id)[0]
     ).toISOString(),
     completed: false,
   },
@@ -729,7 +727,7 @@ const makeTransaction = async () => {
       gateway: selectedNetwork.value.l1Gateway,
       info: {
         expectedCompleteTimestamp: new Date(
-          new Date().getTime() + getEstmatdDepositDelay(eraNetwork.value.key)
+          new Date().getTime() + getWaitTime(eraNetwork.value.l1Network?.id)[0]
         ).toISOString(),
         completed: false,
       },
@@ -830,5 +828,8 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
   text-align: right;
   padding: 20px 20px 0 0;
   color: #555;
+  position: absolute;
+  right: 10px;
+  top: -30px;
 }
 </style>
