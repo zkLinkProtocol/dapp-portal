@@ -396,6 +396,7 @@ const thirdChainMethods = computed(() => {
         label: i.name,
         description: i.description,
         as: "a",
+        target: "_blank",
         href: i.url,
       },
     };
