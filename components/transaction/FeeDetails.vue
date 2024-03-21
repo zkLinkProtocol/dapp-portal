@@ -65,7 +65,7 @@ const props = defineProps({
   },
 });
 
-const displayFeeAsFiat = ref(true);
+const displayFeeAsFiat = ref(false);
 const canDisplayFeeAsFiat = computed(() => (props.feeToken?.price ? true : false));
 
 const totalPrice = computed(() => {
