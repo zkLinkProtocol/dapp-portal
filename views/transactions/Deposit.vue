@@ -809,7 +809,6 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
   padding: 0 0 16px 0;
   justify-content: center;
   color: #F29914;
-  font-family: "Space Mono";
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
