@@ -21,7 +21,7 @@ export const useZkSyncTokensStore = defineStore("zkSyncTokens", () => {
     if (eraNetwork.value.blockExplorerApi) {
       // const networkVal = route.path === "/assets" || route.path === "/balances" ? "" : eraNetwork.value.key;
       const response: Api.Response.Collection<Api.Response.Token> = await $fetch(
-        `${eraNetwork.value.blockExplorerApi}/tokens?limit=100&key=`
+        `${eraNetwork.value.blockExplorerApi}/tokens?limit=200&key=`
       );
       const explorerTokens = response.items.map(mapApiToken);
       const etherExplorerToken = explorerTokens.find((token) => token.address === ETH_TOKEN.address);
