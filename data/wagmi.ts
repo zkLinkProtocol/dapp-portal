@@ -1,3 +1,4 @@
+import { fallback, http } from "@wagmi/core";
 import { zkSync, type Chain, zkSyncSepoliaTestnet, zkSyncTestnet } from "@wagmi/core/chains";
 import { defaultWagmiConfig } from "@web3modal/wagmi";
 
@@ -47,8 +48,12 @@ const getAllChains = () => {
   return chains;
 };
 
+const chains = getAllChains();
 export const wagmiConfig = defaultWagmiConfig({
   chains: getAllChains() as any,
+  transports: Object.fromEntries(
+    chains.map((chain) => [chain.id, fallback(chain.rpcUrls.default.http.map((e) => http(e)))])
+  ),
   projectId: process.env.WALLET_CONNECT_PROJECT_ID,
   metadata,
   enableCoinbase: false,
