@@ -39,7 +39,7 @@ defineProps({
 
   &.size- {
     &md {
-      @apply py-block-padding-1/2;
+      @apply py-block-padding-1/4;
     }
     &sm {
       @apply py-block-padding-1/4;
