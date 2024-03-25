@@ -14,7 +14,7 @@
     
     <div class="flex warnBox">
       <div>
-        Note: Your funds will be locked for a max of 30 days during the campaign
+        Note: Your funds will be locked for a max of 30 days during the campaign. <span class="font-bold">If you are participating in the OKX Cryptopedia, kindly visit <a href="https://app.zklink.io/bridge" target="_blank" class="underline">https://app.zklink.io/bridge</a> to deposit your assets to ensure successful task verification.</span>
       </div>
     </div>
     <NetworkSelectModal
