@@ -17,7 +17,7 @@
       "src": "iconLg.png",
       "sizes": "512*1512",
       "type": "image/png"
-    },
+    }
   ],
   "iconPath": "icon.png"
 }
