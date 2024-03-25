@@ -170,7 +170,7 @@ const timeAgo = useTimeAgo(props.transfer.timestamp);
   @apply flex items-center gap-4;
 
   .line-button-with-img-image {
-    @apply my-[1.5px] aspect-square h-auto w-12 flex-none self-start;
+    @apply mt-[1.5px] aspect-square h-auto w-9 flex-none self-start;
   }
   .withdrawal-line-body {
     @apply w-full;
