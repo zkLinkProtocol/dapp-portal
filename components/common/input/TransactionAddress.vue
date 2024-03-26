@@ -12,7 +12,7 @@
         </CommonButtonLabel>
       </div>
     </div>
-    <div v-if="inputVisible" class="mt-4">
+    <div v-show="inputVisible" class="mt-4">
       <div class="flex items-center gap-2">
         <CommonInputLine
           v-model.trim="inputted"
