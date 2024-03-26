@@ -90,7 +90,7 @@
         </TypographyCategoryLabel>
 
         <div class="flex flex-col gap-block-gap">
-          <BridgeFromEthereumButton v-if="eraNetwork.l1Network" />
+          <!-- <BridgeFromEthereumButton v-if="eraNetwork.l1Network" /> -->
 
           <CommonCardWithLineButtons v-for="(item, index) in depositMethods" :key="index">
             <DestinationItem v-bind="item.props">
@@ -174,21 +174,19 @@ const zkSyncNetworkDisplay = zkSyncNetworks.filter((e) => !e.hidden);
 
 const depositMethods = computed(() => {
   const methods: { props: Record<string, unknown>; icon?: FunctionalComponent }[] = [];
-  if (!noBalances.value) {
-    zkSyncNetworkDisplay.map((i) => {
-      const obj = {
-        props: {
-          iconUrl: i.logoUrl,
-          key: i.key,
-          label: `Bridge from ${i.l1Network?.name}`,
-          description: `Receive tokens from your ${i.l1Network?.name} account`,
-          as: "a",
-          href: `/?network=${i.key}`,
-        },
-      };
-      methods.push(obj);
-    });
-  }
+  zkSyncNetworkDisplay.map((i) => {
+    const obj = {
+      props: {
+        iconUrl: i.logoUrl,
+        key: i.key,
+        label: `Bridge from ${i.l1Network?.name}`,
+        description: `Receive tokens from your ${i.l1Network?.name} account`,
+        as: "a",
+        href: `/?network=${i.key}`,
+      },
+    };
+    methods.push(obj);
+  });
 
   // const isMainnet = eraNetwork.value.l1Network?.id === mainnet.id;
   const isMainnet = eraNetwork.value.id === mainnet.id; //TODO change to nova chain id
