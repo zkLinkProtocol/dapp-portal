@@ -15,7 +15,7 @@
     },
     {
       "src": "iconLg.png",
-      "sizes": "512*1512",
+      "sizes": "512*512",
       "type": "image/png"
     }
   ],
