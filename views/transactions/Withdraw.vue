@@ -367,16 +367,6 @@ import type { FunctionalComponent } from "vue";
 const showBridge = false;
 const chainList = [
   {
-    "name": "Meson Finance",
-    "description": "https://meson.fi/",
-    "logo": "Meson.svg",
-    "bannerImg": "Meson.jpg",
-    "type": "Infra",
-    "url": "https://meson.fi/",
-    "tiwwerUrl": "https://twitter.com/mesonfi",
-    "discordUrl": "https://discord.com/invite/meson"
-  },
-  {
     "name": "Symbiosis",
     "description": "https://symbiosis.finance/",
     "logo": "Symbiosys.svg",
