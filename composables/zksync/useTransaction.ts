@@ -3,6 +3,7 @@ import { BigNumber, type BigNumberish } from "ethers";
 import { parseEther } from "ethers/lib/utils";
 
 import type { TokenAmount } from "@/types";
+import type { Provider, Signer } from "zksync-ethers";
 
 type TransactionParams = {
   type: "transfer" | "withdrawal";

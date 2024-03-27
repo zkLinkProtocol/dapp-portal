@@ -45,6 +45,18 @@
     <form v-else @submit.prevent="">
       <template v-if="step === 'form'">
         <TransactionWithdrawalsAvailableForClaimAlert />
+        <CommonAlert
+          v-if="type === 'withdrawal' && eraNetwork.l1Network?.id === 1 && !isCustomNode"
+          variant="warning"
+          :icon="ExclamationTriangleIcon"
+          class="mb-block-gap"
+        >
+          <p>
+            Starting from {{ manualFinalizationFormattedLocalDate }} you will need to manually claim your funds after a
+            24 hour withdrawal delay. This requires paying another transaction fee on
+            {{ eraNetwork.l1Network?.name }} network.
+          </p>
+        </CommonAlert>
         <CommonInputTransactionAmount
           v-model="amount"
           v-model:error="amountError"
@@ -309,6 +321,18 @@ import WithdrawalSubmitted from "@/views/transactions/WithdrawalSubmitted.vue";
 import type { FeeEstimationParams } from "@/composables/zksync/useFee";
 import type { Token, TokenAmount } from "@/types";
 import type { BigNumberish } from "ethers";
+
+const manualWithdrawalFinalizationStartDate = new Date(Date.UTC(2024, 3, 1, 0, 0, 0)); // 1st of April 2024 00:00:00 UTC
+const manualFinalizationFormattedLocalDate =
+  manualWithdrawalFinalizationStartDate.toLocaleDateString(undefined, {
+    month: "long",
+    day: "numeric",
+  }) +
+  " " +
+  manualWithdrawalFinalizationStartDate.toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
 
 const props = defineProps({
   type: {
