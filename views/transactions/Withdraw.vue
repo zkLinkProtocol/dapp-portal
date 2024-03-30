@@ -366,16 +366,16 @@ import { useNetworkStore } from "@/store/network";
 import type { FunctionalComponent } from "vue";
 const showBridge = false;
 const chainList = [
-  {
-    "name": "Symbiosis",
-    "description": "https://symbiosis.finance/",
-    "logo": "Symbiosys.svg",
-    "bannerImg": "Symbiosys.jpg",
-    "type": "Defi",
-    "url": "https://symbiosis.finance/",
-    "tiwwerUrl": "https://twitter.com/symbiosis_fi",
-    "discordUrl": "https://discord.com/invite/YHgDSJ42eG"
-  },
+  // {
+  //   "name": "Symbiosis",
+  //   "description": "https://symbiosis.finance/",
+  //   "logo": "Symbiosys.svg",
+  //   "bannerImg": "Symbiosys.jpg",
+  //   "type": "Defi",
+  //   "url": "https://symbiosis.finance/",
+  //   "tiwwerUrl": "https://twitter.com/symbiosis_fi",
+  //   "discordUrl": "https://discord.com/invite/YHgDSJ42eG"
+  // },
   {
     "name": "Owlto Finance",
     "description": "https://owlto.finance/",
