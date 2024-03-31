@@ -210,17 +210,17 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           depositTx.gasLimit = fee.gasLimit;
         }
 
-        if (this._providerL2().isLineaChain()) {
-          const fee = await LineaProvider.attachEstimateFee()({
-            from: depositTx.from,
-            to: depositTx.to,
-            value: depositTx.value?.toHexString() ?? "0x",
-            data: depositTx.data,
-          });
-          console.log("linea fee for ERC20", fee);
-          // TODO will use the gas price data from @rainbow-me/fee-suggestions
-          depositTx.gasLimit = fee.gasLimit;
-        }
+        // if (this._providerL2().isLineaChain()) {
+        //   const fee = await LineaProvider.attachEstimateFee()({
+        //     from: depositTx.from,
+        //     to: depositTx.to,
+        //     value: depositTx.value?.toHexString() ?? "0x",
+        //     data: depositTx.data,
+        //   });
+        //   console.log("linea fee for ERC20", fee);
+        //   // TODO will use the gas price data from @rainbow-me/fee-suggestions
+        //   depositTx.gasLimit = fee.gasLimit;
+        // }
 
         return await this._providerL2().getPriorityOpResponse(await this._signerL1().sendTransaction(depositTx));
       }
@@ -275,13 +275,13 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         });
         return fee;
       }
-      if (this._providerL2().isLineaChain()) {
-        const fee = await LineaProvider.attachEstimateFee()({
-          ...estimateTx,
-          value: estimateTx.value.toHexString(),
-        });
-        return fee;
-      }
+      // if (this._providerL2().isLineaChain()) {
+      //   const fee = await LineaProvider.attachEstimateFee()({
+      //     ...estimateTx,
+      //     value: estimateTx.value.toHexString(),
+      //   });
+      //   return fee;
+      // }
 
       baseGasLimit = await this._providerL1().estimateGas(estimateTx);
       return {
@@ -678,17 +678,17 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         requestExecuteTx.gasLimit = fee.gasLimit;
       }
 
-      if (this._providerL2().isLineaChain()) {
-        const fee = await LineaProvider.attachEstimateFee()({
-          from: requestExecuteTx.from,
-          to: requestExecuteTx.to,
-          value: requestExecuteTx.value?.toHexString() ?? "0x",
-          data: requestExecuteTx.data,
-        });
-        console.log("linea fee", fee);
-        // TODO will use the gas price data from @rainbow-me/fee-suggestions
-        requestExecuteTx.gasLimit = fee.gasLimit;
-      }
+      // if (this._providerL2().isLineaChain()) {
+      //   const fee = await LineaProvider.attachEstimateFee()({
+      //     from: requestExecuteTx.from,
+      //     to: requestExecuteTx.to,
+      //     value: requestExecuteTx.value?.toHexString() ?? "0x",
+      //     data: requestExecuteTx.data,
+      //   });
+      //   console.log("linea fee", fee);
+      //   // TODO will use the gas price data from @rainbow-me/fee-suggestions
+      //   requestExecuteTx.gasLimit = fee.gasLimit;
+      // }
 
       return this._providerL2().getPriorityOpResponse(await this._signerL1().sendTransaction(requestExecuteTx));
     }
