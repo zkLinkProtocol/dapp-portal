@@ -5,7 +5,7 @@ import { parseEther } from "ethers/lib/utils";
 import useTimedCache from "@/composables/useTimedCache";
 
 import type { Token, TokenAmount } from "@/types";
-import type { PublicClient } from "@wagmi/core";
+import type { PublicClient } from "viem";
 import type { BigNumberish } from "ethers";
 import type { Ref } from "vue";
 import type { L1Signer } from "@/zksync-web3-nova/src";
