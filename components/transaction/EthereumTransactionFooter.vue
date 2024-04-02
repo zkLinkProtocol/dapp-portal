@@ -41,17 +41,12 @@
             The current version of your {{ walletName }} wallet may not support {{ l1Network.name }}
           </slot>
         </CommonButton>
-        <CommonButton
-          v-else-if="walletName === 'OKX'"
-          variant="primary"
-          class="w-full"
-          @click="onboardStore.setCorrectNetwork(getNetworkInfo().l1Network?.id)"
-        >
+        <!--//TODO metamask wallect connect cannot work, add manually switch network-->
+        <CommonButton v-else-if="walletName === 'MetaMask'" disabled variant="primary" class="w-full">
           <slot v-bind="{ l1Network, walletName }" name="change-network-manual">
-            Change wallet network to {{ l1Network.name }}
+            Change network manually to {{ l1Network.name }} in your {{ walletName }} wallet
           </slot>
         </CommonButton>
-        <!--//TODO metamask wallect connect cannot work, add manually switch network-->
         <CommonButton
           v-else
           variant="primary"
@@ -59,7 +54,7 @@
           @click="onboardStore.setCorrectNetwork(getNetworkInfo().l1Network?.id)"
         >
           <slot v-bind="{ l1Network, walletName }" name="change-network-manual">
-            Change network manually to {{ l1Network.name }} in your {{ walletName }} wallet
+            Change wallet network to {{ l1Network.name }}
           </slot>
         </CommonButton>
       </template>
@@ -132,7 +127,6 @@ const buttonStep = computed(() => {
     return "continue";
   }
 });
-
 const continueInWalletTipDisplayed = computed(() => {
   if (buttonStep.value === "network" && switchingNetworkInProgress.value) {
     return true;
