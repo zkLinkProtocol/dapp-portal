@@ -1,26 +1,25 @@
+import { injected, safe, walletConnect } from "@wagmi/connectors";
 import {
-  configureChains,
-  createConfig,
   getAccount,
-  getNetwork,
+  getConnections,
+  getConnectors,
   getPublicClient,
   getWalletClient,
-  InjectedConnector,
-  switchNetwork as switchWalletNetwork,
+  http,
+  reconnect,
+  switchChain as switchWalletNetwork,
   disconnect as walletDisconnect,
   watchAccount,
-  watchNetwork,
 } from "@wagmi/core";
-import { SafeConnector } from "@wagmi/connectors/safe";
-import { WalletConnectConnector } from "@wagmi/core/connectors/walletConnect";
-import { publicProvider } from "@wagmi/core/providers/public";
-import { createWeb3Modal } from "@web3modal/wagmi";
-import type { ZkSyncNetwork } from "@/data/networks";
+import { createWeb3Modal, defaultWagmiConfig } from "@web3modal/wagmi";
+import { type Chain, createClient } from "viem";
+
 import useColorMode from "@/composables/useColorMode";
 import useNetworks from "@/composables/useNetworks";
 import useObservable from "@/composables/useObservable";
 
-import type { Chain } from "@wagmi/core";
+import type { ZkSyncNetwork } from "@/data/networks";
+import type { Connector } from "@wagmi/core";
 
 import { useRuntimeConfig } from "#imports";
 import { confirmedSupportedWallets, disabledWallets } from "@/data/wallets";
@@ -36,8 +35,8 @@ export const useOnboardStore = defineStore("onboard", () => {
       network: "zklink-nova",
       nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
       rpcUrls: {
-        default: { http: [network.rpcUrl], webSocket:['wss://rpc.zklink.io'] },
-        public: { http: [network.rpcUrl] , webSocket:['wss://rpc.zklink.io'] },
+        default: { http: [network.rpcUrl], webSocket: ["wss://rpc.zklink.io"] },
+        public: { http: [network.rpcUrl], webSocket: ["wss://rpc.zklink.io"] },
       },
       blockExplorers: {
         default: { name: "zkLink Nova Explorer", url: "https://explorer.zklink.io" },
@@ -66,7 +65,6 @@ export const useOnboardStore = defineStore("onboard", () => {
   const { selectedColorMode } = useColorMode();
   const { selectedNetwork, l1Network } = storeToRefs(useNetworkStore());
 
-  const { publicClient } = configureChains(extendedChains, [publicProvider()]);
   const metadata = {
     name: "zkLink Nova Portal",
     description: "zkLink Nova Portal - view balances, transfer and bridge tokens",
@@ -75,56 +73,71 @@ export const useOnboardStore = defineStore("onboard", () => {
   };
   console.log("extendedChains", extendedChains);
   console.log("selectedNetwork", selectedNetwork.value);
-  const wagmiConfig = createConfig({
-    autoConnect: true,
+  const wagmiConfig = defaultWagmiConfig({
+    chains: extendedChains,
+    projectId: env.walletConnectProjectID,
+    metadata,
     connectors: [
-      new SafeConnector({
-        chains: extendedChains,
-        options: {
-          allowedDomains: [/app.safe.global$/],
-          debug: true,
-        },
+      injected(),
+      safe({
+        allowedDomains: [/app.safe.global$/],
+        debug: true,
       }),
-      new WalletConnectConnector({
-        chains: extendedChains,
-        options: { projectId: env.walletConnectProjectID, showQrModal: false, metadata },
-      }),
-      new InjectedConnector({ chains: extendedChains, options: { shimDisconnect: true } }),
+      walletConnect({ projectId: env.walletConnectProjectID, showQrModal: false, metadata }),
     ],
-    publicClient,
+    client: ({ chain }) => {
+      return createClient({ chain, transport: http() });
+    },
   });
+  reconnect(wagmiConfig);
 
-  const account = ref(getAccount());
-  const network = ref(getNetwork());
+  const account = ref(getAccount(wagmiConfig));
+  const network = ref(getAccount(wagmiConfig));
   const connectingWalletError = ref<string | undefined>();
-  const connectorName = ref(wagmiConfig.connector?.name);
+  const connectorName = ref<string | undefined>(); // ref(wagmiConfig.connector?.name);
   const walletName = ref<string | undefined>();
+  const wagmiConnector = ref<Connector | undefined>();
   const walletNotSupported = computed(() => {
-    if (!walletName.value || !wagmiConfig.connector) return false;
+    if (!walletName.value || !wagmiConnector) return false;
     console.log("walletName.value", walletName.value);
-    console.log("wagmiConfig.connector", wagmiConfig.connector);
+    console.log("wagmiConfig.connector", wagmiConnector);
     console.log("confirmedSupportedWallets", confirmedSupportedWallets);
     const isWalletNotSupported = !confirmedSupportedWallets.find(
-      (wallet) => wallet.walletName === walletName.value && wallet.type === wagmiConfig.connector?.id
+      (wallet) => wallet.walletName === walletName.value && wallet.type === wagmiConnector?.type
     );
     console.log("isWalletNotSupported", isWalletNotSupported);
     return isWalletNotSupported;
   });
   const identifyWalletName = async () => {
-    const provider = await wagmiConfig.connector?.getProvider();
-    const name = provider?.session?.peer?.metadata?.name;
+    const connectors = getConnectors(wagmiConfig);
+    console.log("connectors: ", connectors);
 
-    if (!name && wagmiConfig.connector?.name !== "WalletConnect") {
-      walletName.value = wagmiConfig.connector?.name.replace(/ Wallet$/, "").trim();
-      console.log("wagmiConfig.connector?.name------------>", wagmiConfig.connector?.name);
+    // const client = await getWalletClient(wagmiConfig);
+    // console.log("client: ", client);
+    const connections = getConnections(wagmiConfig);
+    console.log("connections: ", connections);
+    const connector = connections?.[0]?.connector;
+    wagmiConnector.value = connector;
+    connectorName.value = connector?.name;
+    let name = "";
+    if (connections?.[0]?.connector.getProvider) {
+      const provider: any = await connections?.[0]?.connector.getProvider();
+      name = provider?.session?.peer?.metadata?.name;
+    } else {
+      name = connector?.name;
+    }
+
+    if (!name && connector?.name !== "WalletConnect") {
+      walletName.value = connector?.name.replace(/ Wallet$/, "").trim();
+      console.log("wagmiConfig.connector?.name------------>", connector?.name);
     } else {
       walletName.value = name?.replace(/ Wallet$/, "").trim();
       console.log("name--------------->", name);
     }
 
-    if (walletName.value && wagmiConfig.connector) {
+    if (walletName.value && connector) {
       const isWalletDisabled = !!disabledWallets.find(
-        (wallet) => wallet.walletName === walletName.value && wallet.type === wagmiConfig.connector?.id
+        (wallet) => wallet.walletName === walletName.value && wallet.type === connector?.type
       );
       if (isWalletDisabled) throw new Error(`Unfortunately ${walletName.value} wallet is not supported at the moment!`);
     }
@@ -133,13 +146,14 @@ export const useOnboardStore = defineStore("onboard", () => {
   const web3modal = createWeb3Modal({
     wagmiConfig,
     projectId: env.walletConnectProjectID,
-    chains: extendedChains,
+    connectorImages: {},
     excludeWalletIds: ["bc949c5d968ae81310268bf9193f9c9fb7bb4e1283e1284af8f2bd4992535fd6"],
     featuredWalletIds: [
       // "1ae92b26df02f0abca6304df07debccd18262fdf5fe82daa81593582dac9a369",rainbow
-      // "971e689d0a5be527bac79629b4ee9b925e82208e5168b733496a09c0faed0709", // okx wallet 
+      "971e689d0a5be527bac79629b4ee9b925e82208e5168b733496a09c0faed0709", // okx wallet
       "8a0ee50d1f22f6651afcae7eb4253e52a3310b90af5daef78a8c4929a9bb99d4", // binance web3 wallet
       "c7708575a2c3c9e6a8ab493d56cdcc56748f03956051d021b8cd8d697d9a3fd2", // fox wallet
+      "aba1f652e61fd536e8a7a5cd5e0319c9047c435ef8f7e907717361ff33bb3588",
       // "38f5d18bd8522c244bdd70cb4a68e0e718865155811c043f052fb9f1c51de662",//bitget
     ],
     // termsConditionsUrl: "https://zksync.io/terms",
@@ -147,43 +161,46 @@ export const useOnboardStore = defineStore("onboard", () => {
     themeMode: selectedColorMode.value,
   });
 
-  watchAccount(async (updatedAccount) => {
-    // There is a bug in @wagmi/core@0.10.11 or @web3modal/ethereum@^2.3.7
-    // On page update or after using `ethereumClient.disconnect` method
-    // the account state is replaced with "connecting" state
-    if (updatedAccount.status === "connecting" && !updatedAccount.connector) {
-      return;
-    }
-    try {
-      await identifyWalletName();
-      console.log("updatedAccount", updatedAccount.address);
-      account.value = updatedAccount;
-      connectorName.value = wagmiConfig.connector?.name;
-    } catch (err) {
-      disconnect();
-      const error = formatError(err as Error);
-      if (error) {
-        connectingWalletError.value = error.message;
+  watchAccount(wagmiConfig, {
+    onChange: async (updatedAccount) => {
+      // There is a bug in @wagmi/core@0.10.11 or @web3modal/ethereum@^2.3.7
+      // On page update or after using `ethereumClient.disconnect` method
+      // the account state is replaced with "connecting" state
+      if (updatedAccount.status === "connecting" && !updatedAccount.connector) {
+        return;
       }
-    }
+      try {
+        await identifyWalletName();
+        console.log("updatedAccount", updatedAccount.address);
+        account.value = updatedAccount;
+        network.value = updatedAccount;
+        connectorName.value = wagmiConnector?.value?.name;
+      } catch (err) {
+        disconnect();
+        const error = formatError(err as Error);
+        if (error) {
+          connectingWalletError.value = error.message;
+        }
+      }
+    },
   });
-  watchNetwork((updatedNetwork) => {
-    console.log("updatedNetwork", updatedNetwork.chain?.id);
-    const currentSelectChain = updatedNetwork.chains.find((chain) => chain.id === selectedNetwork.value.l1Network?.id)
-    if (currentSelectChain && wagmiConfig.connector?.id === "walletConnect") {
-      console.log("currentSelectChain", currentSelectChain.id);
-      updatedNetwork.chain = currentSelectChain;
-      console.log("updatedNetwork after++", updatedNetwork.chain?.id);
-    }
-    network.value = updatedNetwork;
-  });
-  watch(selectedColorMode, (colorMode) => {
-    web3modal.setThemeMode(colorMode);
-  });
+  // watchNetwork((updatedNetwork) => {
+  //   console.log("updatedNetwork", updatedNetwork.chain?.id);
+  //   const currentSelectChain = updatedNetwork.chains.find((chain) => chain.id === selectedNetwork.value.l1Network?.id);
+  //   if (currentSelectChain && wagmiConfig.connector?.id === "walletConnect") {
+  //     console.log("currentSelectChain", currentSelectChain.id);
+  //     updatedNetwork.chain = currentSelectChain;
+  //     console.log("updatedNetwork after++", updatedNetwork.chain?.id);
+  //   }
+  //   network.value = updatedNetwork;
+  // });
+  // watch(selectedColorMode, (colorMode) => {
+  //   web3modal.setThemeMode(colorMode);
+  // });
 
   const openModal = () => web3modal.open();
   const disconnect = () => {
-    walletDisconnect();
+    walletDisconnect(wagmiConfig);
   };
 
   const isCorrectNetworkSet = computed(() => {
@@ -192,7 +209,7 @@ export const useOnboardStore = defineStore("onboard", () => {
   });
   const switchNetworkById = async (chainId: number, networkName?: string) => {
     try {
-      return await switchWalletNetwork({ chainId });
+      return await switchWalletNetwork(wagmiConfig, { chainId });
     } catch (err) {
       if (err instanceof Error && err.message.includes("does not support programmatic chain switching")) {
         throw new Error(`Please switch network manually to "${networkName}" in your ${walletName.value} wallet`);
@@ -211,7 +228,7 @@ export const useOnboardStore = defineStore("onboard", () => {
     },
     { cache: false }
   );
-  const setCorrectNetwork = async (id:any) => {
+  const setCorrectNetwork = async (id: any) => {
     return await switchNetworkById(id).catch(() => undefined);
   };
 
@@ -223,30 +240,33 @@ export const useOnboardStore = defineStore("onboard", () => {
     }
   );
 
-  const {subscribe: subscribeOnNetworkChange, notify: notifyOnNetworkChange} = useObservable<number | undefined>();
+  const { subscribe: subscribeOnNetworkChange, notify: notifyOnNetworkChange } = useObservable<number | undefined>();
   watch(
     () => network.value.chain?.id,
     () => {
       notifyOnNetworkChange(network.value.chain?.id);
     }
-  )
+  );
 
   const getWallet = async (chainId: number | undefined = l1Network.value?.id) => {
-    console.log("getWallet chainId", chainId)
+    console.log("getWallet chainId", chainId);
     //TODO check if chainId is available in the wallet, if not, catch the error and show a message to the user, and let user can to retry manually
-    const client = await getWalletClient(chainId ? { chainId } : undefined);
+    const client = await getWalletClient(wagmiConfig, chainId ? { chainId } : undefined);
     if (!client) throw new Error("Wallet is not available");
 
     return client;
   };
 
+  const config = ref(wagmiConfig);
   return {
+    wagmiConfig: computed(() => config.value),
     account: computed(() => account.value),
     isConnected: computed(() => !!account.value.address),
     network: computed(() => network.value),
     isConnectingWallet: computed(() => {
-      console.log("account.value", account.value.isConnecting, account.value.isReconnecting)
-      return account.value.isReconnecting || account.value.isConnecting}),
+      console.log("account.value", account.value.isConnecting, account.value.isReconnecting);
+      return account.value.isReconnecting || account.value.isConnecting;
+    }),
     connectingWalletError,
     connectorName,
     walletName: computed(() => walletName.value),
@@ -261,9 +281,9 @@ export const useOnboardStore = defineStore("onboard", () => {
     switchNetworkById,
 
     getWallet,
-    getPublicClient: (chainId:any = '') => {
+    getPublicClient: (chainId: any = "") => {
       if (!l1Network.value) throw new Error(`L1 network is not available on ${selectedNetwork.value.name}`);
-      return getPublicClient({ chainId: chainId || l1Network.value?.id });
+      return getPublicClient(wagmiConfig, { chainId: chainId || l1Network.value?.id });
     },
 
     subscribeOnAccountChange,

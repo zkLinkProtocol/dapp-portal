@@ -15,10 +15,6 @@ import { formatError } from "@/utils/formatters";
 import useNetworks from "@/composables/useNetworks";
 import { Provider } from "@/zksync-web3-nova/src";
 import { useNetworkStore } from "@/store/network";
-import {
-  getNetwork,
-  watchNetwork
-} from "@wagmi/core";
 
 export default (transactionInfo: ComputedRef<TransactionInfo>) => {
   const status = ref<"not-started" | "processing" | "waiting-for-signature" | "sending" | "done">("not-started");
@@ -27,7 +23,7 @@ export default (transactionInfo: ComputedRef<TransactionInfo>) => {
   const onboardStore = useOnboardStore();
   const providerStore = useZkSyncProviderStore();
   const tokensStore = useZkSyncTokensStore();
-  const { isCorrectNetworkSet } = storeToRefs(onboardStore);
+  const { isCorrectNetworkSet, network } = storeToRefs(onboardStore);
   const { tokens } = storeToRefs(tokensStore);
   const { primaryNetwork, zkSyncNetworks } = useNetworks();
 
@@ -134,7 +130,7 @@ export default (transactionInfo: ComputedRef<TransactionInfo>) => {
     async () => {
       tokensStore.requestTokens();
       const publicClient = onboardStore.getPublicClient();
-
+      if (!publicClient) return;
       const transactionParams = await getTransactionParams();
       const [price, limit] = await Promise.all([
         retry(async () => BigNumber.from((await publicClient.getGasPrice()).toString())),
@@ -163,7 +159,7 @@ export default (transactionInfo: ComputedRef<TransactionInfo>) => {
 
   const commitTransaction = async () => {
     try {
-      const network = ref(getNetwork());
+      // const network = ref(getNetwork());
       error.value = undefined;
 
       status.value = "processing";
@@ -180,7 +176,7 @@ export default (transactionInfo: ComputedRef<TransactionInfo>) => {
       });
 
       status.value = "sending";
-      const receipt = await onboardStore.getPublicClient().waitForTransactionReceipt({
+      const receipt = await onboardStore.getPublicClient()!.waitForTransactionReceipt({
         hash: transactionHash.value!,
         onReplaced: (replacement) => {
           transactionHash.value = replacement.transaction.hash;

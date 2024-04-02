@@ -1,19 +1,22 @@
-import { Address, fetchBalance } from "@wagmi/core";
+import { getBalance } from "@wagmi/core";
 
 import type { Hash, TokenAmount } from "@/types";
+import type { Config } from "@wagmi/core";
+import type { Address } from "viem";
 
 import { l1Networks } from "@/data/networks";
 import { useEthereumBalanceStore } from "@/store/ethereumBalance";
 import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
-import { useZkSyncTokensStore } from "@/store/zksync/tokens";
 import { useSearchtokenStore } from "@/store/searchToken";
+import { useZkSyncTokensStore } from "@/store/zksync/tokens";
 export const useZkSyncEthereumBalanceStore = defineStore("zkSyncEthereumBalances", () => {
   const runtimeConfig = useRuntimeConfig();
   const onboardStore = useOnboardStore();
   const ethereumBalancesStore = useEthereumBalanceStore();
   const tokensStore = useZkSyncTokensStore();
   const { l1Network, selectedNetwork } = storeToRefs(useNetworkStore());
+  const wagmiConfig = onboardStore.wagmiConfig;
   const { account } = storeToRefs(onboardStore);
   const { balance: ethereumBalance } = storeToRefs(ethereumBalancesStore);
   const { l1Tokens } = storeToRefs(tokensStore);
@@ -54,7 +57,7 @@ export const useZkSyncEthereumBalanceStore = defineStore("zkSyncEthereumBalances
     );
     return await Promise.all([
       ...filterL1tokens.map(async (token) => {
-        const amount = await fetchBalance({
+        const amount = await getBalance(wagmiConfig as Config, {
           address: account.value.address!,
           chainId: l1Network.value!.id,
           token: token.address === ETH_TOKEN.l1Address ? undefined : (token.address! as Hash),
@@ -67,7 +70,7 @@ export const useZkSyncEthereumBalanceStore = defineStore("zkSyncEthereumBalances
       ...(searchTokenBalance.value ?? [])
         .filter((token) => !Object.values(l1Tokens.value ?? []).find((e) => e.address === token.address))
         .map(async (e) => {
-          const amount = await fetchBalance({
+          const amount = await getBalance(wagmiConfig as Config, {
             address: account.value.address!,
             chainId: l1Network.value!.id,
             token: e.address === ETH_TOKEN.l1Address ? undefined : (e.address! as Hash),
