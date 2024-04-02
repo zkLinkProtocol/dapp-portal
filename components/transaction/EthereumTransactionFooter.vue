@@ -67,15 +67,14 @@ import { computed } from "vue";
 
 import { storeToRefs } from "pinia";
 
+import useNetworks from "@/composables/useNetworks";
+
+import type { TransactionInfo } from "@/store/zksync/transactionStatus";
+import type { PropType } from "vue";
+
 import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
 import { TransitionAlertScaleInOutTransition } from "@/utils/transitions";
-import type { TransactionInfo } from "@/store/zksync/transactionStatus";
-import useNetworks from "@/composables/useNetworks";
-import {
-  getNetwork,
-  watchNetwork
-} from "@wagmi/core";
 
 const props = defineProps({
   transaction: {
@@ -96,6 +95,7 @@ const {
   switchingNetworkError,
   connectorName,
   walletName,
+  network,
 } = storeToRefs(onboardStore);
 const { selectedNetwork, l1Network } = storeToRefs(useNetworkStore());
 const { primaryNetwork, zkSyncNetworks } = useNetworks();
@@ -103,15 +103,10 @@ const getNetworkInfo = () => {
   const newNetwork = zkSyncNetworks.find(
     (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === props.transaction?.gateway?.toLowerCase()
   );
-  const obj = {l1Network:{id: l1Network.value?.id}}
-  return props.transaction? (newNetwork ?? primaryNetwork): obj;
+  const obj = { l1Network: { id: l1Network.value?.id } };
+  return props.transaction ? newNetwork ?? primaryNetwork : obj;
 };
 
-const network = ref(getNetwork());
-
-watchNetwork((updatedNetwork) => {
-  network.value = updatedNetwork;
-});
 const buttonStep = computed(() => {
   console.log("buttonStep getNetworkInfo().l1Network?.id", getNetworkInfo().l1Network?.id);
   console.log("buttonStep network.value.chain?.id", network.value.chain?.id);

@@ -1,53 +1,55 @@
 import {
-  goerli,
-  mainnet,
-  sepolia,
-  arbitrumSepolia,
-  scrollSepolia,
-  zkSyncSepoliaTestnet,
-  lineaTestnet,
-  linea,
-  mantle,
-  mantleTestnet,
-  zkSync,
   arbitrum,
+  arbitrumSepolia,
+  base,
+  goerli,
+  linea,
+  lineaTestnet,
+  mainnet,
   manta,
   mantaTestnet,
+  mantle,
+  mantleTestnet,
   optimism,
-  base,
+  scrollSepolia,
+  sepolia,
+  zkSync,
+  zkSyncSepoliaTestnet,
 } from "@wagmi/core/chains";
+import { defineChain } from "viem";
+
+import Hyperchains from "@/hyperchains/config.json";
 
 import type { Token } from "@/types";
 import type { Chain } from "@wagmi/core/chains";
+import type { Address } from "viem";
+
 import { PRIMARY_CHAIN_KEY } from "@/zksync-web3-nova/src/utils";
-import { Address } from "@wagmi/core";
-import Hyperchains from "@/hyperchains/config.json";
-import { defineChain } from "viem";
 
 export const blast = /*#__PURE__*/ defineChain({
   id: 81457,
-  name: 'Blast Mainnet',
-  network: 'blast',
+  name: "Blast Mainnet",
+  network: "blast",
   nativeCurrency: {
     decimals: 18,
-    name: 'ETH',
-    symbol: 'ETH',
+    name: "ETH",
+    symbol: "ETH",
   },
   rpcUrls: {
-    default: { http: ['https://rpc.blast.io'] },
-    public: { http: ['https://rpc.blast.io'] },
+    default: { http: ["https://rpc.blast.io"] },
+    public: { http: ["https://rpc.blast.io"] },
   },
   blockExplorers: {
     etherscan: {
-      name: 'Blast Explorer',
-      url: 'https://blastscan.io/',
+      name: "Blast Explorer",
+      url: "https://blastscan.io/",
     },
     default: {
-      name: 'Blast Explorer',
-      url: 'https://blastscan.io/',
+      name: "Blast Explorer",
+      url: "https://blastscan.io/",
     },
-  }
-})
+  },
+});
 
 export const l1Networks = {
   mainnet: {
@@ -479,30 +481,30 @@ export const zkSyncNetworks: ZkSyncNetwork[] = [
 ];
 export const getWaitTime = (id: any) => {
   const nodeType = process.env.NODE_TYPE;
-  const responseTime = 2
-  if (id === (nodeType === "nexus"?mainnet.id: goerli.id)) {
-    return [((12.8 + responseTime) * 60 * 1000 + responseTime), (12.8 + responseTime)];
+  const responseTime = 2;
+  if (id === (nodeType === "nexus" ? mainnet.id : goerli.id)) {
+    return [(12.8 + responseTime) * 60 * 1000 + responseTime, 12.8 + responseTime];
   }
-  if (id === (nodeType === "nexus"?linea.id: lineaTestnet.id)) {
-    return [(1 * 60 * 1000), 1];
+  if (id === (nodeType === "nexus" ? linea.id : lineaTestnet.id)) {
+    return [1 * 60 * 1000, 1];
   }
-  if (id === (nodeType === "nexus"?zkSync.id: zkSyncSepoliaTestnet.id)) {
-    return [((1 + responseTime) * 60 * 1000), (1 + responseTime)];
+  if (id === (nodeType === "nexus" ? zkSync.id : zkSyncSepoliaTestnet.id)) {
+    return [(1 + responseTime) * 60 * 1000, 1 + responseTime];
   }
-  if (id === (nodeType === "nexus"?arbitrum.id: arbitrumSepolia.id)) {
-    return [((1 + responseTime) * 60 * 1000), (1 + responseTime)];
+  if (id === (nodeType === "nexus" ? arbitrum.id : arbitrumSepolia.id)) {
+    return [(1 + responseTime) * 60 * 1000, 1 + responseTime];
   }
-  if (id === (nodeType === "nexus"?mantle.id: mantleTestnet.id)) {
-    return [((1 + responseTime) * 60 * 1000), (1 + responseTime)];
+  if (id === (nodeType === "nexus" ? mantle.id : mantleTestnet.id)) {
+    return [(1 + responseTime) * 60 * 1000, 1 + responseTime];
   }
-  if (id === (nodeType === "nexus"?manta.id: mantaTestnet.id)) {
-    return [((1 + responseTime) * 60 * 1000), (1 + responseTime)];
+  if (id === (nodeType === "nexus" ? manta.id : mantaTestnet.id)) {
+    return [(1 + responseTime) * 60 * 1000, 1 + responseTime];
   }
   if (id === blast.id) {
-    return [((1 + responseTime) * 60 * 1000), (1 + responseTime)];
+    return [(1 + responseTime) * 60 * 1000, 1 + responseTime];
   }
-  return [((2 + responseTime) * 60 * 1000), (2 + responseTime)];
-}
+  return [(2 + responseTime) * 60 * 1000, 2 + responseTime];
+};
 const determineChainList = (): ZkSyncNetwork[] => {
   const zkSyncNetworks: ZkSyncNetwork[] = [];
   const nodeType = process.env.NODE_TYPE || "nexus-goerli";
