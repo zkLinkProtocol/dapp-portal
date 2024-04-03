@@ -102,7 +102,7 @@
       </span>
       <div>Note: Withdrawals will be enabled before 04/13/2024</div>
     </div> -->
-    <div className="banner">
+    <div className="banner" v-if="!route.query.s || route.query.s !== 'okx'">
       <a href="https://app.zklink.io/" target="\_blank">
         <img
           src="/img/banner.svg"
