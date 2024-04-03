@@ -1,14 +1,18 @@
 import { watch } from "vue";
 
 import { useMemoize } from "@vueuse/core";
-import { fetchEnsAddress } from "@wagmi/core";
+import { getEnsAddress as fetchEnsAddress } from "@wagmi/core";
 
 import type { Ref } from "vue";
 
-const getEnsAddress = useMemoize((name: string) => fetchEnsAddress({ name: name, chainId: 1 }));
+import { useOnboardStore } from "@/store/onboard";
 
 export default (ensName: Ref<string>) => {
   const nameToAddress = ref<{ [name: string]: string }>({});
+  const onboardStore = useOnboardStore();
+  const config = onboardStore.wagmiConfig;
+  const getEnsAddress = useMemoize((name: string) => fetchEnsAddress(config, { name: name, chainId: 1 }));
+
   const {
     inProgress,
     error,
