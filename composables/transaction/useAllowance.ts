@@ -3,9 +3,10 @@ import { BigNumber } from "ethers";
 import IERC20 from "@/zksync-web3-nova/abi/IERC20.json";
 
 import type { Hash } from "@/types";
-import type { PublicClient, WalletClient } from "@wagmi/core";
 import type { BigNumberish } from "ethers";
+import type { PublicClient, WalletClient } from "viem";
 import type { Ref } from "vue";
+import { WriteContractParameters } from "@wagmi/core";
 
 export default (
   accountAddress: Ref<string | undefined>,

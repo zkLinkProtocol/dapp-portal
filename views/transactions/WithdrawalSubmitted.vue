@@ -146,6 +146,7 @@ import { computed, watch } from "vue";
 import { ExclamationTriangleIcon } from "@heroicons/vue/24/outline";
 import { storeToRefs } from "pinia";
 
+import useNetworks from "@/composables/useNetworks";
 import { isWithdrawalManualFinalizationRequired } from "@/composables/zksync/useTransaction";
 import useWithdrawalFinalization from "@/composables/zksync/useWithdrawalFinalization";
 
@@ -156,10 +157,6 @@ import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
-import {
-  getNetwork,watchNetwork
-} from "@wagmi/core";
-import useNetworks from "@/composables/useNetworks";
 
 const props = defineProps({
   transaction: {
@@ -172,23 +169,24 @@ const props = defineProps({
   },
 });
 
-const network = ref(getNetwork());
+// const network = ref(getNetwork());
 
-watchNetwork((updatedNetwork) => {
-  network.value = updatedNetwork;
-});
+// watchNetwork((updatedNetwork) => {
+//   network.value = updatedNetwork;
+// });
 const { primaryNetwork, zkSyncNetworks } = useNetworks();
 
-const { selectedNetwork, l1Network,l1BlockExplorerUrl } = storeToRefs(useNetworkStore());
+const { selectedNetwork, l1Network, l1BlockExplorerUrl } = storeToRefs(useNetworkStore());
 const getNetworkInfo = () => {
   const newNetwork = zkSyncNetworks.find(
     (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === props.transaction?.gateway?.toLowerCase()
   );
-  const obj = {l1Network:{id: l1Network.value?.id,blockExplorers:{default:{url:l1BlockExplorerUrl}}}}
-  return props.transaction? (newNetwork ?? primaryNetwork): obj;
+  const obj = { l1Network: { id: l1Network.value?.id, blockExplorers: { default: { url: l1BlockExplorerUrl } } } };
+  return props.transaction ? newNetwork ?? primaryNetwork : obj;
 };
 const l1BlockExplorerUrls = getNetworkInfo().l1Network?.blockExplorers?.default.url;
 const onboardStore = useOnboardStore();
+const network = onboardStore.network;
 const transactionStatusStore = useZkSyncTransactionStatusStore();
 const { eraNetwork, blockExplorerUrl } = storeToRefs(useZkSyncProviderStore());
 const { connectorName, isCorrectNetworkSet } = storeToRefs(onboardStore);
