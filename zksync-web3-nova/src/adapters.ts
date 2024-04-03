@@ -159,6 +159,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     async deposit(transaction: {
       token: Address;
       amount: BigNumberish;
+      toMerge?: boolean;
       to?: Address;
       operatorTip?: BigNumberish;
       bridgeAddress?: Address;
@@ -296,6 +297,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     async getDepositTx(transaction: {
       token: Address;
       amount: BigNumberish;
+      toMerge?: boolean;
       to?: Address;
       operatorTip?: BigNumberish;
       bridgeAddress?: Address;
@@ -350,18 +352,21 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           ...tx,
         };
       } else {
-        const args: [Address, Address, BigNumberish, BigNumberish, BigNumberish] = [
+        const args: [Address, Address, BigNumberish, BigNumberish, BigNumberish, Address] = [
           to,
           token,
           amount,
           tx.l2GasLimit,
           tx.gasPerPubdataByte,
+          to,
         ];
-
+        debugger;
         overrides.value ??= baseCost.add(operatorTip);
         await checkBaseCost(baseCost, overrides.value);
 
-        return await bridgeContracts.erc20.populateTransaction.deposit(...args, overrides);
+        return tx.toMerge
+          ? await bridgeContracts.erc20.populateTransaction.depositToMerge(...args, overrides)
+          : await bridgeContracts.erc20.populateTransaction.deposit(...args, overrides);
       }
     }
 
@@ -517,7 +522,11 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
     //for mantle and manta
     async getL1FeeForOp(calldata: string): Promise<BigNumber> {
-      if (!this._providerL2().isMantleChain() && !this._providerL2().isMantaChain() && !this._providerL2().isBlastChain()) {
+      if (
+        !this._providerL2().isMantleChain() &&
+        !this._providerL2().isMantaChain() &&
+        !this._providerL2().isBlastChain()
+      ) {
         return BigNumber.from(0);
       }
       const abi = [
@@ -846,7 +855,12 @@ async function insertGasPrice(
   overrides: ethers.PayableOverrides
 ) {
   if (!overrides.gasPrice && !overrides.maxFeePerGas) {
-    if (l2Provider.isArbitrumChain() || l2Provider.isMantaChain() || l2Provider.isMantleChain() || l2Provider.isBlastChain()) {
+    if (
+      l2Provider.isArbitrumChain() ||
+      l2Provider.isMantaChain() ||
+      l2Provider.isMantleChain() ||
+      l2Provider.isBlastChain()
+    ) {
       //if arbitrum
       console.log("arbitrum chain");
       console.log("manta chain, mantle chain, arbitrum chain, only support gasPrice");
