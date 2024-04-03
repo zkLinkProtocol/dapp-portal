@@ -11,10 +11,15 @@
     >
       Confirm transaction
     </PageTitle>
-    
-    <div class="flex warnBox">
+
+    <div class="warnBox flex">
       <div>
-        Note: Your funds will be locked for a max of 30 days during the campaign. <span class="font-bold">If you are participating in the OKX Cryptopedia or Nova Parade, kindly visit <a href="https://app.zklink.io/bridge" target="_blank" class="underline">https://app.zklink.io/bridge</a> to deposit your assets to ensure successful task verification and and to earn Nova Points.</span>
+        Note: Your funds will be locked for a max of 30 days during the campaign.
+        <span class="font-bold"
+          >If you are participating in the OKX Cryptopedia or Nova Parade, kindly visit
+          <a href="https://app.zklink.io/bridge" target="_blank" class="underline">https://app.zklink.io/bridge</a> to
+          deposit your assets to ensure successful task verification and and to earn Nova Points.</span
+        >
       </div>
     </div>
     <NetworkSelectModal
@@ -94,12 +99,12 @@
             </div>
           </template>
         </CommonInputTransactionAddress>
-        <div class="flex sm:mt-block-gap justify-between gap-3">
-          <CommonButton class="flex-1" :class="{'merge':isMerge}" @click="isMerge = true">
-            Merge <img src="/img/Shape.svg" class="w-3 h-3 ml-2" alt="">
+        <div class="flex justify-between gap-3 sm:mt-block-gap" v-if="mergeSupported">
+          <CommonButton class="flex-1" :class="{ merge: isMerge }" @click="isMerge = true">
+            Merge <img src="/img/Shape.svg" class="ml-2 h-3 w-3" alt="" />
           </CommonButton>
-          <CommonButton class="flex-1" :class="{'notMerge':!isMerge}" @click="isMerge = false">
-            Not Merge <img src="/img/Shape.svg" class="w-3 h-3 ml-2" alt="">
+          <CommonButton class="flex-1" :class="{ notMerge: !isMerge }" @click="isMerge = false">
+            Not Merge <img src="/img/Shape.svg" class="ml-2 h-3 w-3" alt="" />
           </CommonButton>
         </div>
         <CommonButton
@@ -158,7 +163,9 @@
               :loading="feeLoading"
             />
           </transition>
-          <CommonButtonLabel as="span" class="ml-auto text-right">~ {{getWaitTime(eraNetwork.l1Network?.id)[1]}} minutes</CommonButtonLabel>
+          <CommonButtonLabel as="span" class="ml-auto text-right"
+            >~ {{ getWaitTime(eraNetwork.l1Network?.id)[1] }} minutes</CommonButtonLabel
+          >
         </div>
         <transition v-bind="TransitionAlertScaleInOutTransition">
           <CommonAlert v-if="!enoughBalanceToCoverFee" class="mt-4" variant="error" :icon="ExclamationTriangleIcon">
@@ -362,6 +369,7 @@ import { storeToRefs } from "pinia";
 import EthereumTransactionFooter from "@/components/transaction/EthereumTransactionFooter.vue";
 
 import useAllowance from "@/composables/transaction/useAllowance";
+import useMergeToken from "@/composables/transaction/useMergeToken";
 import useInterval from "@/composables/useInterval";
 import useNetworks from "@/composables/useNetworks";
 import useEcosystemBanner from "@/composables/zksync/deposit/useEcosystemBanner";
@@ -375,6 +383,7 @@ import type { BigNumberish } from "ethers";
 
 import { useRoute, useRouter } from "#app";
 import { customBridgeTokens } from "@/data/customBridgeTokens";
+import { getWaitTime } from "@/data/networks";
 import { useDestinationsStore } from "@/store/destinations";
 import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
@@ -391,7 +400,6 @@ import { silentRouterChange } from "@/utils/helpers";
 import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/transitions";
 import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
-import { getWaitTime } from "@/data/networks";
 
 const route = useRoute();
 const router = useRouter();
@@ -453,7 +461,7 @@ const selectedTokenAddress = ref<string | undefined>(
 );
 const selectedToken = computed<Token | undefined>(() => {
   if (!selectedTokenAddress.value) {
-    if(!selectedNetwork.value.isEthGasToken && defaultToken.value?.address === ETH_ADDRESS){
+    if (!selectedNetwork.value.isEthGasToken && defaultToken.value?.address === ETH_ADDRESS) {
       return availableTokens.value[1];
     }
     return defaultToken.value;
@@ -461,9 +469,9 @@ const selectedToken = computed<Token | undefined>(() => {
   const res =
     availableTokens.value.find((e) => e.address === selectedTokenAddress.value) ||
     availableBalances.value.find((e) => e.address === selectedTokenAddress.value) ||
-    defaultToken.value
-  
-  if(!selectedNetwork.value.isEthGasToken && res.address === ETH_ADDRESS) {
+    defaultToken.value;
+
+  if (!selectedNetwork.value.isEthGasToken && res.address === ETH_ADDRESS) {
     return availableTokens.value[1];
   }
   return res;
@@ -485,6 +493,9 @@ const amountInputTokenAddress = computed({
 const tokenBalance = computed<BigNumberish | undefined>(() => {
   return balance.value?.find((e) => e.address === selectedToken.value?.address)?.amount;
 });
+const { result: mergeTokenInfo, inProgress: mergeTokenInfoInProgress } = useMergeToken(
+  computed(() => selectedToken.value?.l2Address)
+);
 
 const {
   result: allowance,
@@ -587,11 +598,24 @@ const totalComputeAmount = computed(() => {
 });
 const enoughBalanceForTransaction = computed(() => !amountError.value);
 
+const mergeSupported = computed(() => {
+  if (!selectedToken.value || !mergeTokenInfo.value || !amount.value) return false;
+  // console.log('mergeTokenInfo: ', mergeTokenInfo.value)
+  console.log(selectedToken.value);
+  const amountVal = decimalToBigNumber(amount.value, selectedToken.value.decimals);
+  return (
+    mergeTokenInfo.value?.isSupported &&
+    !mergeTokenInfo.value?.isLocked &&
+    amountVal.add(mergeTokenInfo.value?.balance).lte(mergeTokenInfo.value?.depositLimit)
+  );
+});
+
 const transaction = computed<
   | {
       token: TokenAmount;
       from: { address: string; destination: TransactionDestinfonboardStoreation };
       to: { address: string; destination: TransactionDestination };
+      toMerge?: boolean;
     }
   | undefined
 >(() => {
@@ -612,6 +636,7 @@ const transaction = computed<
       address: toAddress,
       destination: destination.value,
     },
+    toMerge: isMerge.value
   };
 });
 const transactionHasGateway = ref<TransactionInfo>();
@@ -718,6 +743,7 @@ const makeTransaction = async () => {
       to: transaction.value!.to.address,
       tokenAddress: transaction.value!.token.address,
       amount: transaction.value!.token.amount,
+      toMerge: transaction.value!.toMerge
     },
     feeValues.value!
   );
@@ -794,7 +820,7 @@ const fetchBalances = async (force = false) => {
 };
 fetchBalances();
 
-const unsubscribeFetchBalance = onboardStore.subscribeOnAccountChange((newAddress:any) => {
+const unsubscribeFetchBalance = onboardStore.subscribeOnAccountChange((newAddress: any) => {
   if (!newAddress) return;
   estimate();
   fetchBalances();
@@ -806,38 +832,37 @@ onBeforeUnmount(() => {
 });
 
 onboardStore.subscribeOnNetworkChange((newchainId) => {
-  if(!newchainId) return;
+  if (!newchainId) return;
   resetFeeImmediately();
 });
-
 </script>
 
 <style lang="scss" scoped>
-.warnBox1{
+.warnBox1 {
   display: flex;
-  a{
-    color: #0BC48F;
+  a {
+    color: #0bc48f;
   }
 }
-.warnBox{
+.warnBox {
   display: inline-flex;
   padding: 0 0 16px 0;
   justify-content: center;
-  color: #F29914;
+  color: #f29914;
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
   line-height: normal;
-  img{
+  img {
     width: 21px;
     height: 21px;
     margin-right: 5px;
   }
-  a{
-    color: #0BC48F;
+  a {
+    color: #0bc48f;
   }
 }
-.waitTime{
+.waitTime {
   width: 100%;
   text-align: right;
   padding: 20px 20px 0 0;
@@ -846,12 +871,12 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
   right: 10px;
   top: -30px;
 }
-.merge{
+.merge {
   border-radius: 16px;
-  background: rgba(3, 212, 152, 0.50)!important;
+  background: rgba(3, 212, 152, 0.5) !important;
 }
-.notMerge{
+.notMerge {
   border-radius: 16px;
-  background: rgba(23, 85, 244, 0.25)!important;
+  background: rgba(23, 85, 244, 0.25) !important;
 }
 </style>

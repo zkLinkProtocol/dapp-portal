@@ -24,9 +24,11 @@ import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 interface IL1BridgeInterface extends ethers.utils.Interface {
   functions: {
     "claimFailedDeposit(address,address,bytes32,uint256,uint256,uint16,bytes32[])": FunctionFragment;
-    "deposit(address,address,uint256,uint256,uint256)": FunctionFragment;
+    "deposit(address,address,uint256,uint256,uint256,address)": FunctionFragment;
+    "depositToMerge(address,address,uint256,uint256,uint256,address)": FunctionFragment;
     "finalizeWithdrawal(uint256,uint256,uint16,bytes,bytes32[])": FunctionFragment;
     "isWithdrawalFinalized(uint256,uint256)": FunctionFragment;
+    "l2Bridge()": FunctionFragment;
     "l2TokenAddress(address)": FunctionFragment;
   };
 
@@ -44,7 +46,11 @@ interface IL1BridgeInterface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "deposit",
-    values: [string, string, BigNumberish, BigNumberish, BigNumberish]
+    values: [string, string, BigNumberish, BigNumberish, BigNumberish, string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "depositToMerge",
+    values: [string, string, BigNumberish, BigNumberish, BigNumberish, string]
   ): string;
   encodeFunctionData(
     functionFragment: "finalizeWithdrawal",
@@ -54,6 +60,7 @@ interface IL1BridgeInterface extends ethers.utils.Interface {
     functionFragment: "isWithdrawalFinalized",
     values: [BigNumberish, BigNumberish]
   ): string;
+  encodeFunctionData(functionFragment: "l2Bridge", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "l2TokenAddress",
     values: [string]
@@ -65,6 +72,10 @@ interface IL1BridgeInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "deposit", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "depositToMerge",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "finalizeWithdrawal",
     data: BytesLike
   ): Result;
@@ -72,6 +83,7 @@ interface IL1BridgeInterface extends ethers.utils.Interface {
     functionFragment: "isWithdrawalFinalized",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "l2Bridge", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "l2TokenAddress",
     data: BytesLike
@@ -79,12 +91,14 @@ interface IL1BridgeInterface extends ethers.utils.Interface {
 
   events: {
     "ClaimedFailedDeposit(address,address,uint256)": EventFragment;
-    "DepositInitiated(address,address,address,uint256)": EventFragment;
+    "DepositInitiated(bytes32,address,address,address,uint256)": EventFragment;
+    "DepositToMergeInitiated(bytes32,address,address,address,uint256,bool)": EventFragment;
     "WithdrawalFinalized(address,address,uint256)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "ClaimedFailedDeposit"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "DepositInitiated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "DepositToMergeInitiated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "WithdrawalFinalized"): EventFragment;
 }
 
@@ -106,9 +120,9 @@ export class IL1Bridge extends Contract {
       _depositSender: string,
       _l1Token: string,
       _l2TxHash: BytesLike,
-      _l2BlockNumber: BigNumberish,
+      _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
-      _l2TxNumberInBlock: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
       _merkleProof: BytesLike[],
       overrides?: Overrides
     ): Promise<ContractTransaction>;
@@ -117,9 +131,9 @@ export class IL1Bridge extends Contract {
       _depositSender: string,
       _l1Token: string,
       _l2TxHash: BytesLike,
-      _l2BlockNumber: BigNumberish,
+      _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
-      _l2TxNumberInBlock: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
       _merkleProof: BytesLike[],
       overrides?: Overrides
     ): Promise<ContractTransaction>;
@@ -130,38 +144,60 @@ export class IL1Bridge extends Contract {
       _amount: BigNumberish,
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
+      _refundRecipient: string,
       overrides?: PayableOverrides
     ): Promise<ContractTransaction>;
 
-    "deposit(address,address,uint256,uint256,uint256)"(
+    "deposit(address,address,uint256,uint256,uint256,address)"(
       _l2Receiver: string,
       _l1Token: string,
       _amount: BigNumberish,
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
+      _refundRecipient: string,
+      overrides?: PayableOverrides
+    ): Promise<ContractTransaction>;
+
+    depositToMerge(
+      _l2Receiver: string,
+      _l1Token: string,
+      _amount: BigNumberish,
+      _l2TxGasLimit: BigNumberish,
+      _l2TxGasPerPubdataByte: BigNumberish,
+      _refundRecipient: string,
+      overrides?: PayableOverrides
+    ): Promise<ContractTransaction>;
+
+    "depositToMerge(address,address,uint256,uint256,uint256,address)"(
+      _l2Receiver: string,
+      _l1Token: string,
+      _amount: BigNumberish,
+      _l2TxGasLimit: BigNumberish,
+      _l2TxGasPerPubdataByte: BigNumberish,
+      _refundRecipient: string,
       overrides?: PayableOverrides
     ): Promise<ContractTransaction>;
 
     finalizeWithdrawal(
-      _l2BlockNumber: BigNumberish,
+      _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
-      _l2TxNumberInBlock: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
       _message: BytesLike,
       _merkleProof: BytesLike[],
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
     "finalizeWithdrawal(uint256,uint256,uint16,bytes,bytes32[])"(
-      _l2BlockNumber: BigNumberish,
+      _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
-      _l2TxNumberInBlock: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
       _message: BytesLike,
       _merkleProof: BytesLike[],
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
     isWithdrawalFinalized(
-      _l2BlockNumber: BigNumberish,
+      _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
@@ -169,11 +205,19 @@ export class IL1Bridge extends Contract {
     }>;
 
     "isWithdrawalFinalized(uint256,uint256)"(
-      _l2BlockNumber: BigNumberish,
+      _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
       0: boolean;
+    }>;
+
+    l2Bridge(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    "l2Bridge()"(overrides?: CallOverrides): Promise<{
+      0: string;
     }>;
 
     l2TokenAddress(
@@ -195,9 +239,9 @@ export class IL1Bridge extends Contract {
     _depositSender: string,
     _l1Token: string,
     _l2TxHash: BytesLike,
-    _l2BlockNumber: BigNumberish,
+    _l2BatchNumber: BigNumberish,
     _l2MessageIndex: BigNumberish,
-    _l2TxNumberInBlock: BigNumberish,
+    _l2TxNumberInBatch: BigNumberish,
     _merkleProof: BytesLike[],
     overrides?: Overrides
   ): Promise<ContractTransaction>;
@@ -206,9 +250,9 @@ export class IL1Bridge extends Contract {
     _depositSender: string,
     _l1Token: string,
     _l2TxHash: BytesLike,
-    _l2BlockNumber: BigNumberish,
+    _l2BatchNumber: BigNumberish,
     _l2MessageIndex: BigNumberish,
-    _l2TxNumberInBlock: BigNumberish,
+    _l2TxNumberInBatch: BigNumberish,
     _merkleProof: BytesLike[],
     overrides?: Overrides
   ): Promise<ContractTransaction>;
@@ -219,47 +263,73 @@ export class IL1Bridge extends Contract {
     _amount: BigNumberish,
     _l2TxGasLimit: BigNumberish,
     _l2TxGasPerPubdataByte: BigNumberish,
+    _refundRecipient: string,
     overrides?: PayableOverrides
   ): Promise<ContractTransaction>;
 
-  "deposit(address,address,uint256,uint256,uint256)"(
+  "deposit(address,address,uint256,uint256,uint256,address)"(
     _l2Receiver: string,
     _l1Token: string,
     _amount: BigNumberish,
     _l2TxGasLimit: BigNumberish,
     _l2TxGasPerPubdataByte: BigNumberish,
+    _refundRecipient: string,
+    overrides?: PayableOverrides
+  ): Promise<ContractTransaction>;
+
+  depositToMerge(
+    _l2Receiver: string,
+    _l1Token: string,
+    _amount: BigNumberish,
+    _l2TxGasLimit: BigNumberish,
+    _l2TxGasPerPubdataByte: BigNumberish,
+    _refundRecipient: string,
+    overrides?: PayableOverrides
+  ): Promise<ContractTransaction>;
+
+  "depositToMerge(address,address,uint256,uint256,uint256,address)"(
+    _l2Receiver: string,
+    _l1Token: string,
+    _amount: BigNumberish,
+    _l2TxGasLimit: BigNumberish,
+    _l2TxGasPerPubdataByte: BigNumberish,
+    _refundRecipient: string,
     overrides?: PayableOverrides
   ): Promise<ContractTransaction>;
 
   finalizeWithdrawal(
-    _l2BlockNumber: BigNumberish,
+    _l2BatchNumber: BigNumberish,
     _l2MessageIndex: BigNumberish,
-    _l2TxNumberInBlock: BigNumberish,
+    _l2TxNumberInBatch: BigNumberish,
     _message: BytesLike,
     _merkleProof: BytesLike[],
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
   "finalizeWithdrawal(uint256,uint256,uint16,bytes,bytes32[])"(
-    _l2BlockNumber: BigNumberish,
+    _l2BatchNumber: BigNumberish,
     _l2MessageIndex: BigNumberish,
-    _l2TxNumberInBlock: BigNumberish,
+    _l2TxNumberInBatch: BigNumberish,
     _message: BytesLike,
     _merkleProof: BytesLike[],
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
   isWithdrawalFinalized(
-    _l2BlockNumber: BigNumberish,
+    _l2BatchNumber: BigNumberish,
     _l2MessageIndex: BigNumberish,
     overrides?: CallOverrides
   ): Promise<boolean>;
 
   "isWithdrawalFinalized(uint256,uint256)"(
-    _l2BlockNumber: BigNumberish,
+    _l2BatchNumber: BigNumberish,
     _l2MessageIndex: BigNumberish,
     overrides?: CallOverrides
   ): Promise<boolean>;
+
+  l2Bridge(overrides?: CallOverrides): Promise<string>;
+
+  "l2Bridge()"(overrides?: CallOverrides): Promise<string>;
 
   l2TokenAddress(_l1Token: string, overrides?: CallOverrides): Promise<string>;
 
@@ -273,9 +343,9 @@ export class IL1Bridge extends Contract {
       _depositSender: string,
       _l1Token: string,
       _l2TxHash: BytesLike,
-      _l2BlockNumber: BigNumberish,
+      _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
-      _l2TxNumberInBlock: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
       _merkleProof: BytesLike[],
       overrides?: CallOverrides
     ): Promise<void>;
@@ -284,9 +354,9 @@ export class IL1Bridge extends Contract {
       _depositSender: string,
       _l1Token: string,
       _l2TxHash: BytesLike,
-      _l2BlockNumber: BigNumberish,
+      _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
-      _l2TxNumberInBlock: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
       _merkleProof: BytesLike[],
       overrides?: CallOverrides
     ): Promise<void>;
@@ -297,47 +367,73 @@ export class IL1Bridge extends Contract {
       _amount: BigNumberish,
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
+      _refundRecipient: string,
       overrides?: CallOverrides
     ): Promise<string>;
 
-    "deposit(address,address,uint256,uint256,uint256)"(
+    "deposit(address,address,uint256,uint256,uint256,address)"(
       _l2Receiver: string,
       _l1Token: string,
       _amount: BigNumberish,
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
+      _refundRecipient: string,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    depositToMerge(
+      _l2Receiver: string,
+      _l1Token: string,
+      _amount: BigNumberish,
+      _l2TxGasLimit: BigNumberish,
+      _l2TxGasPerPubdataByte: BigNumberish,
+      _refundRecipient: string,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    "depositToMerge(address,address,uint256,uint256,uint256,address)"(
+      _l2Receiver: string,
+      _l1Token: string,
+      _amount: BigNumberish,
+      _l2TxGasLimit: BigNumberish,
+      _l2TxGasPerPubdataByte: BigNumberish,
+      _refundRecipient: string,
       overrides?: CallOverrides
     ): Promise<string>;
 
     finalizeWithdrawal(
-      _l2BlockNumber: BigNumberish,
+      _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
-      _l2TxNumberInBlock: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
       _message: BytesLike,
       _merkleProof: BytesLike[],
       overrides?: CallOverrides
     ): Promise<void>;
 
     "finalizeWithdrawal(uint256,uint256,uint16,bytes,bytes32[])"(
-      _l2BlockNumber: BigNumberish,
+      _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
-      _l2TxNumberInBlock: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
       _message: BytesLike,
       _merkleProof: BytesLike[],
       overrides?: CallOverrides
     ): Promise<void>;
 
     isWithdrawalFinalized(
-      _l2BlockNumber: BigNumberish,
+      _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
       overrides?: CallOverrides
     ): Promise<boolean>;
 
     "isWithdrawalFinalized(uint256,uint256)"(
-      _l2BlockNumber: BigNumberish,
+      _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
       overrides?: CallOverrides
     ): Promise<boolean>;
+
+    l2Bridge(overrides?: CallOverrides): Promise<string>;
+
+    "l2Bridge()"(overrides?: CallOverrides): Promise<string>;
 
     l2TokenAddress(
       _l1Token: string,
@@ -358,10 +454,20 @@ export class IL1Bridge extends Contract {
     ): EventFilter;
 
     DepositInitiated(
+      l2DepositTxHash: BytesLike | null,
       from: string | null,
       to: string | null,
-      l1Token: string | null,
+      l1Token: null,
       amount: null
+    ): EventFilter;
+
+    DepositToMergeInitiated(
+      l2DepositTxHash: BytesLike | null,
+      from: string | null,
+      to: string | null,
+      l1Token: null,
+      amount: null,
+      toMerge: null
     ): EventFilter;
 
     WithdrawalFinalized(
@@ -376,9 +482,9 @@ export class IL1Bridge extends Contract {
       _depositSender: string,
       _l1Token: string,
       _l2TxHash: BytesLike,
-      _l2BlockNumber: BigNumberish,
+      _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
-      _l2TxNumberInBlock: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
       _merkleProof: BytesLike[],
       overrides?: Overrides
     ): Promise<BigNumber>;
@@ -387,9 +493,9 @@ export class IL1Bridge extends Contract {
       _depositSender: string,
       _l1Token: string,
       _l2TxHash: BytesLike,
-      _l2BlockNumber: BigNumberish,
+      _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
-      _l2TxNumberInBlock: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
       _merkleProof: BytesLike[],
       overrides?: Overrides
     ): Promise<BigNumber>;
@@ -400,47 +506,73 @@ export class IL1Bridge extends Contract {
       _amount: BigNumberish,
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
+      _refundRecipient: string,
       overrides?: PayableOverrides
     ): Promise<BigNumber>;
 
-    "deposit(address,address,uint256,uint256,uint256)"(
+    "deposit(address,address,uint256,uint256,uint256,address)"(
       _l2Receiver: string,
       _l1Token: string,
       _amount: BigNumberish,
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
+      _refundRecipient: string,
+      overrides?: PayableOverrides
+    ): Promise<BigNumber>;
+
+    depositToMerge(
+      _l2Receiver: string,
+      _l1Token: string,
+      _amount: BigNumberish,
+      _l2TxGasLimit: BigNumberish,
+      _l2TxGasPerPubdataByte: BigNumberish,
+      _refundRecipient: string,
+      overrides?: PayableOverrides
+    ): Promise<BigNumber>;
+
+    "depositToMerge(address,address,uint256,uint256,uint256,address)"(
+      _l2Receiver: string,
+      _l1Token: string,
+      _amount: BigNumberish,
+      _l2TxGasLimit: BigNumberish,
+      _l2TxGasPerPubdataByte: BigNumberish,
+      _refundRecipient: string,
       overrides?: PayableOverrides
     ): Promise<BigNumber>;
 
     finalizeWithdrawal(
-      _l2BlockNumber: BigNumberish,
+      _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
-      _l2TxNumberInBlock: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
       _message: BytesLike,
       _merkleProof: BytesLike[],
       overrides?: Overrides
     ): Promise<BigNumber>;
 
     "finalizeWithdrawal(uint256,uint256,uint16,bytes,bytes32[])"(
-      _l2BlockNumber: BigNumberish,
+      _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
-      _l2TxNumberInBlock: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
       _message: BytesLike,
       _merkleProof: BytesLike[],
       overrides?: Overrides
     ): Promise<BigNumber>;
 
     isWithdrawalFinalized(
-      _l2BlockNumber: BigNumberish,
+      _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     "isWithdrawalFinalized(uint256,uint256)"(
-      _l2BlockNumber: BigNumberish,
+      _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    l2Bridge(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "l2Bridge()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     l2TokenAddress(
       _l1Token: string,
@@ -458,9 +590,9 @@ export class IL1Bridge extends Contract {
       _depositSender: string,
       _l1Token: string,
       _l2TxHash: BytesLike,
-      _l2BlockNumber: BigNumberish,
+      _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
-      _l2TxNumberInBlock: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
       _merkleProof: BytesLike[],
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
@@ -469,9 +601,9 @@ export class IL1Bridge extends Contract {
       _depositSender: string,
       _l1Token: string,
       _l2TxHash: BytesLike,
-      _l2BlockNumber: BigNumberish,
+      _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
-      _l2TxNumberInBlock: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
       _merkleProof: BytesLike[],
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
@@ -482,47 +614,73 @@ export class IL1Bridge extends Contract {
       _amount: BigNumberish,
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
+      _refundRecipient: string,
       overrides?: PayableOverrides
     ): Promise<PopulatedTransaction>;
 
-    "deposit(address,address,uint256,uint256,uint256)"(
+    "deposit(address,address,uint256,uint256,uint256,address)"(
       _l2Receiver: string,
       _l1Token: string,
       _amount: BigNumberish,
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
+      _refundRecipient: string,
+      overrides?: PayableOverrides
+    ): Promise<PopulatedTransaction>;
+
+    depositToMerge(
+      _l2Receiver: string,
+      _l1Token: string,
+      _amount: BigNumberish,
+      _l2TxGasLimit: BigNumberish,
+      _l2TxGasPerPubdataByte: BigNumberish,
+      _refundRecipient: string,
+      overrides?: PayableOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "depositToMerge(address,address,uint256,uint256,uint256,address)"(
+      _l2Receiver: string,
+      _l1Token: string,
+      _amount: BigNumberish,
+      _l2TxGasLimit: BigNumberish,
+      _l2TxGasPerPubdataByte: BigNumberish,
+      _refundRecipient: string,
       overrides?: PayableOverrides
     ): Promise<PopulatedTransaction>;
 
     finalizeWithdrawal(
-      _l2BlockNumber: BigNumberish,
+      _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
-      _l2TxNumberInBlock: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
       _message: BytesLike,
       _merkleProof: BytesLike[],
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
     "finalizeWithdrawal(uint256,uint256,uint16,bytes,bytes32[])"(
-      _l2BlockNumber: BigNumberish,
+      _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
-      _l2TxNumberInBlock: BigNumberish,
+      _l2TxNumberInBatch: BigNumberish,
       _message: BytesLike,
       _merkleProof: BytesLike[],
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
     isWithdrawalFinalized(
-      _l2BlockNumber: BigNumberish,
+      _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     "isWithdrawalFinalized(uint256,uint256)"(
-      _l2BlockNumber: BigNumberish,
+      _l2BatchNumber: BigNumberish,
       _l2MessageIndex: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    l2Bridge(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "l2Bridge()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     l2TokenAddress(
       _l1Token: string,
