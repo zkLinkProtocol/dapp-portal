@@ -18,8 +18,13 @@
     <div v-if="buttonStep === 'network'" class="transaction-footer-row">
       <CommonButtonTopInfo>Incorrect network selected in your wallet</CommonButtonTopInfo>
       <template v-if="l1Network">
+        <CommonButton v-if="isGateWalletUnsupportedChain" disabled variant="primary" class="w-full">
+          <slot v-bind="{ l1Network, walletName }" name="change-network-manual">
+            The current version of your {{ walletName }} wallet may not support {{ l1Network.name }}
+          </slot>
+        </CommonButton>
         <CommonButton
-          v-if="connectorName !== 'WalletConnect'"
+          v-else-if="connectorName !== 'WalletConnect'"
           type="submit"
           :disabled="switchingNetworkInProgress"
           variant="primary"
@@ -82,10 +87,10 @@ import useNetworks from "@/composables/useNetworks";
 import type { TransactionInfo } from "@/store/zksync/transactionStatus";
 import type { PropType } from "vue";
 
+import { l1Networks } from "@/data/networks";
 import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
 import { TransitionAlertScaleInOutTransition } from "@/utils/transitions";
-
 const props = defineProps({
   transaction: {
     type: Object as PropType<TransactionInfo>,
@@ -109,6 +114,7 @@ const {
 } = storeToRefs(onboardStore);
 const { selectedNetwork, l1Network } = storeToRefs(useNetworkStore());
 const { primaryNetwork, zkSyncNetworks } = useNetworks();
+console.log("l1Netowrk: ", l1Network.value);
 const getNetworkInfo = () => {
   const newNetwork = zkSyncNetworks.find(
     (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === props.transaction?.gateway?.toLowerCase()
@@ -116,6 +122,17 @@ const getNetworkInfo = () => {
   const obj = { l1Network: { id: l1Network.value?.id } };
   return props.transaction ? newNetwork ?? primaryNetwork : obj;
 };
+
+const isGateWalletUnsupportedChain = computed(() => {
+  const supprotedChainIds = [
+    l1Networks.mainnet.id,
+    l1Networks.arbitrum.id,
+    l1Networks.zkSync.id,
+    l1Networks.optimism.id,
+  ] as number[];
+  return walletName.value?.includes("Gate") && l1Network.value?.id && !supprotedChainIds.includes(l1Network.value?.id);
+});
+
 const buttonStep = computed(() => {
   console.log("buttonStep getNetworkInfo().l1Network?.id", getNetworkInfo().l1Network?.id);
   console.log("buttonStep network.value.chain?.id", network.value.chain?.id);
