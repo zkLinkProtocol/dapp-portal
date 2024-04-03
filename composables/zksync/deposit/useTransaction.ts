@@ -49,6 +49,7 @@ export default (getL1Signer: () => Promise<L1Signer | undefined>) => {
         to: transaction.to,
         token: transaction.tokenAddress,
         amount: transaction.amount,
+        toMerge: transaction.toMerge,
         l2GasLimit: fee.l2GasLimit,
         overrides,
       });

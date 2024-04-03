@@ -360,7 +360,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           tx.gasPerPubdataByte,
           to,
         ];
-
+        debugger;
         overrides.value ??= baseCost.add(operatorTip);
         await checkBaseCost(baseCost, overrides.value);
 
