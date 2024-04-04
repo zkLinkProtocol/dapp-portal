@@ -1,5 +1,28 @@
 <template>
   <div>
+    <div class="okx-tips mb-[10px] flex gap-[12px]" v-if="route.query?.s === 'okx'">
+      <img :src="okxIcon" class="h-[64px] w-[64px] rounded-[8px]" />
+      <div>
+        <a
+          href="https://www.okx.com/web3/discover/cryptopedia/event/28"
+          target="_blank"
+          class="okx-tips-title flex cursor-pointer items-center gap-[4px]"
+        >
+          <span>OKX Cryptopedia</span>
+          <img :src="launchIcon" />
+        </a>
+        <div class="mt-[5px]">
+          <p class="okx-tips-desc">
+            Withdrawals from Nova are locked until April 14th, 10am UTC. During this time, you can use a third-party
+            bridge to withdraw your assets.
+          </p>
+          <p class="okx-tips-desc">
+            Please wait a few minutes for deposits to arrive before verifying the task on OKX Cryptopedia.
+          </p>
+        </div>
+      </div>
+    </div>
+
     <PageTitle v-if="step === 'form'">Deposit</PageTitle>
     <PageTitle
       v-else-if="step === 'confirm'"
@@ -12,16 +35,10 @@
       Confirm transaction
     </PageTitle>
 
-    <div class="warnBox flex">
-      <div>
-        Note: Your funds will be locked for a max of 30 days during the campaign.
-        <span class="font-bold"
-          >If you are participating in the OKX Cryptopedia or Nova Parade, kindly visit
-          <a href="https://app.zklink.io/bridge" target="_blank" class="underline">https://app.zklink.io/bridge</a> to
-          deposit your assets to ensure successful task verification and and to earn Nova Points.</span
-        >
-      </div>
+    <div class="warnBox flex" v-if="!route.query.s || route.query.s !== 'okx'">
+      <div>Note: Your funds will be locked for a max of 30 days during the campaign.</div>
     </div>
+
     <NetworkSelectModal
       v-model:opened="fromNetworkModalOpened"
       title="From"
@@ -35,6 +52,7 @@
     <CommonErrorBlock v-else-if="balanceError" @try-again="fetchBalances">
       Getting balances error: {{ balanceError.message }}
     </CommonErrorBlock>
+
     <form v-else @submit.prevent="">
       <template v-if="step === 'form'">
         <TransactionWithdrawalsAvailableForClaimAlert />
@@ -401,6 +419,9 @@ import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/
 import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 
+const okxIcon = '/img/okx-cryptopedia.svg';
+const launchIcon = '/img/launch.svg';
+
 const route = useRoute();
 const router = useRouter();
 
@@ -424,7 +445,6 @@ const fromNetworkSelected = (networkKey?: string) => {
     router.replace({ name: "withdraw", query: route.query });
   }
 };
-
 const step = ref<"form" | "confirm" | "submitted">("form");
 const isMerge = ref<true | false>(true);
 const destination = computed(() => destinations.value.nova);
@@ -871,6 +891,42 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
   right: 10px;
   top: -30px;
 }
+
+.okx-tips {
+  position: relative;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #262b33;
+  background: #000;
+  &-title {
+    color: #fff;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+    letter-spacing: -0.07px;
+  }
+  &-desc {
+    position: relative;
+    padding-left: 10px;
+    color: #fff;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: -0.06px;
+    &::after {
+      display: block;
+      content: "";
+      position: absolute;
+      top: 5px;
+      left: 0;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #fff;
+    }
+  }
 .merge {
   border-radius: 16px;
   background: rgba(3, 212, 152, 0.5) !important;

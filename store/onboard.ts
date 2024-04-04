@@ -103,7 +103,7 @@ export const useOnboardStore = defineStore("onboard", () => {
     console.log("wagmiConfig.connector", wagmiConnector);
     console.log("confirmedSupportedWallets", confirmedSupportedWallets);
     const isWalletNotSupported = !confirmedSupportedWallets.find(
-      (wallet) => wallet.walletName === walletName.value && wallet.type === wagmiConnector?.type
+      (wallet) => wallet.walletName === walletName.value && wallet.type === wagmiConnector?.value?.type
     );
     console.log("isWalletNotSupported", isWalletNotSupported);
     return isWalletNotSupported;
