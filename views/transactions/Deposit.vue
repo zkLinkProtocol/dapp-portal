@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="okx-tips mb-[10px] flex gap-[12px]" v-if="route.query?.s === 'okx'">
-      <img src="/img/okx-cryptopedia.svg" class="h-[64px] w-[64px] rounded-[8px]" />
+      <img :src="okxIcon" class="h-[64px] w-[64px] rounded-[8px]" />
       <div>
         <a
           href="https://www.okx.com/web3/discover/cryptopedia/event/28"
@@ -9,7 +9,7 @@
           class="okx-tips-title flex cursor-pointer items-center gap-[4px]"
         >
           <span>OKX Cryptopedia</span>
-          <img src="/img/launch.svg" />
+          <img :src="launchIcon" />
         </a>
         <div class="mt-[5px]">
           <p class="okx-tips-desc">
@@ -404,10 +404,11 @@ import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 import { getWaitTime } from "@/data/networks";
 
+const okxIcon = '/img/okx-cryptopedia.svg';
+const launchIcon = '/img/launch.svg';
+
 const route = useRoute();
 const router = useRouter();
-
-console.log("route", route.query);
 
 const onboardStore = useOnboardStore();
 const tokensStore = useZkSyncTokensStore();
