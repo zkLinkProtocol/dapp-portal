@@ -44,7 +44,10 @@ export const useZkSyncTokensStore = defineStore("zkSyncTokens", () => {
     return Object.fromEntries(
       tokensRaw.value
         .filter((e) => e.l1Address)
-        .map((token) => [token.l1Address!, { ...token, l1Address: undefined, address: token.l1Address! }])
+        .map((token) => [
+          token.l1Address!,
+          { ...token, l1Address: undefined, address: token.l1Address!, l2Address: token.l2Address },
+        ])
     );
   });
 

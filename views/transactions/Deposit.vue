@@ -117,6 +117,14 @@
             </div>
           </template>
         </CommonInputTransactionAddress>
+        <div class="flex justify-between gap-3 sm:mt-block-gap" v-if="mergeSupported">
+          <CommonButton class="flex-1" :class="{ merge: isMerge }" @click="isMerge = true">
+            Merge <img src="/img/Shape.svg" class="ml-2 h-3 w-3" alt="" />
+          </CommonButton>
+          <CommonButton class="flex-1" :class="{ notMerge: !isMerge }" @click="isMerge = false">
+            Not Merge <img src="/img/Shape.svg" class="ml-2 h-3 w-3" alt="" />
+          </CommonButton>
+        </div>
         <CommonButton
           v-if="tokenCustomBridge"
           type="submit"
@@ -133,6 +141,12 @@
       <template v-else-if="step === 'confirm'">
         <CommonCardWithLineButtons>
           <TransactionSummaryTokenEntry label="You deposit" :token="transaction!.token" />
+          <TransactionSummaryAddressEntry
+            v-if="isMerge"
+            label="You Receive"
+            :address="transaction!.from.address"
+            :destination="transaction!.from.destination"
+          />
           <TransactionSummaryAddressEntry
             label="From"
             :address="transaction!.from.address"
@@ -373,6 +387,7 @@ import { storeToRefs } from "pinia";
 import EthereumTransactionFooter from "@/components/transaction/EthereumTransactionFooter.vue";
 
 import useAllowance from "@/composables/transaction/useAllowance";
+import useMergeToken from "@/composables/transaction/useMergeToken";
 import useInterval from "@/composables/useInterval";
 import useNetworks from "@/composables/useNetworks";
 import useEcosystemBanner from "@/composables/zksync/deposit/useEcosystemBanner";
@@ -386,6 +401,7 @@ import type { BigNumberish } from "ethers";
 
 import { useRoute, useRouter } from "#app";
 import { customBridgeTokens } from "@/data/customBridgeTokens";
+import { getWaitTime } from "@/data/networks";
 import { useDestinationsStore } from "@/store/destinations";
 import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
@@ -402,7 +418,6 @@ import { silentRouterChange } from "@/utils/helpers";
 import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/transitions";
 import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
-import { getWaitTime } from "@/data/networks";
 
 const okxIcon = '/img/okx-cryptopedia.svg';
 const launchIcon = '/img/launch.svg';
@@ -431,6 +446,7 @@ const fromNetworkSelected = (networkKey?: string) => {
   }
 };
 const step = ref<"form" | "confirm" | "submitted">("form");
+const isMerge = ref<true | false>(true);
 const destination = computed(() => destinations.value.nova);
 const availableTokens = computed<Token[]>(() => {
   if (balance.value) return balance.value;
@@ -497,6 +513,9 @@ const amountInputTokenAddress = computed({
 const tokenBalance = computed<BigNumberish | undefined>(() => {
   return balance.value?.find((e) => e.address === selectedToken.value?.address)?.amount;
 });
+const { result: mergeTokenInfo, inProgress: mergeTokenInfoInProgress } = useMergeToken(
+  computed(() => selectedToken.value?.l2Address)
+);
 
 const {
   result: allowance,
@@ -599,11 +618,24 @@ const totalComputeAmount = computed(() => {
 });
 const enoughBalanceForTransaction = computed(() => !amountError.value);
 
+const mergeSupported = computed(() => {
+  if (!selectedToken.value || !mergeTokenInfo.value || !amount.value) return false;
+  // console.log('mergeTokenInfo: ', mergeTokenInfo.value)
+  console.log(selectedToken.value);
+  const amountVal = decimalToBigNumber(amount.value, selectedToken.value.decimals);
+  return (
+    mergeTokenInfo.value?.isSupported &&
+    !mergeTokenInfo.value?.isLocked &&
+    amountVal.add(mergeTokenInfo.value?.balance).lte(mergeTokenInfo.value?.depositLimit)
+  );
+});
+
 const transaction = computed<
   | {
       token: TokenAmount;
       from: { address: string; destination: TransactionDestinfonboardStoreation };
       to: { address: string; destination: TransactionDestination };
+      toMerge?: boolean;
     }
   | undefined
 >(() => {
@@ -624,6 +656,7 @@ const transaction = computed<
       address: toAddress,
       destination: destination.value,
     },
+    toMerge: isMerge.value
   };
 });
 const transactionHasGateway = ref<TransactionInfo>();
@@ -730,6 +763,7 @@ const makeTransaction = async () => {
       to: transaction.value!.to.address,
       tokenAddress: transaction.value!.token.address,
       amount: transaction.value!.token.amount,
+      toMerge: transaction.value!.toMerge
     },
     feeValues.value!
   );
@@ -893,5 +927,12 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
       background: #fff;
     }
   }
+.merge {
+  border-radius: 16px;
+  background: rgba(3, 212, 152, 0.5) !important;
+}
+.notMerge {
+  border-radius: 16px;
+  background: rgba(23, 85, 244, 0.25) !important;
 }
 </style>

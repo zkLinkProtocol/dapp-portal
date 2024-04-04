@@ -44,6 +44,7 @@ export const mapApiToken = (token: Api.Response.Token): Token => {
   }
 
   return {
+    l2Address: token.l2Address,
     l1Address: token.l1Address || undefined,
     address: token.l2Address,
     symbol: token.symbol || "unknown",
