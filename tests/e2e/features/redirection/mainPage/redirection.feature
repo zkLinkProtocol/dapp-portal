@@ -298,7 +298,7 @@ Feature: External Redirection on the Main Page
    
   @id1610
   Scenario: Check redirection for the "Explore ecosystem" button (Withdraw Bridge)
-    Given I go to page "/bridge?network=era-goerli"
+    Given I go to page "/?network=era-goerli"
     When I click by text "Withdraw"
     When I choose "ETH" as token and insert "0.0000000001" as amount
     When I "confirm" transaction after clicking "Send to Ethereum Goerli Testnet" button
