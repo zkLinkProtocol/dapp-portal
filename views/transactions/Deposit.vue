@@ -1,5 +1,28 @@
 <template>
   <div>
+    <div class="okx-tips mb-[10px] flex gap-[12px]" v-if="route.query?.s === 'okx'">
+      <img src="/img/okx-cryptopedia.svg" class="h-[64px] w-[64px] rounded-[8px]" />
+      <div>
+        <a
+          href="https://www.okx.com/web3/discover/cryptopedia/event/28"
+          target="_blank"
+          class="okx-tips-title flex cursor-pointer items-center gap-[4px]"
+        >
+          <span>OKX Cryptopedia</span>
+          <img src="/img/launch.svg" />
+        </a>
+        <div class="mt-[5px]">
+          <p class="okx-tips-desc">
+            Withdrawals from Nova are locked until April 14th, 10am UTC. During this time, you can use a third-party
+            bridge to withdraw your assets.
+          </p>
+          <p class="okx-tips-desc">
+            Please wait a few minutes for deposits to arrive before verifying the task on OKX Cryptopedia.
+          </p>
+        </div>
+      </div>
+    </div>
+
     <PageTitle v-if="step === 'form'">Deposit</PageTitle>
     <PageTitle
       v-else-if="step === 'confirm'"
@@ -11,12 +34,11 @@
     >
       Confirm transaction
     </PageTitle>
-    
-    <div class="flex warnBox">
-      <div>
-        Note: Your funds will be locked for a max of 30 days during the campaign. <span class="font-bold" v-if="!route.query.s || route.query.s !== 'okx'">If you are participating in the OKX Cryptopedia, kindly visit <a href="https://app.zklink.io/bridge" target="_blank" class="underline">https://app.zklink.io/bridge</a> to deposit your assets to ensure successful task verification.</span>
-      </div>
+
+    <div class="warnBox flex" v-if="!route.query.s || route.query.s !== 'okx'">
+      <div>Note: Your funds will be locked for a max of 30 days during the campaign.</div>
     </div>
+
     <NetworkSelectModal
       v-model:opened="fromNetworkModalOpened"
       title="From"
@@ -30,6 +52,7 @@
     <CommonErrorBlock v-else-if="balanceError" @try-again="fetchBalances">
       Getting balances error: {{ balanceError.message }}
     </CommonErrorBlock>
+
     <form v-else @submit.prevent="">
       <template v-if="step === 'form'">
         <TransactionWithdrawalsAvailableForClaimAlert />
@@ -144,7 +167,9 @@
               :loading="feeLoading"
             />
           </transition>
-          <CommonButtonLabel as="span" class="ml-auto text-right">~ {{getWaitTime(eraNetwork.l1Network?.id)[1]}} minutes</CommonButtonLabel>
+          <CommonButtonLabel as="span" class="ml-auto text-right"
+            >~ {{ getWaitTime(eraNetwork.l1Network?.id)[1] }} minutes</CommonButtonLabel
+          >
         </div>
         <transition v-bind="TransitionAlertScaleInOutTransition">
           <CommonAlert v-if="!enoughBalanceToCoverFee" class="mt-4" variant="error" :icon="ExclamationTriangleIcon">
@@ -382,6 +407,8 @@ import { getWaitTime } from "@/data/networks";
 const route = useRoute();
 const router = useRouter();
 
+console.log("route", route.query);
+
 const onboardStore = useOnboardStore();
 const tokensStore = useZkSyncTokensStore();
 const providerStore = useZkSyncProviderStore();
@@ -437,7 +464,7 @@ const selectedTokenAddress = ref<string | undefined>(
 );
 const selectedToken = computed<Token | undefined>(() => {
   if (!selectedTokenAddress.value) {
-    if(!selectedNetwork.value.isEthGasToken && defaultToken.value?.address === ETH_ADDRESS){
+    if (!selectedNetwork.value.isEthGasToken && defaultToken.value?.address === ETH_ADDRESS) {
       return availableTokens.value[1];
     }
     return defaultToken.value;
@@ -445,9 +472,9 @@ const selectedToken = computed<Token | undefined>(() => {
   const res =
     availableTokens.value.find((e) => e.address === selectedTokenAddress.value) ||
     availableBalances.value.find((e) => e.address === selectedTokenAddress.value) ||
-    defaultToken.value
-  
-  if(!selectedNetwork.value.isEthGasToken && res.address === ETH_ADDRESS) {
+    defaultToken.value;
+
+  if (!selectedNetwork.value.isEthGasToken && res.address === ETH_ADDRESS) {
     return availableTokens.value[1];
   }
   return res;
@@ -778,7 +805,7 @@ const fetchBalances = async (force = false) => {
 };
 fetchBalances();
 
-const unsubscribeFetchBalance = onboardStore.subscribeOnAccountChange((newAddress:any) => {
+const unsubscribeFetchBalance = onboardStore.subscribeOnAccountChange((newAddress: any) => {
   if (!newAddress) return;
   estimate();
   fetchBalances();
@@ -790,38 +817,37 @@ onBeforeUnmount(() => {
 });
 
 onboardStore.subscribeOnNetworkChange((newchainId) => {
-  if(!newchainId) return;
+  if (!newchainId) return;
   resetFeeImmediately();
 });
-
 </script>
 
 <style lang="scss" scoped>
-.warnBox1{
+.warnBox1 {
   display: flex;
-  a{
-    color: #0BC48F;
+  a {
+    color: #0bc48f;
   }
 }
-.warnBox{
+.warnBox {
   display: inline-flex;
   padding: 0 0 16px 0;
   justify-content: center;
-  color: #F29914;
+  color: #f29914;
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
   line-height: normal;
-  img{
+  img {
     width: 21px;
     height: 21px;
     margin-right: 5px;
   }
-  a{
-    color: #0BC48F;
+  a {
+    color: #0bc48f;
   }
 }
-.waitTime{
+.waitTime {
   width: 100%;
   text-align: right;
   padding: 20px 20px 0 0;
@@ -829,5 +855,42 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
   position: absolute;
   right: 10px;
   top: -30px;
+}
+
+.okx-tips {
+  position: relative;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #262b33;
+  background: #000;
+  &-title {
+    color: #fff;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+    letter-spacing: -0.07px;
+  }
+  &-desc {
+    position: relative;
+    padding-left: 10px;
+    color: #fff;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: -0.06px;
+    &::after {
+      display: block;
+      content: "";
+      position: absolute;
+      top: 5px;
+      left: 0;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #fff;
+    }
+  }
 }
 </style>
