@@ -6,7 +6,7 @@ Feature: Deposit
 
   @id785 @id1609 @id1607
   Scenario: Make a deposit on Bridge (Deposit)
-    Given I go to page "/bridge?network=era-goerli"
+    Given I go to page "/?network=era-goerli"
     When I click by text "Deposit"
     Then Element with "id" "amount-input" should have "" "value"
     Then Element with "testId" "fee-amount" should be "visible"
