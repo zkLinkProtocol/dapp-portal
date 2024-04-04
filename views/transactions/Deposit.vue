@@ -927,6 +927,7 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
       background: #fff;
     }
   }
+}
 .merge {
   border-radius: 16px;
   background: rgba(3, 212, 152, 0.5) !important;
