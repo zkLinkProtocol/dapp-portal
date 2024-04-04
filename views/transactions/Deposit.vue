@@ -1,12 +1,13 @@
 <template>
   <div>
-    <div class="okx-tips mb-[10px] flex gap-[12px]" v-if="route.query?.s === 'okx'">
-      <img :src="okxIcon" class="h-[64px] w-[64px] rounded-[8px]" />
-      <div>
+    <div class="okx-tips mb-[10px]" v-if="route.query?.s === 'okx'">
+      <div class="okx-tips-cover"></div>
+      <!-- <img src="/img/okx-cryptopedia.svg" class="h-[64px] w-[64px] rounded-[8px]" /> -->
+      <div class="z-2">
         <a
           href="https://www.okx.com/web3/discover/cryptopedia/event/28"
           target="_blank"
-          class="okx-tips-title flex cursor-pointer items-center gap-[4px]"
+          class="okx-tips-title flex cursor-pointer items-center gap-[4px] z-2 relative"
         >
           <span>OKX Cryptopedia</span>
           <img :src="launchIcon" />
@@ -898,6 +899,23 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
   border-radius: 8px;
   border: 1px solid #262b33;
   background: #000;
+  background-image: url("/img/okx-tips-bg.svg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  .okx-tips-cover {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: block;
+    background: rgba($color: #000000, $alpha: 0.7);
+    z-index: 0;
+  }
+
   &-title {
     color: #fff;
     font-size: 14px;
