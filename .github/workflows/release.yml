@@ -75,8 +75,8 @@ jobs:
 
       - name: Reorganize Files
         run: |
-          mkdir -p dist/bridge
-          mv dist/_nuxt dist/bridge/_nuxt
+          mkdir -p dist
+          mv dist/_nuxt dist/_nuxt
 
       - name: Deploy
         uses: matter-labs/action-hosting-deploy@main

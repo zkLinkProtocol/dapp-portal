@@ -39,7 +39,7 @@ Feature: Artifacts - UI
   @id1678
   Scenario: Check "Insufficient balance" warning message (Zero token balance) (Bridge)
     Then A wallet should be "empty"
-    When I go to page "/bridge?network=era-goerli"
+    When I go to page "/?network=era-goerli"
     When I click by text "Withdraw"
     When I choose "ETH" as token and insert "1000" as amount
     Then Message " Insufficient balance " should be visible

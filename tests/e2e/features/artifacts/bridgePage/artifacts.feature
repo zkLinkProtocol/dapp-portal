@@ -6,7 +6,7 @@ Feature: Withdraw
 
   @id1602
   Scenario: Check the Account Dropdown Artifacts on the Bridge Page
-    Given I go to page "/bridge?network=era-goerli"
+    Given I go to page "/?network=era-goerli"
     #click on the account dropdown
     When I click by partial text "..."
     Then Modal card element with the "//*[contains(@class, 'address-avatar')]" xpath should be "visible"
@@ -24,7 +24,7 @@ Feature: Withdraw
 
   @id1603
   Scenario: Check the Network Switcher Artifacts on the Bridge Page
-    Given I go to page "/bridge?network=era-goerli"
+    Given I go to page "/?network=era-goerli"
     #click on the account dropdown
     When I click by partial text "..."
     Then Element with "text" "Bridge network" should be "visible"
@@ -35,7 +35,7 @@ Feature: Withdraw
 
   @id1604:I
   Scenario: Check the View on Explorer Artifacts on the Bridge Page (Testnet)
-    Given I go to page "/bridge?network=era-goerli"
+    Given I go to page "/?network=era-goerli"
     #click on the account dropdown
     When I click by partial text "..."
     Then Element with "text" "View on Explorer" should be "visible"
@@ -51,7 +51,7 @@ Feature: Withdraw
 
   @id1604:II
   Scenario: Check the View on Explorer Artifacts on the Bridge Page (Mainnet)
-    Given I go to page "/bridge?network=era-mainnet"
+    Given I go to page "/?network=era-mainnet"
     #click on the account dropdown
     When I click by partial text "..."
     Then Element with "text" "View on Explorer" should be "visible"
@@ -67,7 +67,7 @@ Feature: Withdraw
 
   @id1597
   Scenario: Check the Bridge artifacts on Withdraw (Testnet)
-    Given I go to page "/bridge?network=era-goerli"
+    Given I go to page "/?network=era-goerli"
     When I click by text "Withdraw"
     Then Element with "text" "Bridge" should be "visible"
     Then Element with "partial text" "Recent withdrawals" should be "visible"
@@ -100,7 +100,7 @@ Feature: Withdraw
 
   @id1613
   Scenario: Check the Bridge To artifacts on Withdraw (Testnet)
-    Given I go to page "/bridge?network=era-goerli"
+    Given I go to page "/?network=era-goerli"
     When I click by text "Withdraw"
     When I click by "text" with "Your Ethereum Goerli Testnet account" value
     Then Element with "text" "Bridge to" should be "visible"
@@ -120,7 +120,7 @@ Feature: Withdraw
   @id1599
   Scenario: Check the Bridge artifacts on Withdraw: a wallet is not connected
     Given I'm logged out
-    Given I go to page "/bridge?network=era-goerli"
+    Given I go to page "/?network=era-goerli"
     Then Element with "text" "Bridge" should be "visible"
     When I click by text "Withdraw"
     Then Element with "text" " Connect wallet " should be "visible"
@@ -135,7 +135,7 @@ Feature: Withdraw
 
   @id1612
   Scenario: Check the editing recipient address in Bridge (Withdraw)
-    Given I go to page "/bridge?network=era-goerli"
+    Given I go to page "/?network=era-goerli"
     When I click by text "Withdraw"
     When I click by "text" with "Your Ethereum Goerli Testnet account" value
     Then Element with "text" "Bridge to" should be "visible"
@@ -146,7 +146,7 @@ Feature: Withdraw
 
     @id756
     Scenario: Check the Bridge artifacts on Deposit (Testnet)
-      Given I go to page "/bridge?network=era-goerli"
+      Given I go to page "/?network=era-goerli"
       Then Element with "text" "Bridge" should be "visible"
       Then Element with "text" "Deposit" should be "visible"
       Then Element with "text" "Withdraw" should be "visible"
@@ -182,7 +182,7 @@ Feature: Withdraw
       @id1598
       Scenario: Check the Bridge artifacts on Deposit: a wallet is not connected
         Given I'm logged out
-        Given I go to page "/bridge?network=era-goerli"
+        Given I go to page "/?network=era-goerli"
         Then Element with "text" "Bridge" should be "visible"
         When I click by text "Deposit"
         Then Element with "text" " Connect wallet " should be "visible"
@@ -197,7 +197,7 @@ Feature: Withdraw
 
     @id1611
     Scenario: Check the editing recipient address in Bridge (Deposit)
-      Given I go to page "/bridge?network=era-goerli"
+      Given I go to page "/?network=era-goerli"
       When I click by text "Deposit"
       When I click by "text" with "Your zkSync Era Testnet account" value
       Then Element with "text" "Bridge to" should be "visible"
