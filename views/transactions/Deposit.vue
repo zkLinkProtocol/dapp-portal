@@ -7,7 +7,7 @@
         <a
           href="https://www.okx.com/web3/discover/cryptopedia/event/28"
           target="_blank"
-          class="okx-tips-title flex cursor-pointer items-center gap-[4px] z-2 relative"
+          class="okx-tips-title z-2 relative flex cursor-pointer items-center gap-[4px]"
         >
           <span>OKX Cryptopedia</span>
           <img :src="launchIcon" />
@@ -72,6 +72,7 @@
           :max-amount="maxAmount"
           :approve-required="!enoughAllowance"
           :loading="tokensRequestInProgress || balanceInProgress"
+          :merge-limit-exceeds="mergeLimitExceeds"
           class="mb-block-padding-1/2 sm:mb-block-gap"
         >
           <template #dropdown>
@@ -145,8 +146,9 @@
           <TransactionSummaryAddressEntry
             v-if="isMerge"
             label="You Receive"
-            :address="transaction!.from.address"
-            :destination="transaction!.from.destination"
+            :address="mergeTokenInfo?.mergeToken"
+            :destination="{iconUrl: transaction!.token.iconUrl}"
+            :addressLabel="transaction!.token.symbol"
           />
           <TransactionSummaryAddressEntry
             label="From"
@@ -420,8 +422,8 @@ import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/
 import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 
-const okxIcon = '/img/okx-cryptopedia.svg';
-const launchIcon = '/img/launch.svg';
+const okxIcon = "/img/okx-cryptopedia.svg";
+const launchIcon = "/img/launch.svg";
 
 const route = useRoute();
 const router = useRouter();
@@ -620,15 +622,15 @@ const totalComputeAmount = computed(() => {
 const enoughBalanceForTransaction = computed(() => !amountError.value);
 
 const mergeSupported = computed(() => {
+  return mergeTokenInfo.value?.isSupported && !mergeTokenInfo.value?.isLocked;
+});
+
+const mergeLimitExceeds = computed(() => {
   if (!selectedToken.value || !mergeTokenInfo.value || !amount.value) return false;
-  // console.log('mergeTokenInfo: ', mergeTokenInfo.value)
-  console.log(selectedToken.value);
   const amountVal = decimalToBigNumber(amount.value, selectedToken.value.decimals);
-  return (
-    mergeTokenInfo.value?.isSupported &&
-    !mergeTokenInfo.value?.isLocked &&
-    amountVal.add(mergeTokenInfo.value?.balance).lte(mergeTokenInfo.value?.depositLimit)
-  );
+  const exceeds = amountVal.add(mergeTokenInfo.value?.balance).gt(mergeTokenInfo.value?.depositLimit);
+  console.log("exceeds: ", exceeds);
+  return isMerge.value && exceeds;
 });
 
 const transaction = computed<
@@ -657,7 +659,7 @@ const transaction = computed<
       address: toAddress,
       destination: destination.value,
     },
-    toMerge: isMerge.value
+    toMerge: isMerge.value,
   };
 });
 const transactionHasGateway = ref<TransactionInfo>();
@@ -723,6 +725,7 @@ const continueButtonDisabled = computed(() => {
   if (!enoughAllowance.value) return false; // When allowance approval is required we can proceed to approve stage even if deposit fee is not loaded
   if (!isAddressInputValid.value) return true;
   if (feeLoading.value || !fee.value) return true;
+  if (mergeLimitExceeds.value) return true;
   return false;
 });
 
@@ -764,7 +767,7 @@ const makeTransaction = async () => {
       to: transaction.value!.to.address,
       tokenAddress: transaction.value!.token.address,
       amount: transaction.value!.token.amount,
-      toMerge: transaction.value!.toMerge
+      toMerge: transaction.value!.toMerge,
     },
     feeValues.value!
   );
