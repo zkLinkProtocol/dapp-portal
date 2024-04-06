@@ -46,11 +46,18 @@ const props = defineProps({
     type: Object as PropType<TransactionDestination>,
     required: true,
   },
+  addressLabel: {
+    type: String,
+    required: false
+  }
 });
 
 const { account } = storeToRefs(useOnboardStore());
 
 const accountLabel = computed(() => {
+  if(props.addressLabel) {
+    return props.addressLabel;
+  }
   if (props.address === account.value.address) {
     return `Your ${props.destination.label} account`;
   }
