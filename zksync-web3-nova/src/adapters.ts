@@ -322,7 +322,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         tx.amount,
         tx.to,
         await this.getAddress(),
-        tx.gasPerPubdataByte
+        tx.gasPerPubdataByte,
+        tx.toMerge
       );
 
       const { to, token, amount, operatorTip, overrides } = tx;
