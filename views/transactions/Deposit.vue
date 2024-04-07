@@ -212,7 +212,7 @@
             <NuxtLink :to="{ name: 'receive-methods' }" class="alert-link">Receive funds</NuxtLink>
           </CommonAlert>
         </transition>
-        <div class="flex justify-between gap-3 sm:mt-2" v-if="mergeSupported">
+        <div class="flex justify-between gap-3 sm:mt-2 mb-1">
           <CommonButtonLabel as="span" class="text-left relative showTip">
             Merge Token <img src="/img/Shape.svg" class="ml-1 h-3 w-3 inline-block" alt="" />
             <div class="tooltip">
@@ -220,7 +220,16 @@
             </div>
           </CommonButtonLabel>
           <CommonButtonLabel as="span" class="text-right">
-            {{ isMerge?'Merge':'Not Merge' }} <span class="underline cursor-pointer"  @click="isMerge = !isMerge">Switch</span>
+            <span v-if="isMerge">Merge</span>  <Switch
+              v-model="isMerge"
+              :class="isMerge ? 'bg-blue-900' : 'bg-gray-500'"
+              class="relative inline-flex h-4 w-10 items-center rounded-full align-middle"
+            >
+              <span
+                :class="isMerge ? 'translate-x-0 bg-blue-600' : 'translate-x-4 bg-slate-600'"
+                class="inline-block h-6 w-6 transform rounded-full bg-white transition"
+              />
+            </Switch>
           </CommonButtonLabel>
         </div>
         <CommonErrorBlock v-if="allowanceRequestError" class="mt-2" @try-again="requestAllowance">
@@ -424,6 +433,7 @@ import { silentRouterChange } from "@/utils/helpers";
 import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/transitions";
 import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
+import { Switch } from "@headlessui/vue";
 
 const okxIcon = "/img/okx-cryptopedia.svg";
 const launchIcon = "/img/launch.svg";
