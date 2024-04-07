@@ -811,7 +811,7 @@ const makeTransaction = async () => {
         transactionInfo.value = completedTransaction;
         setTimeout(() => {
           transfersHistoryStore.reloadRecentTransfers().catch(() => undefined);
-          eraWalletStore.requestBalance({ force: true }).catch(() => undefined);
+          fetchBalances(true).catch(() => undefined);
         }, 2000);
       })
       .catch((err) => {
