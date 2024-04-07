@@ -630,7 +630,7 @@ const mergeLimitExceeds = computed(() => {
   const amountVal = decimalToBigNumber(amount.value, selectedToken.value.decimals);
   const exceeds = amountVal.add(mergeTokenInfo.value?.balance).gt(mergeTokenInfo.value?.depositLimit);
   console.log("exceeds: ", exceeds);
-  return isMerge.value && exceeds;
+  return mergeSupported.value && isMerge.value && exceeds;
 });
 
 const transaction = computed<
