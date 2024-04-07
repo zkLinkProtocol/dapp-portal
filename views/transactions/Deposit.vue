@@ -119,14 +119,6 @@
             </div>
           </template>
         </CommonInputTransactionAddress>
-        <div class="flex justify-between gap-3 sm:mt-block-gap" v-if="mergeSupported">
-          <CommonButton class="flex-1" :class="{ merge: isMerge }" @click="isMerge = true">
-            Merge <img src="/img/Shape.svg" class="ml-2 h-3 w-3" alt="" />
-          </CommonButton>
-          <CommonButton class="flex-1" :class="{ notMerge: !isMerge }" @click="isMerge = false">
-            Not Merge <img src="/img/Shape.svg" class="ml-2 h-3 w-3" alt="" />
-          </CommonButton>
-        </div>
         <CommonButton
           v-if="tokenCustomBridge"
           type="submit"
@@ -220,6 +212,26 @@
             <NuxtLink :to="{ name: 'receive-methods' }" class="alert-link">Receive funds</NuxtLink>
           </CommonAlert>
         </transition>
+        <div class="flex justify-between gap-3 sm:mt-2 mb-1" v-if="mergeSupported">
+          <CommonButtonLabel as="span" class="text-left relative showTip">
+            Merge Token <img src="/img/Shape.svg" class="ml-1 h-3 w-3 inline-block" alt="" />
+            <div class="tooltip">
+              All supported source tokens with the same entity from different networks can be merged into a single merged token. <a href="https://docs.zklink.io/how-it-works/token-merge" target="_blank">Learn More</a>.
+            </div>
+          </CommonButtonLabel>
+          <CommonButtonLabel as="span" class="text-right">
+            <span v-if="isMerge">Merge</span>  <Switch
+              v-model="isMerge"
+              :class="isMerge ? 'bg-blue-900' : 'bg-gray-500'"
+              class="relative inline-flex h-4 w-10 items-center rounded-full align-middle"
+            >
+              <span
+                :class="isMerge ? 'translate-x-0 bg-blue-600' : 'translate-x-4 bg-slate-600'"
+                class="inline-block h-6 w-6 transform rounded-full bg-white transition"
+              />
+            </Switch>
+          </CommonButtonLabel>
+        </div>
         <CommonErrorBlock v-if="allowanceRequestError" class="mt-2" @try-again="requestAllowance">
           Checking allowance error: {{ allowanceRequestError.message }}
         </CommonErrorBlock>
@@ -421,6 +433,7 @@ import { silentRouterChange } from "@/utils/helpers";
 import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/transitions";
 import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
+import { Switch } from "@headlessui/vue";
 
 const okxIcon = "/img/okx-cryptopedia.svg";
 const launchIcon = "/img/launch.svg";
@@ -956,5 +969,23 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
 .notMerge {
   border-radius: 16px;
   background: rgba(23, 85, 244, 0.25) !important;
+}
+.showTip:hover{
+  .tooltip{
+    display: block;
+  }
+}
+.tooltip{
+  display: none;
+  position: absolute;
+  padding: 12px 20px 12px 24px;
+  top: -4.5rem;
+  width: 35rem;
+  left: -10rem;
+  border-radius: 8px;
+  background: #1F2127;
+  a{
+    color: #1755F4;
+  }
 }
 </style>
