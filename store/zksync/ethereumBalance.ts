@@ -1,4 +1,4 @@
-import { getBalance, multicall } from "@wagmi/core";
+import { getBalance, getPublicClient } from "@wagmi/core";
 
 import type { Hash, TokenAmount } from "@/types";
 import type { Config } from "@wagmi/core";
@@ -55,75 +55,50 @@ export const useZkSyncEthereumBalanceStore = defineStore("zkSyncEthereumBalances
     const filterL1tokens = Object.values(l1Tokens.value ?? []).filter(
       (e) => e.networkKey === selectedNetwork.value.key || e.address === ETH_TOKEN.l1Address
     );
-    console.log("chain: ", l1Network.value, network.value);
-    if (l1Network.value?.id === network.value.chainId) {
-      const ethBalance = await getBalance(wagmiConfig as Config, {
-        address: account.value.address!,
-        chainId: l1Network.value!.id,
-        token: undefined,
-      });
-      const erc20Tokens = filterL1tokens.filter((t) => t.address !== ETH_TOKEN.l1Address);
-      const filterTokenBalances = await multicall(wagmiConfig as Config, {
+
+    const publicClient = getPublicClient(wagmiConfig as Config, { chainId: l1Network.value?.id });
+
+    const ethBalance = await getBalance(wagmiConfig as Config, {
+      address: account.value.address!,
+      chainId: l1Network.value!.id,
+      token: undefined,
+    });
+    const erc20Tokens = filterL1tokens.filter((t) => t.address !== ETH_TOKEN.l1Address);
+    const filterTokenBalances =
+      (await publicClient?.multicall({
         contracts: erc20Tokens.map((item) => ({
           address: item.address as Hash,
           abi: erc20Abi,
           functionName: "balanceOf",
           args: [account.value.address!],
         })),
-      });
-      console.log("filterTokenBalances: ", filterTokenBalances);
-      const searchTokens = (searchTokenBalance.value ?? []).filter(
-        (token) => !Object.values(l1Tokens.value ?? []).find((e) => e.address === token.address)
-      );
-      const searchTokenBalances = await multicall(wagmiConfig as Config, {
+      })) ?? [];
+
+    const searchTokens = (searchTokenBalance.value ?? []).filter(
+      (token) => !Object.values(l1Tokens.value ?? []).find((e) => e.address === token.address)
+    );
+    const searchTokenBalances =
+      (await publicClient?.multicall({
         contracts: searchTokens.map((item) => ({
           address: item.address as Hash,
           abi: erc20Abi,
           functionName: "balanceOf",
           args: [account.value.address!],
         })),
-      });
-      console.log("searchTokenBalances: ", searchTokenBalances);
-      const ethToken = filterL1tokens.find((item) => item.address === ETH_TOKEN.l1Address);
-      return [
-        { ...ethToken!, amount: ethBalance.value.toString() },
-        ...filterTokenBalances.map((item, index) => ({
-          ...erc20Tokens[index],
-          amount: item.result?.toString() ?? "0",
-        })),
-        ...searchTokenBalances.map((item, index) => ({
-          ...searchTokens[index],
-          amount: item.result?.toString() ?? "0",
-        })),
-      ];
-    } else {
-      return await Promise.all([
-        ...filterL1tokens.map(async (token) => {
-          const amount = await getBalance(wagmiConfig as Config, {
-            address: account.value.address!,
-            chainId: l1Network.value!.id,
-            token: token.address === ETH_TOKEN.l1Address ? undefined : (token.address! as Hash),
-          });
-          return {
-            ...token,
-            amount: amount.value.toString(),
-          };
-        }),
-        ...(searchTokenBalance.value ?? [])
-          .filter((token) => !Object.values(l1Tokens.value ?? []).find((e) => e.address === token.address))
-          .map(async (e) => {
-            const amount = await getBalance(wagmiConfig as Config, {
-              address: account.value.address!,
-              chainId: l1Network.value!.id,
-              token: e.address === ETH_TOKEN.l1Address ? undefined : (e.address! as Hash),
-            });
-            return {
-              ...e,
-              amount: amount.value.toString(),
-            };
-          }),
-      ]);
-    }
+      })) ?? [];
+
+    const ethToken = filterL1tokens.find((item) => item.address === ETH_TOKEN.l1Address);
+    return [
+      { ...ethToken!, amount: ethBalance.value.toString() },
+      ...filterTokenBalances.map((item, index) => ({
+        ...erc20Tokens[index],
+        amount: item.result?.toString() ?? "0",
+      })),
+      ...searchTokenBalances.map((item, index) => ({
+        ...searchTokens[index],
+        amount: item.result?.toString() ?? "0",
+      })),
+    ];
   };
   let isSaveToken = false,
     oldBalance: TokenAmount[];
