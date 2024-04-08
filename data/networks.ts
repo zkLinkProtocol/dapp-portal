@@ -228,7 +228,7 @@ export const nexusNode: ZkSyncNetwork[] = [
     erc20BridgeL1: "0x62351b47e060c61868Ab7E05920Cb42bD9A5f2B2",
     erc20BridgeL2: "0x321Ce902eDFC6466B224ce5D9A7Bc16858855272",
     l1Gateway: "0xdE1Ce751405Fe6D836349226EEdCDFFE1C3BE269",
-    isEthGasToken: false,
+    isEthGasToken: true,
     l1Network: l1Networks.mantle,
   },
   {

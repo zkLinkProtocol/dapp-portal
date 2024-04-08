@@ -55,6 +55,13 @@ export const useZkSyncEthereumBalanceStore = defineStore("zkSyncEthereumBalances
     const filterL1tokens = Object.values(l1Tokens.value ?? []).filter(
       (e) => e.networkKey === selectedNetwork.value.key || e.address === ETH_TOKEN.l1Address
     );
+    if (selectedNetwork.value.key === "mantle") {
+      const nativeToken = filterL1tokens.find((e) => e.address === ETH_TOKEN.l1Address);
+      const wmntToken = filterL1tokens.find((e) => e.symbol === "WMNT");
+      nativeToken!.symbol = "MNT";
+      nativeToken!.price = wmntToken?.price ?? 0;
+      nativeToken!.iconUrl = "/img/mantle.svg";
+    }
     return await Promise.all([
       ...filterL1tokens.map(async (token) => {
         const amount = await getBalance(wagmiConfig as Config, {

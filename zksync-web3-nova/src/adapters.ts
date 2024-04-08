@@ -23,13 +23,14 @@ import {
   undoL1ToL2Alias,
   estimateDefaultBridgeDepositL2Gas,
   scaleGasLimit,
+  WMNT_CONTRACT,
 } from "./utils";
 import { Hash } from "~/types";
 import { Interface } from "ethers/lib/utils";
 import { abi as primaryGetterAbi } from "../abi/GettersFacet.json";
 import { l1EthDepositAbi } from "./abi";
 import { Fee, LineaProvider, zkSyncProvider } from "./zkSyncProvider"; //TODO the filename is not accurate
-
+import WrappedMNTAbi from "../abi/WrappedMNT.json";
 type Constructor<T = {}> = new (...args: any[]) => T;
 
 interface TxSender {
@@ -156,6 +157,13 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       );
     }
 
+    async depositMNT(amount: BigNumberish) {
+      const wmntContract = new ethers.Contract(WMNT_CONTRACT, WrappedMNTAbi, this._signerL1());
+      const { hash } = await wmntContract.deposit({ value: amount });
+      const res = await this._providerL1().waitForTransaction(hash);
+      console.log("approve mnt res: ", res);
+    }
+
     async deposit(transaction: {
       token: Address;
       amount: BigNumberish;
@@ -168,7 +176,16 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       overrides?: ethers.PayableOverrides;
       approveOverrides?: ethers.Overrides;
     }): Promise<PriorityOpResponse> {
+      // handle mnt deposit
+      let isMntDeposit = false;
+      if (this._providerL2().isMantleChain() && transaction.token == ETH_ADDRESS) {
+        isMntDeposit = true;
+        await this.depositMNT(transaction.amount);
+        transaction.token = WMNT_CONTRACT;
+        transaction.approveERC20 = true;
+      }
       const depositTx = await this.getDepositTx(transaction);
+
       if (transaction.token == ETH_ADDRESS) {
         depositTx.overrides ??= {};
         console.log("depositTx.overrides", depositTx.overrides);
@@ -194,6 +211,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           const baseGasLimit = await this._providerL1().estimateGas(depositTx);
           const gasLimit = scaleGasLimit(baseGasLimit);
           depositTx.gasLimit = gasLimit;
+        }
+        if (depositTx.gasLimit && isMntDeposit) {
+          depositTx.gasLimit = depositTx.gasLimit.mul(2); // or the tx would fail
         }
 
         if (this._providerL2().isZkSyncChain()) {
@@ -517,7 +537,11 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
     //for mantle and manta
     async getL1FeeForOp(calldata: string): Promise<BigNumber> {
-      if (!this._providerL2().isMantleChain() && !this._providerL2().isMantaChain() && !this._providerL2().isBlastChain()) {
+      if (
+        !this._providerL2().isMantleChain() &&
+        !this._providerL2().isMantaChain() &&
+        !this._providerL2().isBlastChain()
+      ) {
         return BigNumber.from(0);
       }
       const abi = [
@@ -846,7 +870,12 @@ async function insertGasPrice(
   overrides: ethers.PayableOverrides
 ) {
   if (!overrides.gasPrice && !overrides.maxFeePerGas) {
-    if (l2Provider.isArbitrumChain() || l2Provider.isMantaChain() || l2Provider.isMantleChain() || l2Provider.isBlastChain()) {
+    if (
+      l2Provider.isArbitrumChain() ||
+      l2Provider.isMantaChain() ||
+      l2Provider.isMantleChain() ||
+      l2Provider.isBlastChain()
+    ) {
       //if arbitrum
       console.log("arbitrum chain");
       console.log("manta chain, mantle chain, arbitrum chain, only support gasPrice");
