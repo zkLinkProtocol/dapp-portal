@@ -149,6 +149,7 @@ export type ZkSyncNetwork = {
   l1Gateway?: Address;
   isEthGasToken?: boolean;
   getTokens?: () => Token[] | Promise<Token[]>; // If blockExplorerApi is specified, tokens will be fetched from there. Otherwise, this function will be used.
+  wethContract?: Address;
 };
 
 export const nexusNode: ZkSyncNetwork[] = [
@@ -167,6 +168,7 @@ export const nexusNode: ZkSyncNetwork[] = [
     l1Gateway: "0x83Bc7394738A7A084081aF22EEC0051908c0055c",
     isEthGasToken: true,
     l1Network: l1Networks.mainnet,
+    wethContract: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
   },
   {
     id: 810180,
@@ -214,6 +216,7 @@ export const nexusNode: ZkSyncNetwork[] = [
     l1Gateway: "0x273D59aed2d793167c162E64b9162154B07583C0",
     isEthGasToken: true,
     l1Network: l1Networks.arbitrum,
+    wethContract: "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
   },
   {
     id: 810180,

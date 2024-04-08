@@ -48,6 +48,7 @@ export default (transactionInfo: ComputedRef<TransactionInfo>) => {
       erc20BridgeL1: eraNetwork.erc20BridgeL1,
       erc20BridgeL2: eraNetwork.erc20BridgeL2,
       l1Gateway: eraNetwork.l1Gateway,
+      wethContract: eraNetwork.wethContract
     });
     provider.setIsEthGasToken(eraNetwork.isEthGasToken ?? true);
     return provider;

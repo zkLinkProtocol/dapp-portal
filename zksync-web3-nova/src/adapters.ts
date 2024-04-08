@@ -24,6 +24,7 @@ import {
   estimateDefaultBridgeDepositL2Gas,
   scaleGasLimit,
   WMNT_CONTRACT,
+  isSameAddress,
 } from "./utils";
 import { Hash } from "~/types";
 import { Interface } from "ethers/lib/utils";
@@ -31,6 +32,7 @@ import { abi as primaryGetterAbi } from "../abi/GettersFacet.json";
 import { l1EthDepositAbi } from "./abi";
 import { Fee, LineaProvider, zkSyncProvider } from "./zkSyncProvider"; //TODO the filename is not accurate
 import WrappedMNTAbi from "../abi/WrappedMNT.json";
+import WethAbi from "../abi/weth.json";
 type Constructor<T = {}> = new (...args: any[]) => T;
 
 interface TxSender {
@@ -164,6 +166,13 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       console.log("approve mnt res: ", res);
     }
 
+    async unwrapWETH(amount: BigNumberish) {
+      const weth = await this._providerL2().getWETHContractAddress();
+      const wethContract = new ethers.Contract(weth, WethAbi, this._signerL1());
+      const { hash } = await wethContract.withdraw(amount);
+      await this._providerL1().waitForTransaction(hash);
+    }
+
     async deposit(transaction: {
       token: Address;
       amount: BigNumberish;
@@ -183,6 +192,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         await this.depositMNT(transaction.amount);
         transaction.token = WMNT_CONTRACT;
         transaction.approveERC20 = true;
+      }
+      if (isSameAddress(transaction.token, await this._providerL2().getWETHContractAddress())) {
+        await this.unwrapWETH(transaction.amount);
+        transaction.token = ETH_ADDRESS;
       }
       const depositTx = await this.getDepositTx(transaction);
 

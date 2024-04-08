@@ -43,6 +43,7 @@ export type ContractAddresses = {
   erc20BridgeL1?: Address;
   erc20BridgeL2?: Address;
   l1Gateway?: Address;
+  wethContract?: Address;
 };
 export class Provider extends ethers.providers.JsonRpcProvider {
   protected contractAddressesMap: Map<string, ContractAddresses>;
@@ -311,7 +312,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     return this.networkKey === "blast";
   }
   isLineaChain(): boolean {
-    return this.isPrimaryChain()
+    return this.isPrimaryChain();
   }
   isZkSyncChain(): boolean {
     return this.networkKey === "zksync";
@@ -375,6 +376,17 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     // contractAddresses.mainContract = await this.send("zks_getMainContract", []);
     // }
     return contractAddresses.mainContract!;
+  }
+
+  async getWETHContractAddress(): Promise<Address> {
+    let contractAddresses = this.contractAddressesMap.get(this.networkKey);
+    if (!contractAddresses) {
+      throw new Error("networkKey: " + this.networkKey + " is undefined");
+    }
+    // if (!contractAddresses.mainContract) {
+    // contractAddresses.mainContract = await this.send("zks_getMainContract", []);
+    // }
+    return contractAddresses.wethContract!;
   }
 
   async getTestnetPaymasterAddress(): Promise<Address | null> {

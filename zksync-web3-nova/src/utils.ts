@@ -582,3 +582,7 @@ export async function fetchErc20(
     decimals: decimals,
   } as TokenAmount;
 }
+
+export function isSameAddress(a: Address, b: Address) {
+  return a && b && a.toLowerCase() === b.toLowerCase();
+}

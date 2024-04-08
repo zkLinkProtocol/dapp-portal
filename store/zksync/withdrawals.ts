@@ -56,6 +56,7 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
         erc20BridgeL1: eraNetwork.erc20BridgeL1,
         erc20BridgeL2: eraNetwork.erc20BridgeL2,
         l1Gateway: eraNetwork.l1Gateway,
+        wethContract: eraNetwork.wethContract
       });
       provider.setIsEthGasToken(eraNetwork.isEthGasToken ?? true);
       return provider;
@@ -141,6 +142,7 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
           erc20BridgeL1: eraNetworks.erc20BridgeL1,
           erc20BridgeL2: eraNetworks.erc20BridgeL2,
           l1Gateway: eraNetworks.l1Gateway,
+          wethContract: eraNetworks.wethContract,
         });
         provider.setIsEthGasToken(eraNetworks.isEthGasToken ?? true);
         return provider;
