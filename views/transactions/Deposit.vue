@@ -216,7 +216,7 @@
           <CommonButtonLabel as="span" class="text-left relative showTip">
             Merge Token <img src="/img/Shape.svg" class="ml-1 h-3 w-3 inline-block" alt="" />
             <div class="tooltip">
-              All supported source tokens with the same entity from different networks can be merged into a single merged token. <a href="https://docs.zklink.io/how-it-works/token-merge" target="_blank">Learn More</a>.
+              All supported source tokens with the same entity from different networks can be merged into a single merged token. Holding or using merged token to engage with supported dApps could receive higher multipliers. <a href="https://docs.zklink.io/how-it-works/token-merge" target="_blank">Learn More</a>.
             </div>
           </CommonButtonLabel>
           <CommonButtonLabel as="span" class="text-right">
