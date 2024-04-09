@@ -166,9 +166,12 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       console.log("approve mnt res: ", res);
     }
 
-    async unwrapWETH(amount: BigNumberish) {
-      const weth = await this._providerL2().getWETHContractAddress();
-      const wethContract = new ethers.Contract(weth, WethAbi, this._signerL1());
+    async unwrapWETH(token: Address, amount: BigNumberish) {
+      const weths = await this._providerL2().getWETHContractAddress();
+      if (!weths.map((item) => item.toLowerCase().includes(token.toLowerCase()))) {
+        return;
+      }
+      const wethContract = new ethers.Contract(token, WethAbi, this._signerL1());
       const { hash } = await wethContract.withdraw(amount);
       await this._providerL1().waitForTransaction(hash);
     }
@@ -193,8 +196,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         transaction.token = WMNT_CONTRACT;
         transaction.approveERC20 = true;
       }
-      if (isSameAddress(transaction.token, await this._providerL2().getWETHContractAddress())) {
-        await this.unwrapWETH(transaction.amount);
+      const weths = await this._providerL2().getWETHContractAddress();
+      if (weths.map((item) => item.toLowerCase()).includes(transaction.token.toLowerCase())) {
+        await this.unwrapWETH(transaction.token, transaction.amount);
         transaction.token = ETH_ADDRESS;
       }
       const depositTx = await this.getDepositTx(transaction);

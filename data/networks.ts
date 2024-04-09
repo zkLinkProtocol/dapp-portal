@@ -149,7 +149,7 @@ export type ZkSyncNetwork = {
   l1Gateway?: Address;
   isEthGasToken?: boolean;
   getTokens?: () => Token[] | Promise<Token[]>; // If blockExplorerApi is specified, tokens will be fetched from there. Otherwise, this function will be used.
-  wethContract?: Address;
+  wethContract?: Address[];
 };
 
 export const nexusNode: ZkSyncNetwork[] = [
@@ -168,7 +168,7 @@ export const nexusNode: ZkSyncNetwork[] = [
     l1Gateway: "0x83Bc7394738A7A084081aF22EEC0051908c0055c",
     isEthGasToken: true,
     l1Network: l1Networks.mainnet,
-    wethContract: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+    wethContract: ["0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"],
   },
   {
     id: 810180,
@@ -184,6 +184,7 @@ export const nexusNode: ZkSyncNetwork[] = [
     erc20BridgeL2: "0x01c3f51294494e350AD69B999Db6B382b3B510b9",
     isEthGasToken: true,
     l1Network: l1Networks.linea,
+    wethContract: ["0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f"],
   },
   {
     id: 810180,
@@ -200,6 +201,7 @@ export const nexusNode: ZkSyncNetwork[] = [
     l1Gateway: "0xeCD189e0f390826E137496a4e4a23ACf76c942Ab",
     isEthGasToken: true,
     l1Network: l1Networks.zkSync,
+    wethContract: ["0x5aea5775959fbc2557cc8789bc1bf90a239d9a91", "0x8Ebe4A94740515945ad826238Fc4D56c6B8b0e60"],
   },
   {
     id: 810180,
@@ -216,7 +218,7 @@ export const nexusNode: ZkSyncNetwork[] = [
     l1Gateway: "0x273D59aed2d793167c162E64b9162154B07583C0",
     isEthGasToken: true,
     l1Network: l1Networks.arbitrum,
-    wethContract: "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
+    wethContract: ["0x82af49447d8a07e3bd95bd0d56f35241523fbab1"],
   },
   {
     id: 810180,
@@ -233,6 +235,7 @@ export const nexusNode: ZkSyncNetwork[] = [
     l1Gateway: "0xdE1Ce751405Fe6D836349226EEdCDFFE1C3BE269",
     isEthGasToken: true,
     l1Network: l1Networks.mantle,
+    wethContract: ["0xdEAddEaDdeadDEadDEADDEAddEADDEAddead1111"],
   },
   {
     id: 810180,
@@ -249,6 +252,7 @@ export const nexusNode: ZkSyncNetwork[] = [
     l1Gateway: "0x649Dfa2c4d09D877419fA1eDC4005BfbEF7CD82D",
     isEthGasToken: true,
     l1Network: l1Networks.manta,
+    wethContract: ["0x0Dc808adcE2099A9F62AA87D9670745AbA741746"],
   },
   {
     id: 810180,
@@ -265,6 +269,7 @@ export const nexusNode: ZkSyncNetwork[] = [
     l1Gateway: "0x41FaF46Ca4Dfd912B65B66D29BdD432782BB1158",
     isEthGasToken: true,
     l1Network: l1Networks.blast,
+    wethContract: ["0x4300000000000000000000000000000000000004"],
   },
   {
     id: 810180,
@@ -281,6 +286,7 @@ export const nexusNode: ZkSyncNetwork[] = [
     l1Gateway: "0x668e8F67adB8219e1816C2E5bBEa055A78AF3026",
     isEthGasToken: true,
     l1Network: l1Networks.optimism,
+    wethContract: ["0x4200000000000000000000000000000000000006"],
   },
   {
     id: 810180,
@@ -297,6 +303,7 @@ export const nexusNode: ZkSyncNetwork[] = [
     l1Gateway: "0x4eEA93966AA5cd658225E0D43b665A5a491d2b7E",
     isEthGasToken: true,
     l1Network: l1Networks.base,
+    wethContract: ["0x4200000000000000000000000000000000000006"],
   },
 ];
 

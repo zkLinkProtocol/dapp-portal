@@ -43,7 +43,7 @@ export type ContractAddresses = {
   erc20BridgeL1?: Address;
   erc20BridgeL2?: Address;
   l1Gateway?: Address;
-  wethContract?: Address;
+  wethContract?: Address[];
 };
 export class Provider extends ethers.providers.JsonRpcProvider {
   protected contractAddressesMap: Map<string, ContractAddresses>;
@@ -378,7 +378,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     return contractAddresses.mainContract!;
   }
 
-  async getWETHContractAddress(): Promise<Address> {
+  async getWETHContractAddress(): Promise<Address[]> {
     let contractAddresses = this.contractAddressesMap.get(this.networkKey);
     if (!contractAddresses) {
       throw new Error("networkKey: " + this.networkKey + " is undefined");

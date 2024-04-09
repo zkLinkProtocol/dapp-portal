@@ -69,7 +69,7 @@ export const useZkSyncWalletStore = defineStore("zkSyncWallet", () => {
 
   const getPrimaryL1VoidSigner = () => {
     const web3Provider = new ethers.providers.Web3Provider(
-      getPublicClient({ chainId: primaryNetwork.l1Network?.id }) as any,
+      onboardStore.getPublicClient(primaryNetwork.l1Network?.id) as any,
       "any"
     );
     const voidSigner = new VoidSigner(account.value.address || ETH_TOKEN.address, web3Provider);
