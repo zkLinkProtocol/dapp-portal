@@ -973,6 +973,7 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
 .showTip:hover{
   .tooltip{
     display: block;
+    z-index: 100;
   }
 }
 .tooltip{
