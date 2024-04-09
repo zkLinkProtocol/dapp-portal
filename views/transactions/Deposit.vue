@@ -784,7 +784,7 @@ const makeTransaction = async () => {
       to: transaction.value!.to.address,
       tokenAddress: transaction.value!.token.address,
       amount: transaction.value!.token.amount,
-      toMerge: transaction.value!.toMerge,
+      toMerge: mergeSupported.value && transaction.value!.toMerge,
     },
     feeValues.value!
   );
