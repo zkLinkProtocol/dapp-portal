@@ -8,15 +8,17 @@ import { Provider } from "@ethersproject/providers";
 import type { IL1Bridge } from "./IL1Bridge";
 
 export class IL1BridgeFactory {
-  static connect(
-    address: string,
-    signerOrProvider: Signer | Provider
-  ): IL1Bridge {
+  static connect(address: string, signerOrProvider: Signer | Provider): IL1Bridge {
     return new Contract(address, _abi, signerOrProvider) as IL1Bridge;
   }
 }
 
 const _abi = [
+  {
+    inputs: [],
+    name: "FunctionNotSupported",
+    type: "error",
+  },
   {
     anonymous: false,
     inputs: [
@@ -47,6 +49,12 @@ const _abi = [
     inputs: [
       {
         indexed: true,
+        internalType: "bytes32",
+        name: "l2DepositTxHash",
+        type: "bytes32",
+      },
+      {
+        indexed: true,
         internalType: "address",
         name: "from",
         type: "address",
@@ -58,7 +66,7 @@ const _abi = [
         type: "address",
       },
       {
-        indexed: true,
+        indexed: false,
         internalType: "address",
         name: "l1Token",
         type: "address",
@@ -71,6 +79,49 @@ const _abi = [
       },
     ],
     name: "DepositInitiated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "bytes32",
+        name: "l2DepositTxHash",
+        type: "bytes32",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "from",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "to",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "l1Token",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "bool",
+        name: "toMerge",
+        type: "bool",
+      },
+    ],
+    name: "DepositToMergeInitiated",
     type: "event",
   },
   {
@@ -117,7 +168,7 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "_l2BlockNumber",
+        name: "_l2BatchNumber",
         type: "uint256",
       },
       {
@@ -127,7 +178,7 @@ const _abi = [
       },
       {
         internalType: "uint16",
-        name: "_l2TxNumberInBlock",
+        name: "_l2TxNumberInBatch",
         type: "uint16",
       },
       {
@@ -168,6 +219,11 @@ const _abi = [
         name: "_l2TxGasPerPubdataByte",
         type: "uint256",
       },
+      {
+        internalType: "address",
+        name: "_refundRecipient",
+        type: "address",
+      },
     ],
     name: "deposit",
     outputs: [
@@ -183,8 +239,52 @@ const _abi = [
   {
     inputs: [
       {
+        internalType: "address",
+        name: "_l2Receiver",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_l1Token",
+        type: "address",
+      },
+      {
         internalType: "uint256",
-        name: "_l2BlockNumber",
+        name: "_amount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_l2TxGasLimit",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_l2TxGasPerPubdataByte",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "_refundRecipient",
+        type: "address",
+      },
+    ],
+    name: "depositToMerge",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "txHash",
+        type: "bytes32",
+      },
+    ],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_l2BatchNumber",
         type: "uint256",
       },
       {
@@ -194,7 +294,7 @@ const _abi = [
       },
       {
         internalType: "uint16",
-        name: "_l2TxNumberInBlock",
+        name: "_l2TxNumberInBatch",
         type: "uint16",
       },
       {
@@ -217,7 +317,7 @@ const _abi = [
     inputs: [
       {
         internalType: "uint256",
-        name: "_l2BlockNumber",
+        name: "_l2BatchNumber",
         type: "uint256",
       },
       {
@@ -232,6 +332,19 @@ const _abi = [
         internalType: "bool",
         name: "",
         type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "l2Bridge",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
       },
     ],
     stateMutability: "view",

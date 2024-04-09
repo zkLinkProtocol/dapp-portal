@@ -10,6 +10,7 @@ export type Token = {
   iconUrl?: string;
   price?: TokenPrice;
   networkKey?: string;
+  l2Address: string;
 };
 export type TokenAmount = Token & { amount: BigNumberish };
 

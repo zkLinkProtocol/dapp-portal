@@ -422,10 +422,11 @@ export async function getERC20BridgeCalldata(
   l1Sender: string,
   l2Receiver: string,
   amount: BigNumberish,
-  provider: ethers.providers.Provider
+  provider: ethers.providers.Provider,
+  toMerge?: boolean
 ): Promise<string> {
   const gettersData = await getERC20GettersData(l1TokenAddress, provider);
-  return L2_BRIDGE_ABI.encodeFunctionData("finalizeDeposit", [
+  return L2_BRIDGE_ABI.encodeFunctionData(toMerge ? "finalizeDepositToMerge" : "finalizeDeposit", [
     l1Sender,
     l2Receiver,
     l1TokenAddress,
@@ -519,7 +520,8 @@ export async function estimateDefaultBridgeDepositL2Gas(
   amount: BigNumberish,
   to: Address,
   from?: Address,
-  gasPerPubdataByte?: BigNumberish
+  gasPerPubdataByte?: BigNumberish,
+  toMerge?: boolean
 ): Promise<BigNumber> {
   // If the `from` address is not provided, we use a random address, because
   // due to storage slot aggregation, the gas estimation will depend on the address
@@ -538,7 +540,7 @@ export async function estimateDefaultBridgeDepositL2Gas(
     const l1ERC20BridgeAddresses = (await providerL2.getDefaultBridgeAddresses()).erc20L1;
     const erc20BridgeAddress = (await providerL2.getDefaultBridgeAddresses()).erc20L2;
 
-    const calldata = await getERC20BridgeCalldata(token, from, to, amount, providerL1);
+    const calldata = await getERC20BridgeCalldata(token, from, to, amount, providerL1, toMerge);
 
     return await providerL2.estimateL1ToL2Execute({
       caller: applyL1ToL2Alias(l1ERC20BridgeAddresses!),

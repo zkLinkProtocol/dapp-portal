@@ -7,10 +7,10 @@
         <a
           href="https://www.okx.com/web3/discover/cryptopedia/event/28"
           target="_blank"
-          class="okx-tips-title flex cursor-pointer items-center gap-[4px] z-2 relative"
+          class="okx-tips-title z-2 relative flex cursor-pointer items-center gap-[4px]"
         >
           <span>OKX Cryptopedia</span>
-          <img src="/img/launch.svg" />
+          <img :src="launchIcon" />
         </a>
         <div class="mt-[5px]">
           <p class="okx-tips-desc">
@@ -72,6 +72,7 @@
           :max-amount="maxAmount"
           :approve-required="!enoughAllowance"
           :loading="tokensRequestInProgress || balanceInProgress"
+          :merge-limit-exceeds="mergeLimitExceeds"
           class="mb-block-padding-1/2 sm:mb-block-gap"
         >
           <template #dropdown>
@@ -134,6 +135,13 @@
       <template v-else-if="step === 'confirm'">
         <CommonCardWithLineButtons>
           <TransactionSummaryTokenEntry label="You deposit" :token="transaction!.token" />
+          <TransactionSummaryAddressEntry
+            v-if="isMerge"
+            label="You Receive"
+            :address="mergeTokenInfo?.mergeToken"
+            :destination="{iconUrl: transaction!.token.iconUrl}"
+            :addressLabel="transaction!.token.symbol"
+          />
           <TransactionSummaryAddressEntry
             label="From"
             :address="transaction!.from.address"
@@ -204,6 +212,26 @@
             <NuxtLink :to="{ name: 'receive-methods' }" class="alert-link">Receive funds</NuxtLink>
           </CommonAlert>
         </transition>
+        <div class="flex justify-between gap-3 sm:mt-2 mb-1" v-if="mergeSupported">
+          <CommonButtonLabel as="span" class="text-left relative showTip">
+            Merge Token <img src="/img/Shape.svg" class="ml-1 h-3 w-3 inline-block" alt="" />
+            <div class="tooltip">
+              All supported source tokens with the same entity from different networks can be merged into a single merged token. Holding or using merged token to engage with supported dApps could receive higher multipliers. <a href="https://docs.zklink.io/how-it-works/token-merge" target="_blank">Learn More</a>.
+            </div>
+          </CommonButtonLabel>
+          <CommonButtonLabel as="span" class="text-right">
+            <span v-if="isMerge">Merge</span>  <Switch
+              v-model="isMerge"
+              :class="isMerge ? 'bg-blue-900' : 'bg-gray-500'"
+              class="relative inline-flex h-4 w-10 items-center rounded-full align-middle"
+            >
+              <span
+                :class="isMerge ? 'translate-x-0 bg-blue-600' : 'translate-x-4 bg-slate-600'"
+                class="inline-block h-6 w-6 transform rounded-full bg-[#888C91] transition"
+              />
+            </Switch>
+          </CommonButtonLabel>
+        </div>
         <CommonErrorBlock v-if="allowanceRequestError" class="mt-2" @try-again="requestAllowance">
           Checking allowance error: {{ allowanceRequestError.message }}
         </CommonErrorBlock>
@@ -374,6 +402,7 @@ import { storeToRefs } from "pinia";
 import EthereumTransactionFooter from "@/components/transaction/EthereumTransactionFooter.vue";
 
 import useAllowance from "@/composables/transaction/useAllowance";
+import useMergeToken from "@/composables/transaction/useMergeToken";
 import useInterval from "@/composables/useInterval";
 import useNetworks from "@/composables/useNetworks";
 import useEcosystemBanner from "@/composables/zksync/deposit/useEcosystemBanner";
@@ -387,6 +416,7 @@ import type { BigNumberish } from "ethers";
 
 import { useRoute, useRouter } from "#app";
 import { customBridgeTokens } from "@/data/customBridgeTokens";
+import { getWaitTime } from "@/data/networks";
 import { useDestinationsStore } from "@/store/destinations";
 import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
@@ -403,12 +433,13 @@ import { silentRouterChange } from "@/utils/helpers";
 import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/transitions";
 import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
-import { getWaitTime } from "@/data/networks";
+import { Switch } from "@headlessui/vue";
+
+const okxIcon = "/img/okx-cryptopedia.svg";
+const launchIcon = "/img/launch.svg";
 
 const route = useRoute();
 const router = useRouter();
-
-console.log("route", route.query);
 
 const onboardStore = useOnboardStore();
 const tokensStore = useZkSyncTokensStore();
@@ -431,6 +462,7 @@ const fromNetworkSelected = (networkKey?: string) => {
   }
 };
 const step = ref<"form" | "confirm" | "submitted">("form");
+const isMerge = ref<true | false>(true);
 const destination = computed(() => destinations.value.nova);
 const availableTokens = computed<Token[]>(() => {
   if (balance.value) return balance.value;
@@ -497,6 +529,9 @@ const amountInputTokenAddress = computed({
 const tokenBalance = computed<BigNumberish | undefined>(() => {
   return balance.value?.find((e) => e.address === selectedToken.value?.address)?.amount;
 });
+const { result: mergeTokenInfo, inProgress: mergeTokenInfoInProgress } = useMergeToken(
+  computed(() => selectedToken.value?.l2Address)
+);
 
 const {
   result: allowance,
@@ -599,11 +634,24 @@ const totalComputeAmount = computed(() => {
 });
 const enoughBalanceForTransaction = computed(() => !amountError.value);
 
+const mergeSupported = computed(() => {
+  return mergeTokenInfo.value?.isSupported && !mergeTokenInfo.value?.isLocked;
+});
+
+const mergeLimitExceeds = computed(() => {
+  if (!selectedToken.value || !mergeTokenInfo.value || !amount.value) return false;
+  const amountVal = decimalToBigNumber(amount.value, selectedToken.value.decimals);
+  const exceeds = amountVal.add(mergeTokenInfo.value?.balance).gt(mergeTokenInfo.value?.depositLimit);
+  console.log("exceeds: ", exceeds);
+  return mergeSupported.value && isMerge.value && exceeds;
+});
+
 const transaction = computed<
   | {
       token: TokenAmount;
       from: { address: string; destination: TransactionDestinfonboardStoreation };
       to: { address: string; destination: TransactionDestination };
+      toMerge?: boolean;
     }
   | undefined
 >(() => {
@@ -624,6 +672,7 @@ const transaction = computed<
       address: toAddress,
       destination: destination.value,
     },
+    toMerge: isMerge.value,
   };
 });
 const transactionHasGateway = ref<TransactionInfo>();
@@ -689,6 +738,7 @@ const continueButtonDisabled = computed(() => {
   if (!enoughAllowance.value) return false; // When allowance approval is required we can proceed to approve stage even if deposit fee is not loaded
   if (!isAddressInputValid.value) return true;
   if (feeLoading.value || !fee.value) return true;
+  if (mergeLimitExceeds.value) return true;
   return false;
 });
 
@@ -730,6 +780,7 @@ const makeTransaction = async () => {
       to: transaction.value!.to.address,
       tokenAddress: transaction.value!.token.address,
       amount: transaction.value!.token.amount,
+      toMerge: transaction.value!.toMerge,
     },
     feeValues.value!
   );
@@ -773,7 +824,7 @@ const makeTransaction = async () => {
         transactionInfo.value = completedTransaction;
         setTimeout(() => {
           transfersHistoryStore.reloadRecentTransfers().catch(() => undefined);
-          eraWalletStore.requestBalance({ force: true }).catch(() => undefined);
+          fetchBalances(true).catch(() => undefined);
         }, 2000);
       })
       .catch((err) => {
@@ -909,6 +960,33 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
       border-radius: 50%;
       background: #fff;
     }
+  }
+}
+.merge {
+  border-radius: 16px;
+  background: rgba(3, 212, 152, 0.5) !important;
+}
+.notMerge {
+  border-radius: 16px;
+  background: rgba(23, 85, 244, 0.25) !important;
+}
+.showTip:hover{
+  .tooltip{
+    display: block;
+    z-index: 100;
+  }
+}
+.tooltip{
+  display: none;
+  position: absolute;
+  padding: 12px 20px 12px 24px;
+  top: -4.5rem;
+  width: 35rem;
+  left: -10rem;
+  border-radius: 8px;
+  background: #1F2127;
+  a{
+    color: #1755F4;
   }
 }
 </style>

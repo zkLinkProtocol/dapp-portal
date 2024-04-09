@@ -53,6 +53,9 @@
                 Insufficient balance
               </template>
               <template v-else-if="amountError === 'exceeds_balance' && !maxAmount">Amount exceeds balance</template>
+              <template v-else-if="amountError === 'exceeds_merge_limit'">
+                Input amount exceeds the merge limit.
+              </template>
               <template v-else-if="amountError === 'exceeds_max_amount' || amountError === 'exceeds_balance'">
                 Max amount is
                 <button
@@ -66,6 +69,7 @@
               <template v-else-if="amountError === 'exceeds_decimals'">
                 Max decimal length for {{ selectedToken?.symbol }} is {{ selectedToken?.decimals }}
               </template>
+             
             </CommonInputErrorMessage>
             <CommonButtonLabel v-else-if="inputted" as="div" variant="light" class="-mb-6 mt-1 text-right text-sm">
               {{ totalAmountPrice }}
@@ -144,6 +148,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  mergeLimitExceeds: {
+    type: Boolean,
+    default: false
+  }
 });
 
 const emit = defineEmits<{
@@ -215,6 +223,9 @@ const setMaxAmount = () => {
 };
 
 const amountError = computed(() => {
+  if(props.mergeLimitExceeds) {
+    return 'exceeds_merge_limit'
+  }
   if (!selectedToken.value) return;
   if (tokenBalance.value && totalComputeAmount.value.gt(tokenBalance.value.amount)) {
     return "exceeds_balance";
