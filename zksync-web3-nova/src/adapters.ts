@@ -179,6 +179,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     async deposit(transaction: {
       token: Address;
       amount: BigNumberish;
+      toMerge?: boolean;
       to?: Address;
       operatorTip?: BigNumberish;
       bridgeAddress?: Address;
@@ -333,6 +334,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     async getDepositTx(transaction: {
       token: Address;
       amount: BigNumberish;
+      toMerge?: boolean;
       to?: Address;
       operatorTip?: BigNumberish;
       bridgeAddress?: Address;
@@ -357,7 +359,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         tx.amount,
         tx.to,
         await this.getAddress(),
-        tx.gasPerPubdataByte
+        tx.gasPerPubdataByte,
+        tx.toMerge
       );
 
       const { to, token, amount, operatorTip, overrides } = tx;
@@ -387,18 +390,21 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           ...tx,
         };
       } else {
-        const args: [Address, Address, BigNumberish, BigNumberish, BigNumberish] = [
+        const args: [Address, Address, BigNumberish, BigNumberish, BigNumberish, Address] = [
           to,
           token,
           amount,
           tx.l2GasLimit,
           tx.gasPerPubdataByte,
+          to,
         ];
-
+        debugger;
         overrides.value ??= baseCost.add(operatorTip);
         await checkBaseCost(baseCost, overrides.value);
 
-        return await bridgeContracts.erc20.populateTransaction.deposit(...args, overrides);
+        return tx.toMerge
+          ? await bridgeContracts.erc20.populateTransaction.depositToMerge(...args, overrides)
+          : await bridgeContracts.erc20.populateTransaction.deposit(...args, overrides);
       }
     }
 
