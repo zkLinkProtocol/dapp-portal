@@ -227,7 +227,7 @@
             >
               <span
                 :class="isMerge ? 'translate-x-0 bg-blue-600' : 'translate-x-4 bg-slate-600'"
-                class="inline-block h-6 w-6 transform rounded-full bg-white transition"
+                class="inline-block h-6 w-6 transform rounded-full bg-[#888C91] transition"
               />
             </Switch>
           </CommonButtonLabel>
