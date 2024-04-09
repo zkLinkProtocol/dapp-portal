@@ -640,10 +640,14 @@ const mergeSupported = computed(() => {
 
 const mergeLimitExceeds = computed(() => {
   if (!selectedToken.value || !mergeTokenInfo.value || !amount.value) return false;
-  const amountVal = decimalToBigNumber(amount.value, selectedToken.value.decimals);
-  const exceeds = amountVal.add(mergeTokenInfo.value?.balance).gt(mergeTokenInfo.value?.depositLimit);
-  console.log("exceeds: ", exceeds);
-  return mergeSupported.value && isMerge.value && exceeds;
+  try {
+    const amountVal = decimalToBigNumber(amount.value, selectedToken.value.decimals);
+    const exceeds = amountVal.add(mergeTokenInfo.value?.balance).gt(mergeTokenInfo.value?.depositLimit);
+    console.log("exceeds: ", exceeds);
+    return mergeSupported.value && isMerge.value && exceeds;
+  } catch (e) { // may throw exception when amount exceeds decimals
+    return false;
+}
 });
 
 const transaction = computed<
