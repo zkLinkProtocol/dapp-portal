@@ -60,19 +60,21 @@ export default defineNuxtConfig({
       name: portalMeta.title,
       short_name: "Nova Portal",
       description: portalMeta.description,
-      start_url: '/',
-      display: 'standalone',
-      background_color: '#000',
-      icons: [{
-        src: 'icon.png',
-        sizes: '180',
-        type: 'image/png'
-      }],
-      "iconPath": "icon.png"
+      start_url: "/",
+      display: "standalone",
+      background_color: "#000",
+      icons: [
+        {
+          src: "icon.png",
+          sizes: "180",
+          type: "image/png",
+        },
+      ],
+      iconPath: "icon.png",
     },
     icon: {
       source: "icon.png",
-      fileName: 'icon.png'
+      fileName: "icon.png",
     },
   },
   css: ["@/assets/css/tailwind.css", "@/assets/css/style.scss", "web3-avatar-vue/dist/style.css"],

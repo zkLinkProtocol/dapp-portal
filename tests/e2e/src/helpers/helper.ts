@@ -4,13 +4,14 @@ import crypto from "crypto";
 import * as dotenv from "dotenv";
 import { ethers } from "ethers";
 import https from "https";
-import { Provider } from "@/zksync-web3-nova/src";
 
 import { MainPage } from "../pages/main.page";
 import { config, wallet } from "../support/config";
 
 import type { ICustomWorld } from "../support/custom-world";
 import type { Pickle } from "@cucumber/messages";
+
+import { Provider } from "@/zksync-web3-nova/src";
 const tracesDir = "./artifacts/";
 const algorithm = "aes-256-cbc";
 const key = Buffer.from(wallet.secret, "hex"); // crypto.randomBytes(32);

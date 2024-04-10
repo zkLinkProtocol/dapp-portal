@@ -62,15 +62,16 @@ import { storeToRefs } from "pinia";
 import TokenAmount from "@/components/transaction/lineItem/TokenAmount.vue";
 import TotalPrice from "@/components/transaction/lineItem/TotalPrice.vue";
 
+import useNetworks from "@/composables/useNetworks";
+
 import type { NetworkLayer, Transfer } from "@/utils/mappers";
 import type { Component, PropType } from "vue";
 
+import { iconsList } from "@/data/iconlists";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { shortenAddress } from "@/utils/formatters";
-import { iconsList } from "@/data/iconlists";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
-import useNetworks from "@/composables/useNetworks";
 
 const props = defineProps({
   as: {

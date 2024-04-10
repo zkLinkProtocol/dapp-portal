@@ -3,9 +3,9 @@ import { $fetch } from "ofetch";
 import type { Api } from "@/types";
 import type { Token } from "@/types";
 
+import { useRoute } from "#vue-router";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { mapApiToken } from "@/utils/mappers";
-import { useRoute } from "#vue-router";
 
 export const useZkSyncTokensStore = defineStore("zkSyncTokens", () => {
   const providerStore = useZkSyncProviderStore();

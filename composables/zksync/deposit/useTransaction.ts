@@ -1,8 +1,8 @@
 import useScreening from "@/composables/useScreening";
 
 import type { DepositFeeValues } from "@/composables/zksync/deposit/useFee";
-import type { BigNumberish } from "ethers";
 import type { L1Signer } from "@/zksync-web3-nova/src";
+import type { BigNumberish } from "ethers";
 
 import { useZkSyncWalletStore } from "@/store/zksync/wallet";
 import { formatError } from "@/utils/formatters";

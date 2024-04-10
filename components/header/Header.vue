@@ -75,7 +75,10 @@
         <CommonButton class="hamburger-icon" @click="mobileMainNavigationOpened = true">
           <Bars3Icon class="h-6 w-6" aria-hidden="true" />
           <transition v-bind="TransitionOpacity()">
-            <CommonBadge v-if="withdrawalsAvailableForClaiming && withdrawalsAvailableForClaiming.length" class="action-available-badge">
+            <CommonBadge
+              v-if="withdrawalsAvailableForClaiming && withdrawalsAvailableForClaiming.length"
+              class="action-available-badge"
+            >
               {{ withdrawalsAvailableForClaiming.length }}
             </CommonBadge>
           </transition>
@@ -104,16 +107,8 @@
     </div> -->
     <div className="banner" v-if="!route.query.s || route.query.s !== 'okx'">
       <a href="https://app.zklink.io/" target="\_blank">
-        <img
-          src="/img/banner.svg"
-          alt=""
-          className="bannerImg"
-        />
-        <img
-          src="/img/mobile.svg"
-          alt=""
-          className="mobileImg"
-        />
+        <img src="/img/banner.svg" alt="" className="bannerImg" />
+        <img src="/img/mobile.svg" alt="" className="mobileImg" />
       </a>
     </div>
   </div>
@@ -121,6 +116,7 @@
 
 <script lang="ts" setup>
 import { ref } from "vue";
+import { computed } from "vue";
 
 import {
   ArrowsRightLeftIcon,
@@ -133,11 +129,11 @@ import {
 import { storeToRefs } from "pinia";
 
 import useColorMode from "@/composables/useColorMode";
+import useNetworks from "@/composables/useNetworks";
 
 import { useRoute } from "#imports";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncWithdrawalsStore } from "@/store/zksync/withdrawals";
-import useNetworks from "@/composables/useNetworks";
 const { defaultNetwork, isMainnet } = useNetworks();
 
 const route = useRoute();
@@ -217,28 +213,28 @@ const isShowFaucet = computed(() => defaultNetwork.id === 810182);
     height: 18px;
   }
 }
-.banner{
+.banner {
   width: 100%;
   text-align: center;
-  a{
+  a {
     display: inline-block;
     width: 100%;
     min-width: 0px;
     max-width: 700px;
   }
-  .bannerImg{
+  .bannerImg {
     display: inline-block;
     width: 100%;
     height: 80px;
   }
-  .mobileImg{
+  .mobileImg {
     display: none;
   }
   @media screen and (max-width: 640px) {
-    .bannerImg{
+    .bannerImg {
       display: none;
     }
-    .mobileImg{
+    .mobileImg {
       display: none;
       display: inline-block;
       width: 100%;

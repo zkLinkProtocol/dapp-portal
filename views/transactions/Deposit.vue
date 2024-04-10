@@ -136,7 +136,7 @@
         <CommonCardWithLineButtons>
           <TransactionSummaryTokenEntry label="You deposit" :token="transaction!.token" />
           <TransactionSummaryAddressEntry
-            v-if="isMerge"
+            v-if="mergeSupported && isMerge"
             label="You Receive"
             :address="mergeTokenInfo?.mergeToken"
             :destination="{iconUrl: transaction!.token.iconUrl}"
@@ -212,15 +212,18 @@
             <NuxtLink :to="{ name: 'receive-methods' }" class="alert-link">Receive funds</NuxtLink>
           </CommonAlert>
         </transition>
-        <div class="flex justify-between gap-3 sm:mt-2 mb-1" v-if="mergeSupported">
-          <CommonButtonLabel as="span" class="text-left relative showTip">
-            Merge Token <img src="/img/Shape.svg" class="ml-1 h-3 w-3 inline-block" alt="" />
+        <div class="mb-1 flex justify-between gap-3 sm:mt-2" v-if="mergeSupported">
+          <CommonButtonLabel as="span" class="showTip relative text-left">
+            Merge Token <img src="/img/Shape.svg" class="ml-1 inline-block h-3 w-3" alt="" />
             <div class="tooltip">
-              All supported source tokens with the same entity from different networks can be merged into a single merged token. Holding or using merged token to engage with supported dApps could receive higher multipliers. <a href="https://docs.zklink.io/how-it-works/token-merge" target="_blank">Learn More</a>.
+              All supported source tokens with the same entity from different networks can be merged into a single
+              merged token. Holding or using merged token to engage with supported dApps could receive higher
+              multipliers. <a href="https://docs.zklink.io/how-it-works/token-merge" target="_blank">Learn More</a>.
             </div>
           </CommonButtonLabel>
           <CommonButtonLabel as="span" class="text-right">
-            <span v-if="isMerge">Merge</span>  <Switch
+            <span v-if="isMerge">Merge</span>
+            <Switch
               v-model="isMerge"
               :class="isMerge ? 'bg-blue-900' : 'bg-gray-500'"
               class="relative inline-flex h-4 w-10 items-center rounded-full align-middle"
@@ -388,6 +391,7 @@
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 
+import { Switch } from "@headlessui/vue";
 import {
   ArrowTopRightOnSquareIcon,
   CheckIcon,
@@ -427,13 +431,13 @@ import { useZkSyncTokensStore } from "@/store/zksync/tokens";
 import { getEstmatdDepositDelay, useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransfersHistoryStore } from "@/store/zksync/transfersHistory";
 import { useZkSyncWalletStore } from "@/store/zksync/wallet";
+import { ETH_TOKEN } from "@/utils/constants";
 import { TOKEN_ALLOWANCE } from "@/utils/doc-links";
 import { checksumAddress, decimalToBigNumber, formatRawTokenPrice, parseTokenAmount } from "@/utils/formatters";
 import { silentRouterChange } from "@/utils/helpers";
 import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/transitions";
 import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
-import { Switch } from "@headlessui/vue";
 
 const okxIcon = "/img/okx-cryptopedia.svg";
 const launchIcon = "/img/launch.svg";
@@ -645,15 +649,16 @@ const mergeLimitExceeds = computed(() => {
     const exceeds = amountVal.add(mergeTokenInfo.value?.balance).gt(mergeTokenInfo.value?.depositLimit);
     console.log("exceeds: ", exceeds);
     return mergeSupported.value && isMerge.value && exceeds;
-  } catch (e) { // may throw exception when amount exceeds decimals
+  } catch (e) {
+    // may throw exception when amount exceeds decimals
     return false;
-}
+  }
 });
 
 const transaction = computed<
   | {
       token: TokenAmount;
-      from: { address: string; destination: TransactionDestinfonboardStoreation };
+      from: { address: string; destination: TransactionDestination };
       to: { address: string; destination: TransactionDestination };
       toMerge?: boolean;
     }
@@ -784,7 +789,7 @@ const makeTransaction = async () => {
       to: transaction.value!.to.address,
       tokenAddress: transaction.value!.token.address,
       amount: transaction.value!.token.amount,
-      toMerge: transaction.value!.toMerge,
+      toMerge: mergeSupported.value && transaction.value!.toMerge,
     },
     feeValues.value!
   );
@@ -832,7 +837,7 @@ const makeTransaction = async () => {
         }, 2000);
       })
       .catch((err) => {
-        console.log(err)
+        console.log(err);
         transactionError.value = err as Error;
         transactionStatus.value = "not-started";
       });
@@ -975,13 +980,13 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
   border-radius: 16px;
   background: rgba(23, 85, 244, 0.25) !important;
 }
-.showTip:hover{
-  .tooltip{
+.showTip:hover {
+  .tooltip {
     display: block;
     z-index: 100;
   }
 }
-.tooltip{
+.tooltip {
   display: none;
   position: absolute;
   padding: 12px 20px 12px 24px;
@@ -989,9 +994,9 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
   width: 35rem;
   left: -10rem;
   border-radius: 8px;
-  background: #1F2127;
-  a{
-    color: #1755F4;
+  background: #1f2127;
+  a {
+    color: #1755f4;
   }
 }
 </style>

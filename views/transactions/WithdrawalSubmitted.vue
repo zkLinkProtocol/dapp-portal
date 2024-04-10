@@ -45,7 +45,9 @@
       :from-explorer-link="blockExplorerUrl"
       :from-transaction-hash="transaction.transactionHash"
       :to-transaction-hash="finalizeTransactionHash || transaction.info.toTransactionHash"
-      :to-explorer-link="finalizeTransactionHash || transaction.info.toTransactionHash ? l1BlockExplorerUrls : undefined"
+      :to-explorer-link="
+        finalizeTransactionHash || transaction.info.toTransactionHash ? l1BlockExplorerUrls : undefined
+      "
       :token="transaction.token"
       :completed="transaction.info.completed"
       :animation-state="withdrawalFinalizationAvailable ? 'stopped-in-the-end' : undefined"

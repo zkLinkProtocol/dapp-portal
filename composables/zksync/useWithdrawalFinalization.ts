@@ -1,6 +1,7 @@
 import { useMemoize } from "@vueuse/core";
 import { BigNumber, type BigNumberish } from "ethers";
-import { Wallet } from "@/zksync-web3-nova/src";
+
+import useNetworks from "@/composables/useNetworks";
 
 import ZkSyncL1BridgeInterface from "@/zksync-web3-nova/abi/IL1Bridge.json";
 import ZkSyncContractInterface from "@/zksync-web3-nova/abi/IZkSync.json";
@@ -8,13 +9,13 @@ import ZkSyncContractInterface from "@/zksync-web3-nova/abi/IZkSync.json";
 import type { TransactionInfo } from "@/store/zksync/transactionStatus";
 import type { Hash } from "@/types";
 
+import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncTokensStore } from "@/store/zksync/tokens";
 import { formatError } from "@/utils/formatters";
-import useNetworks from "@/composables/useNetworks";
 import { Provider } from "@/zksync-web3-nova/src";
-import { useNetworkStore } from "@/store/network";
+import { Wallet } from "@/zksync-web3-nova/src";
 
 export default (transactionInfo: ComputedRef<TransactionInfo>) => {
   const status = ref<"not-started" | "processing" | "waiting-for-signature" | "sending" | "done">("not-started");
@@ -48,7 +49,7 @@ export default (transactionInfo: ComputedRef<TransactionInfo>) => {
       erc20BridgeL1: eraNetwork.erc20BridgeL1,
       erc20BridgeL2: eraNetwork.erc20BridgeL2,
       l1Gateway: eraNetwork.l1Gateway,
-      wethContract: eraNetwork.wethContract
+      wethContract: eraNetwork.wethContract,
     });
     provider.setIsEthGasToken(eraNetwork.isEthGasToken ?? true);
     return provider;

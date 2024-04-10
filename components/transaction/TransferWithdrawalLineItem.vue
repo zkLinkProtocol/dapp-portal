@@ -74,7 +74,8 @@ import { storeToRefs } from "pinia";
 
 import TokenAmount from "@/components/transaction/lineItem/TokenAmount.vue";
 import TotalPrice from "@/components/transaction/lineItem/TotalPrice.vue";
-import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
+
+import useNetworks from "@/composables/useNetworks";
 
 import type { NetworkLayer, Transfer } from "@/utils/mappers";
 import type { PropType } from "vue";
@@ -82,7 +83,7 @@ import type { PropType } from "vue";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { shortenAddress } from "@/utils/formatters";
-import useNetworks from "@/composables/useNetworks";
+import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 
 const props = defineProps({
   transfer: {
@@ -105,7 +106,7 @@ const getNetworkInfo = () => {
 const { account } = storeToRefs(useOnboardStore());
 const eraNetwork = getNetworkInfo();
 const label = computed(() => {
-  const article = 'Withdraw';
+  const article = "Withdraw";
   if (props.transfer.to === account.value.address) {
     return article;
   }

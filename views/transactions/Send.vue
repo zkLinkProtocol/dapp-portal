@@ -326,6 +326,7 @@ import type { PropType } from "vue";
 import { useRoute, useRouter } from "#app";
 import { customBridgeTokens } from "@/data/customBridgeTokens";
 import { useDestinationsStore } from "@/store/destinations";
+import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
 import { usePreferencesStore } from "@/store/preferences";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
@@ -343,7 +344,6 @@ import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/
 import TransferSubmitted from "@/views/transactions/TransferSubmitted.vue";
 import WithdrawalSubmitted from "@/views/transactions/WithdrawalSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
-import { useNetworkStore } from "@/store/network";
 
 const props = defineProps({
   type: {
@@ -365,8 +365,8 @@ const { eraNetwork } = storeToRefs(providerStore);
 const { destinations } = storeToRefs(useDestinationsStore());
 const { tokens, tokensRequestInProgress, tokensRequestError } = storeToRefs(tokensStore);
 const { balance, balanceInProgress, balanceError } = storeToRefs(walletStore);
-const { zkSyncNetworks,isCustomNode,defaultNetwork } = useNetworks();
-const selectedNetwork = zkSyncNetworks.filter((i:any)=>i.key === "primary")[0];
+const { zkSyncNetworks, isCustomNode, defaultNetwork } = useNetworks();
+const selectedNetwork = zkSyncNetworks.filter((i: any) => i.key === "primary")[0];
 const toNetworkModalOpened = ref(false);
 const toNetworkSelected = (networkKey?: string) => {
   if (destinations.value.era.key === networkKey) {
@@ -689,7 +689,7 @@ const transactionInfo = ref<TransactionInfo | undefined>();
 const makeTransaction = async () => {
   if (continueButtonDisabled.value) return;
   // const { selectedNetwork } = storeToRefs(useNetworkStore());
-  const selectedNetwork = zkSyncNetworks.filter((i:any)=>i.key === "primary")[0];
+  const selectedNetwork = zkSyncNetworks.filter((i: any) => i.key === "primary")[0];
 
   const tx = await commitTransaction(
     {

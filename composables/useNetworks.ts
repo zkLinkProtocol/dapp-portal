@@ -3,7 +3,7 @@ import Hyperchains from "@/hyperchains/config.json";
 import type { ZkSyncNetwork } from "@/data/networks";
 import type { Token } from "@/types";
 
-import { zkSyncNetworks as defaultEraNetworks, nexusGoerliNode, nexusSepoliaNode, nexusNode } from "@/data/networks";
+import { zkSyncNetworks as defaultEraNetworks, nexusGoerliNode, nexusNode, nexusSepoliaNode } from "@/data/networks";
 import { PRIMARY_CHAIN_KEY } from "~/zksync-web3-nova/src/utils";
 
 export default () => {

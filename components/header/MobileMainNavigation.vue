@@ -106,6 +106,7 @@
 </template>
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue";
+
 import {
   ArrowsRightLeftIcon,
   ArrowsUpDownIcon,
@@ -116,9 +117,12 @@ import {
   WalletIcon,
 } from "@heroicons/vue/24/outline";
 import { storeToRefs } from "pinia";
+
 import useColorMode from "@/composables/useColorMode";
 import useNetworks from "@/composables/useNetworks";
+
 import type { ZkSyncNetwork } from "@/data/networks";
+
 import { useRoute } from "#imports";
 import { useNetworkStore } from "@/store/network";
 import { useZkSyncWithdrawalsStore } from "@/store/zksync/withdrawals";

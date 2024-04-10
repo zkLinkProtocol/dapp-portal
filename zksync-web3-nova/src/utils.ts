@@ -1,27 +1,22 @@
-import { utils, ethers, BigNumber, BigNumberish, BytesLike, Contract } from "ethers";
-import { SignatureLike } from "@ethersproject/bytes";
-import {
-  Address,
-  Eip712Meta,
-  PriorityQueueType,
-  PriorityOpTree,
-  DeploymentInfo,
-  PaymasterParams,
-  EthereumSignature,
-} from "./types";
-import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
-import { Provider } from "./provider";
-import { EIP712Signer } from "./signer";
-import { IERC20MetadataFactory } from "../typechain";
-import { AbiCoder } from "ethers/lib/utils";
-
 export * from "./paymaster-utils";
 
 export const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
-import { abi as IZkSync_abi } from "../abi/IZkSync.json";
-import { TokenAmount } from "~/types";
+import { BigNumber, Contract, ethers, utils } from "ethers";
+import { AbiCoder } from "ethers/lib/utils";
 import { erc20Abi } from "viem";
 
+import { EIP712Signer } from "./signer";
+import { PriorityOpTree, PriorityQueueType } from "./types";
+import { IERC20MetadataFactory } from "../typechain";
+
+import { abi as IZkSync_abi } from "../abi/IZkSync.json";
+
+import type { Provider } from "./provider";
+import type { Address, DeploymentInfo, Eip712Meta, EthereumSignature, PaymasterParams } from "./types";
+import type { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
+import type { SignatureLike } from "@ethersproject/bytes";
+import type { BigNumberish, BytesLike } from "ethers";
+import type { TokenAmount } from "~/types";
 export const ZKSYNC_MAIN_ABI = new utils.Interface(IZkSync_abi);
 export const CONTRACT_DEPLOYER = new utils.Interface((await import("../abi/ContractDeployer.json")).abi);
 export const L1_MESSENGER = new utils.Interface((await import("../abi/IL1Messenger.json")).abi);
@@ -180,8 +175,8 @@ export function serialize(transaction: ethers.providers.TransactionRequest, sign
 
   const meta: Eip712Meta = transaction.customData;
 
-  let maxFeePerGas = transaction.maxFeePerGas || transaction.gasPrice || 0;
-  let maxPriorityFeePerGas = transaction.maxPriorityFeePerGas || maxFeePerGas;
+  const maxFeePerGas = transaction.maxFeePerGas || transaction.gasPrice || 0;
+  const maxPriorityFeePerGas = transaction.maxPriorityFeePerGas || maxFeePerGas;
 
   const fields: any[] = [
     formatNumber(transaction.nonce || 0, "nonce"),
@@ -379,7 +374,9 @@ export function getL2HashFromPriorityOp(
       if (priorityQueueLog && priorityQueueLog.args.txHash != null) {
         txHash = priorityQueueLog.args.txHash;
       }
-    } catch {}
+    } catch {
+      /* empty */
+    }
   }
   if (!txHash) {
     throw new Error("Failed to parse tx logs");

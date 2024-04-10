@@ -1,9 +1,10 @@
 import { getBalance, getPublicClient } from "@wagmi/core";
+import { erc20Abi } from "viem";
 
 import type { Hash, TokenAmount } from "@/types";
 import type { Config } from "@wagmi/core";
 import type { Address } from "viem";
-import { erc20Abi } from "viem";
+
 import { l1Networks } from "@/data/networks";
 import { useEthereumBalanceStore } from "@/store/ethereumBalance";
 import { useNetworkStore } from "@/store/network";
@@ -113,7 +114,9 @@ export const useZkSyncEthereumBalanceStore = defineStore("zkSyncEthereumBalances
     oldBalance = balance.value ?? [];
     try {
       await requestBalance({ force: true });
-    } catch {}
+    } catch (e) {
+      console.log(e);
+    }
     isSaveToken = false;
   };
 

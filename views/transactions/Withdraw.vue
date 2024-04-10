@@ -22,9 +22,10 @@
       Confirm transaction
     </PageTitle>
 
-    <div class="flex warnBox">
+    <div class="warnBox flex">
       <div>
-        Note: Withdrawal will be open for a max of 30 days during the campaign, during these period, you can use third party bridge withdraw your fund
+        Note: Withdrawal will be open for a max of 30 days during the campaign, during these period, you can use third
+        party bridge withdraw your fund
       </div>
     </div>
     <div v-if="showBridge">
@@ -315,7 +316,10 @@
             </DestinationIconContainer>
           </template>
         </DestinationItem>
-        <ArrowTopRightOnSquareIcon class="transaction-hash-button-icon w-6 absolute top-11 right-8 text-slate-400" aria-hidden="true" />
+        <ArrowTopRightOnSquareIcon
+          class="transaction-hash-button-icon absolute right-8 top-11 w-6 text-slate-400"
+          aria-hidden="true"
+        />
       </CommonCardWithLineButtons>
     </div>
   </div>
@@ -341,10 +345,12 @@ import type { TransactionInfo } from "@/store/zksync/transactionStatus";
 import type { Token, TokenAmount } from "@/types";
 import type { BigNumberish } from "ethers";
 import type { PropType } from "vue";
+import type { FunctionalComponent } from "vue";
 
 import { useRoute, useRouter } from "#app";
 import { customBridgeTokens } from "@/data/customBridgeTokens";
 import { useDestinationsStore } from "@/store/destinations";
+import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
 import { usePreferencesStore } from "@/store/preferences";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
@@ -362,8 +368,6 @@ import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/
 import TransferSubmitted from "@/views/transactions/TransferSubmitted.vue";
 import WithdrawalSubmitted from "@/views/transactions/WithdrawalSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
-import { useNetworkStore } from "@/store/network";
-import type { FunctionalComponent } from "vue";
 const showBridge = false;
 const chainList = [
   // {
@@ -377,20 +381,20 @@ const chainList = [
   //   "discordUrl": "https://discord.com/invite/YHgDSJ42eG"
   // },
   {
-    "name": "Owlto Finance",
-    "description": "https://owlto.finance/",
-    "logo": "owlto.svg",
-    "bannerImg": "owlto.jpeg",
-    "type": "Infra",
-    "url": "https://owlto.finance/",
-    "tiwwerUrl": "https://twitter.com/Owlto_Finance",
-    "discordUrl": "https://discord.com/invite/owlto",
-    "status": "Live"
-  }
-]
+    name: "Owlto Finance",
+    description: "https://owlto.finance/",
+    logo: "owlto.svg",
+    bannerImg: "owlto.jpeg",
+    type: "Infra",
+    url: "https://owlto.finance/",
+    tiwwerUrl: "https://twitter.com/Owlto_Finance",
+    discordUrl: "https://discord.com/invite/owlto",
+    status: "Live",
+  },
+];
 const thirdChainMethods = computed(() => {
   const methods: { props: Record<string, unknown>; icon?: FunctionalComponent }[] = [];
-    chainList.map((i) => {
+  chainList.map((i) => {
     const obj = {
       props: {
         iconUrl: `/img/${i.logo}`,
@@ -403,7 +407,7 @@ const thirdChainMethods = computed(() => {
     };
     methods.push(obj);
   });
-return methods;
+  return methods;
 });
 const props = defineProps({
   type: {
@@ -847,29 +851,28 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
-
-.warnBox1{
+.warnBox1 {
   display: flex;
-  a{
-    color: #0BC48F;
+  a {
+    color: #0bc48f;
   }
 }
-.warnBox{
+.warnBox {
   display: inline-flex;
   padding: 0 0 16px 0;
   justify-content: center;
-  color: #F29914;
+  color: #f29914;
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
   line-height: normal;
-  img{
+  img {
     width: 21px;
     height: 21px;
     margin-right: 5px;
   }
-  a{
-    color: #0BC48F;
+  a {
+    color: #0bc48f;
   }
 }
 </style>

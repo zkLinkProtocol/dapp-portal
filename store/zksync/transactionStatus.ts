@@ -1,6 +1,10 @@
 import { useStorage } from "@vueuse/core";
+import { type BigNumberish, type BytesLike, ethers } from "ethers";
 import { decodeEventLog } from "viem";
 
+import useNetworks from "@/composables/useNetworks";
+
+import { abi as secondaryAbi } from "@/views/transactions/ZkLink.json";
 import ZkSyncContractInterface from "@/zksync-web3-nova/abi/IZkSync.json";
 
 import type { FeeEstimationParams } from "@/composables/zksync/useFee";
@@ -8,16 +12,13 @@ import type { TransactionDestination } from "@/store/destinations";
 import type { TokenAmount } from "@/types";
 import type { Hash } from "@/types";
 
+import { nexusGoerliNode } from "@/data/networks";
+import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncWalletStore } from "@/store/zksync/wallet";
-import { abi as secondaryAbi } from "@/views/transactions/ZkLink.json";
-import { ethers, type BigNumberish, type BytesLike } from "ethers";
-import { PRIMARY_CHAIN_KEY } from "~/zksync-web3-nova/src/utils";
-import { nexusGoerliNode } from "@/data/networks";
-import useNetworks from "@/composables/useNetworks";
 import { Provider } from "@/zksync-web3-nova/src";
-import { useNetworkStore } from "@/store/network";
+import { PRIMARY_CHAIN_KEY } from "~/zksync-web3-nova/src/utils";
 
 export type TransactionInfo = {
   type: FeeEstimationParams["type"] | "deposit";
@@ -137,8 +138,8 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
       throw new Error("No L2 transaction hash found");
     }
 
-    let abicoder = new ethers.utils.AbiCoder();
-    let encodedata = abicoder.encode(
+    const abicoder = new ethers.utils.AbiCoder();
+    const encodedata = abicoder.encode(
       ["(bytes32,address,bool,address,uint256,address,uint256,bytes32,uint256,uint256,bytes32,address)"],
       [
         [
@@ -159,6 +160,7 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
     );
     const forwardHash = ethers.utils.keccak256(encodedata) as Hash;
     console.log(forwardHash);
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       const canonicalTxHash = await eraWalletStore.getPrimaryL1VoidSigner().getCanonicalTxHash(forwardHash);
       if (canonicalTxHash) return canonicalTxHash;
@@ -207,7 +209,7 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
       erc20BridgeL1: eraNetwork.erc20BridgeL1,
       erc20BridgeL2: eraNetwork.erc20BridgeL2,
       l1Gateway: eraNetwork.l1Gateway,
-      wethContract: eraNetwork.wethContract
+      wethContract: eraNetwork.wethContract,
     });
     provider.setIsEthGasToken(eraNetwork.isEthGasToken ?? true);
     return provider;

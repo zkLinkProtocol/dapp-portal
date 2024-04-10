@@ -29,7 +29,7 @@
         Change wallet network to {{ eraNetwork.name }}
       </CommonButton>
       <CommonButton v-else-if="walletName === 'Binance Web3'" disabled variant="primary" class="w-full">
-          The current version of your {{ walletName }} wallet may not support {{ eraNetwork.name }}
+        The current version of your {{ walletName }} wallet may not support {{ eraNetwork.name }}
       </CommonButton>
       <CommonButton v-else disabled variant="primary" class="w-full">
         Change network manually to {{ eraNetwork.name }} in your {{ walletName }} wallet
