@@ -212,7 +212,7 @@
             <NuxtLink :to="{ name: 'receive-methods' }" class="alert-link">Receive funds</NuxtLink>
           </CommonAlert>
         </transition>
-        <div class="flex justify-between gap-3 sm:mt-2 mb-1" v-if="mergeSupported">
+        <div class="flex justify-between gap-3 sm:mt-2 mb-1">
           <CommonButtonLabel as="span" class="text-left relative showTip">
             Merge Token <img src="/img/Shape.svg" class="ml-1 h-3 w-3 inline-block" alt="" />
             <div class="tooltip">
@@ -984,7 +984,7 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
   display: none;
   position: absolute;
   padding: 12px 20px 12px 24px;
-  top: -4.5rem;
+  top: -7.5rem;
   width: 35rem;
   left: -10rem;
   border-radius: 8px;
