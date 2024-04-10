@@ -892,8 +892,6 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
   right: 10px;
   top: -30px;
 }
-<<<<<<< HEAD
-<<<<<<< HEAD
 
 .okx-tips {
   position: relative;
@@ -948,12 +946,7 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
     }
   }
 }
-</style>
-=======
-.merge{
-=======
 .merge {
->>>>>>> 6016475 (update deposit for merge token)
   border-radius: 16px;
   background: rgba(3, 212, 152, 0.5) !important;
 }
@@ -961,8 +954,23 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
   border-radius: 16px;
   background: rgba(23, 85, 244, 0.25) !important;
 }
+.showTip:hover{
+  .tooltip{
+    display: block;
+    z-index: 100;
+  }
+}
+.tooltip{
+  display: none;
+  position: absolute;
+  padding: 12px 20px 12px 24px;
+  top: -4.5rem;
+  width: 35rem;
+  left: -10rem;
+  border-radius: 8px;
+  background: #1F2127;
+  a{
+    color: #1755F4;
+  }
+}
 </style>
-<<<<<<< HEAD
->>>>>>> ab5e135 (fix: Adding Page Elements)
-=======
->>>>>>> 6016475 (update deposit for merge token)
