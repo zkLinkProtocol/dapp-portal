@@ -10,7 +10,7 @@
           class="okx-tips-title flex cursor-pointer items-center gap-[4px] z-2 relative"
         >
           <span>OKX Cryptopedia</span>
-          <img src="/img/launch.svg" />
+          <img :src="launchIcon" />
         </a>
         <div class="mt-[5px]">
           <p class="okx-tips-desc">
@@ -405,10 +405,11 @@ import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 import { getWaitTime } from "@/data/networks";
 
+const okxIcon = '/img/okx-cryptopedia.svg';
+const launchIcon = '/img/launch.svg';
+
 const route = useRoute();
 const router = useRouter();
-
-console.log("route", route.query);
 
 const onboardStore = useOnboardStore();
 const tokensStore = useZkSyncTokensStore();
