@@ -26,7 +26,7 @@
               </DestinationIconContainer>
             </template>
           </DestinationItem>
-          <DestinationItem label="Withdraw" as="RouterLink" :to="{ name: '' }" size="sm" :disabled="true">
+          <DestinationItem label="Withdraw" as="RouterLink" :to="{ name: 'withdraw' }" size="sm">
             <template #image>
               <DestinationIconContainer>
                 <ArrowsUpDownIcon aria-hidden="true" />
