@@ -96,7 +96,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
           // receipt is not ready
           return undefined;
         } else {
-          const receipt: any = this.formatter.receipt(result);
+          const receipt = this.formatter.receipt(result);
           if (receipt.blockNumber == null) {
             receipt.confirmations = 0;
           } else if (receipt.confirmations == null) {
@@ -136,6 +136,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
 
       defaultFormatter.formats.receiptLog.l1BatchNumber = Formatter.allowNull(number);
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (defaultFormatter.formats as any).l2Tol1Log = {
         blockNumber: number,
         blockHash: hash,
@@ -153,6 +154,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       defaultFormatter.formats.receipt.l1BatchNumber = Formatter.allowNull(number);
       defaultFormatter.formats.receipt.l1BatchTxIndex = Formatter.allowNull(number);
       defaultFormatter.formats.receipt.l2ToL1Logs = Formatter.arrayOf((value) =>
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         Formatter.check((defaultFormatter.formats as any).l2Tol1Log, value)
       );
 
@@ -221,6 +223,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     }
     result.eip712Meta = {
       gasPerPubdata: utils.hexValue(transaction.customData.gasPerPubdata ?? 0),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
     transaction.type = EIP712_TX_TYPE;
     if (transaction.customData.factoryDeps) {
@@ -292,7 +295,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     this.pollingInterval = 500;
 
     const blockTag = this.formatter.blockTag.bind(this.formatter);
-    this.formatter.blockTag = (tag: any) => {
+    this.formatter.blockTag = (tag) => {
       if (tag == "committed" || tag == "finalized") {
         return tag;
       }
@@ -587,6 +590,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     return this._parseLogs(logs);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected _parseLogs(logs: any[]): Array<Log> {
     return Formatter.arrayOf(this.formatter.filterLog.bind(this.formatter))(logs);
   }
@@ -743,6 +747,7 @@ export class Web3Provider extends Provider {
     this.provider = provider;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   override async send(method: string, params?: Array<any>): Promise<any> {
     params ??= [];
     // Metamask complains about eth_sign (and on some versions hangs)
@@ -755,6 +760,7 @@ export class Web3Provider extends Provider {
   }
 
   override getSigner(addressOrIndex?: number | string): Signer {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return Signer.from(super.getSigner(addressOrIndex) as any);
   }
 

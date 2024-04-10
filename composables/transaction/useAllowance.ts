@@ -1,4 +1,3 @@
-import { WriteContractParameters } from "@wagmi/core";
 import { BigNumber } from "ethers";
 
 import IERC20 from "@/zksync-web3-nova/abi/IERC20.json";

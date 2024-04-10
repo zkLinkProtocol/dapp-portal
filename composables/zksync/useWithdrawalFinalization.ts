@@ -11,7 +11,6 @@ import type { Hash } from "@/types";
 
 import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
-import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncTokensStore } from "@/store/zksync/tokens";
 import { formatError } from "@/utils/formatters";
 import { Provider } from "@/zksync-web3-nova/src";
@@ -22,9 +21,8 @@ export default (transactionInfo: ComputedRef<TransactionInfo>) => {
   const error = ref<Error | undefined>();
   const transactionHash = ref<Hash | undefined>();
   const onboardStore = useOnboardStore();
-  const providerStore = useZkSyncProviderStore();
   const tokensStore = useZkSyncTokensStore();
-  const { isCorrectNetworkSet, network } = storeToRefs(onboardStore);
+  const { network } = storeToRefs(onboardStore);
   const { tokens } = storeToRefs(tokensStore);
   const { primaryNetwork, zkSyncNetworks } = useNetworks();
 

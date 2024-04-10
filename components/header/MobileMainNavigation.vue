@@ -111,7 +111,6 @@ import {
   ArrowsRightLeftIcon,
   ArrowsUpDownIcon,
   CheckIcon,
-  ChevronRightIcon,
   MoonIcon,
   SunIcon,
   WalletIcon,

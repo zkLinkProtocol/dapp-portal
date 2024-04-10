@@ -55,7 +55,7 @@ import {
   MinusIcon,
   PlusIcon,
 } from "@heroicons/vue/24/outline";
-import { useNetwork, useTimeAgo } from "@vueuse/core";
+import { useTimeAgo } from "@vueuse/core";
 import { BigNumber } from "ethers";
 import { storeToRefs } from "pinia";
 
@@ -64,14 +64,12 @@ import TotalPrice from "@/components/transaction/lineItem/TotalPrice.vue";
 
 import useNetworks from "@/composables/useNetworks";
 
-import type { NetworkLayer, Transfer } from "@/utils/mappers";
+import type { Transfer } from "@/utils/mappers";
 import type { Component, PropType } from "vue";
 
-import { iconsList } from "@/data/iconlists";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { shortenAddress } from "@/utils/formatters";
-import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 
 const props = defineProps({
   as: {
@@ -134,10 +132,6 @@ const label = computed(() => {
     return "Minted";
   }
   return props.transfer.type || "Unknown";
-});
-const chainIconUrl = computed(() => {
-  // return props.transfer.token?.chainIconUrl;
-  return getNetworkInfo()?.logoUrl;
 });
 
 const { primaryNetwork, zkSyncNetworks } = useNetworks();

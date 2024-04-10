@@ -178,7 +178,7 @@ const props = defineProps({
 // });
 const { primaryNetwork, zkSyncNetworks } = useNetworks();
 
-const { selectedNetwork, l1Network, l1BlockExplorerUrl } = storeToRefs(useNetworkStore());
+const { l1Network, l1BlockExplorerUrl } = storeToRefs(useNetworkStore());
 const getNetworkInfo = () => {
   const newNetwork = zkSyncNetworks.find(
     (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === props.transaction?.gateway?.toLowerCase()
@@ -191,7 +191,7 @@ const onboardStore = useOnboardStore();
 const network = onboardStore.network;
 const transactionStatusStore = useZkSyncTransactionStatusStore();
 const { eraNetwork, blockExplorerUrl } = storeToRefs(useZkSyncProviderStore());
-const { connectorName, isCorrectNetworkSet } = storeToRefs(onboardStore);
+const { connectorName } = storeToRefs(onboardStore);
 
 const withdrawalManualFinalizationRequired = computed(() => {
   return (

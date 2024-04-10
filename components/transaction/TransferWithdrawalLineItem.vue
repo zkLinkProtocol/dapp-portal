@@ -77,13 +77,11 @@ import TotalPrice from "@/components/transaction/lineItem/TotalPrice.vue";
 
 import useNetworks from "@/composables/useNetworks";
 
-import type { NetworkLayer, Transfer } from "@/utils/mappers";
+import type { Transfer } from "@/utils/mappers";
 import type { PropType } from "vue";
 
 import { useOnboardStore } from "@/store/onboard";
-import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { shortenAddress } from "@/utils/formatters";
-import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 
 const props = defineProps({
   transfer: {
@@ -119,10 +117,7 @@ const formatAddress = (address: string) => {
   }
   return shortenAddress(address);
 };
-const chainIconUrl = computed(() => {
-  // return props.transfer.token?.chainIconUrl;
-  return getNetworkInfo()?.logoUrl;
-});
+
 const getl1NetworkName = () => {
   const { type, gateway } = props.transfer;
   // other chain

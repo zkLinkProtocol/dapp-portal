@@ -45,7 +45,7 @@ export class ContractFactory extends ethers.ContractFactory {
     }
   }
 
-  override getDeployTransaction(...args: any[]): ethers.providers.TransactionRequest {
+  override getDeployTransaction(...args: unknown[]): ethers.providers.TransactionRequest {
     // TODO (SMA-1585): Users should be able to provide the salt.
     const salt = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
@@ -76,7 +76,7 @@ export class ContractFactory extends ethers.ContractFactory {
     return txRequest;
   }
 
-  override async deploy(...args: Array<any>): Promise<Contract> {
+  override async deploy(...args: Array<unknown>): Promise<Contract> {
     const contract = await super.deploy(...args);
 
     const deployTxReceipt = await contract.deployTransaction.wait();

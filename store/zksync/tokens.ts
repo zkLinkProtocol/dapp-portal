@@ -3,14 +3,13 @@ import { $fetch } from "ofetch";
 import type { Api } from "@/types";
 import type { Token } from "@/types";
 
-import { useRoute } from "#vue-router";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { mapApiToken } from "@/utils/mappers";
 
 export const useZkSyncTokensStore = defineStore("zkSyncTokens", () => {
   const providerStore = useZkSyncProviderStore();
   const { eraNetwork } = storeToRefs(providerStore);
-  const route = useRoute();
+  // const route = useRoute();
   const {
     result: tokensRaw,
     inProgress: tokensRequestInProgress,

@@ -489,7 +489,7 @@ export const zkSyncNetworks: ZkSyncNetwork[] = [
     hidden: true,
   },
 ];
-export const getWaitTime = (id: any) => {
+export const getWaitTime = (id: number) => {
   const nodeType = process.env.NODE_TYPE;
   const responseTime = 2;
   if (id === (nodeType === "nexus" ? mainnet.id : goerli.id)) {

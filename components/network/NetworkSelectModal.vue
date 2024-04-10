@@ -48,10 +48,8 @@ import { storeToRefs } from "pinia";
 import useNetworks from "@/composables/useNetworks";
 
 import type { ZkSyncNetwork } from "@/data/networks";
-import type { TransactionDestination } from "@/store/destinations";
 
 import { useRoute } from "#app";
-import { useDestinationsStore } from "@/store/destinations";
 import { useNetworkStore } from "@/store/network";
 import { getNetworkUrl } from "@/utils/helpers";
 
@@ -78,7 +76,7 @@ const emit = defineEmits<{
 
 const { zkSyncNetworks } = useNetworks();
 const zkSyncNetwork = zkSyncNetworks.filter((e) => !e.hidden);
-let arr: any[] = [];
+let arr: Record<string, string | undefined>[] = [];
 zkSyncNetwork.map((i) => {
   const obj = {
     iconUrl: i.logoUrl,
@@ -87,7 +85,6 @@ zkSyncNetwork.map((i) => {
   };
   arr.push(obj);
 });
-const { destinations } = storeToRefs(useDestinationsStore());
 
 const { selectedNetwork } = storeToRefs(useNetworkStore());
 const isNetworkSelected = (network: ZkSyncNetwork) => selectedNetwork.value.key === network.key;
@@ -98,28 +95,28 @@ const buttonClicked = (network: ZkSyncNetwork) => {
   window.location.href = getNetworkUrl(network, route.fullPath);
 };
 const search = ref("");
-const filterDestinations = (networks: TransactionDestination[]) => {
-  const lowercaseSearch = search.value.toLowerCase();
-  return networks.filter(({ label }) =>
-    Object.values({ label })
-      .filter((e) => typeof e === "string")
-      .some((value) => value.toLowerCase().includes(lowercaseSearch))
-  );
-};
-const destinationGroups = computed(() => [
-  {
-    title: "Chains",
-    destinations: [destinations.value.nova, destinations.value.arbitrum],
-  },
-]);
-const displayedGroups = computed(() =>
-  destinationGroups.value
-    .map((e) => ({
-      title: e.title,
-      destinations: filterDestinations(e.destinations),
-    }))
-    .filter((e) => e.destinations.length)
-);
+// const filterDestinations = (networks: TransactionDestination[]) => {
+//   const lowercaseSearch = search.value.toLowerCase();
+//   return networks.filter(({ label }) =>
+//     Object.values({ label })
+//       .filter((e) => typeof e === "string")
+//       .some((value) => value.toLowerCase().includes(lowercaseSearch))
+//   );
+// };
+// const destinationGroups = computed(() => [
+//   {
+//     title: "Chains",
+//     destinations: [destinations.value.nova, destinations.value.arbitrum],
+//   },
+// ]);
+// const displayedGroups = computed(() =>
+//   destinationGroups.value
+//     .map((e) => ({
+//       title: e.title,
+//       destinations: filterDestinations(e.destinations),
+//     }))
+//     .filter((e) => e.destinations.length)
+// );
 const selectedNetworkKey = computed({
   get: () => props.networkKey,
   set: (value) => {

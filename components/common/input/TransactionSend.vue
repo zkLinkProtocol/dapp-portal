@@ -112,7 +112,7 @@ import { decimalToBigNumber, formatTokenPrice, parseTokenAmount, removeSmallAmou
 import { ETH_ADDRESS, L2_ETH_TOKEN_ADDRESS } from "~/zksync-web3-nova/src/utils";
 const { zkSyncNetworks } = useNetworks();
 // const { selectedNetwork } = storeToRefs(useNetworkStore());
-const selectedNetwork = zkSyncNetworks.filter((i: any) => i.key === "primary")[0];
+const selectedNetwork = zkSyncNetworks.filter((i) => i.key === "primary")[0];
 const props = defineProps({
   modelValue: {
     type: String,

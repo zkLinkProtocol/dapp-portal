@@ -97,6 +97,7 @@ const props = defineProps({
     required: true,
   },
 });
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const emit = defineEmits<{
   (eventName: "update:opened", value: boolean): void;
   (eventName: "update:networkKey", networkKey?: string): void;
@@ -105,7 +106,6 @@ const onboardStore = useOnboardStore();
 const {
   account,
   isConnectingWallet,
-  isCorrectNetworkSet,
   switchingNetworkInProgress,
   switchingNetworkError,
   connectorName,

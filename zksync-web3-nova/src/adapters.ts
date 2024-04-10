@@ -9,7 +9,6 @@ import {
   estimateDefaultBridgeDepositL2Gas,
   ETH_ADDRESS,
   isETH,
-  isSameAddress,
   L1_MESSENGER_ADDRESS,
   layer1TxDefaults,
   REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
@@ -17,8 +16,8 @@ import {
   undoL1ToL2Alias,
   WMNT_CONTRACT,
 } from "./utils";
-import { LineaProvider, zkSyncProvider } from "./zkSyncProvider"; //TODO the filename is not accurate
-import { IERC20MetadataFactory, IL1Bridge, IL1BridgeFactory, IL2BridgeFactory, IZkSyncFactory } from "../typechain";
+import { zkSyncProvider } from "./zkSyncProvider"; //TODO the filename is not accurate
+import { IERC20MetadataFactory, IL1BridgeFactory, IL2BridgeFactory, IZkSyncFactory } from "../typechain";
 
 import { abi as primaryGetterAbi } from "../abi/GettersFacet.json";
 import WrappedMNTAbi from "../abi/WrappedMNT.json";
@@ -38,7 +37,7 @@ import type {
 import type { Fee } from "./zkSyncProvider";
 import type { BigNumberish, BytesLike } from "ethers";
 import type { Hash } from "~/types";
-type Constructor<T = unknown> = new (...args: any[]) => T;
+type Constructor<T = unknown> = new (...args: unknown[]) => T;
 
 interface TxSender {
   sendTransaction(tx: ethers.providers.TransactionRequest): Promise<ethers.providers.TransactionResponse>;
@@ -345,7 +344,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       l2GasLimit?: BigNumberish;
       gasPerPubdataByte?: BigNumberish;
       overrides?: ethers.PayableOverrides;
-    }): Promise<any> {
+    }): Promise<unknown> {
       const bridgeContracts = await this.getL1BridgeContracts();
       if (transaction.bridgeAddress) {
         bridgeContracts.erc20.attach(transaction.bridgeAddress);
@@ -402,7 +401,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           tx.gasPerPubdataByte,
           to,
         ];
-        debugger;
         overrides.value ??= baseCost.add(operatorTip);
         await checkBaseCost(baseCost, overrides.value);
 
@@ -589,6 +587,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       const hash = ethers.utils.hexlify(withdrawalHash);
       const receipt = await this._providerL2().getTransactionReceipt(hash);
       const messages = Array.from(receipt.l2ToL1Logs.entries()).filter(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         ([_, log]) => log.sender == L1_MESSENGER_ADDRESS
       );
       const [l2ToL1LogIndex, l2ToL1Log] = messages[index];

@@ -12,7 +12,14 @@ import { IERC20MetadataFactory } from "../typechain";
 import { abi as IZkSync_abi } from "../abi/IZkSync.json";
 
 import type { Provider } from "./provider";
-import type { Address, DeploymentInfo, Eip712Meta, EthereumSignature, PaymasterParams } from "./types";
+import type {
+  Address,
+  DeploymentInfo,
+  Eip712Meta,
+  EthereumSignature,
+  PaymasterParams,
+  TransactionRequest,
+} from "./types";
 import type { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
 import type { SignatureLike } from "@ethersproject/bytes";
 import type { BigNumberish, BytesLike } from "ethers";
@@ -178,7 +185,7 @@ export function serialize(transaction: ethers.providers.TransactionRequest, sign
   const maxFeePerGas = transaction.maxFeePerGas || transaction.gasPrice || 0;
   const maxPriorityFeePerGas = transaction.maxPriorityFeePerGas || maxFeePerGas;
 
-  const fields: any[] = [
+  const fields: unknown[] = [
     formatNumber(transaction.nonce || 0, "nonce"),
     formatNumber(maxPriorityFeePerGas, "maxPriorityFeePerGas"),
     formatNumber(maxFeePerGas, "maxFeePerGas"),
@@ -289,6 +296,7 @@ export function parseTransaction(payload: ethers.BytesLike): ethers.Transaction 
   }
 
   const raw = utils.RLP.decode(bytes.slice(1));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const transaction: any = {
     type: EIP712_TX_TYPE,
     nonce: handleNumber(raw[0]).toNumber(),
@@ -336,6 +344,7 @@ export function parseTransaction(payload: ethers.BytesLike): ethers.Transaction 
   return transaction;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getSignature(transaction: any, ethSignature?: EthereumSignature): Uint8Array {
   if (transaction?.customData?.customSignature && transaction.customData.customSignature.length) {
     return ethers.utils.arrayify(transaction.customData.customSignature);
@@ -352,7 +361,7 @@ function getSignature(transaction: any, ethSignature?: EthereumSignature): Uint8
   return new Uint8Array([...r, ...s, v]);
 }
 
-function eip712TxHash(transaction: any, ethSignature?: EthereumSignature) {
+function eip712TxHash(transaction: TransactionRequest, ethSignature?: EthereumSignature) {
   const signedDigest = EIP712Signer.getSignedDigest(transaction);
   const hashedSignature = ethers.utils.keccak256(getSignature(transaction, ethSignature));
 
@@ -508,7 +517,7 @@ export async function isTypedDataSignatureCorrect(
   address: string,
   domain: TypedDataDomain,
   types: Record<string, Array<TypedDataField>>,
-  value: Record<string, any>,
+  value: Record<string, unknown>,
   signature: SignatureLike
 ): Promise<boolean> {
   const msgHash = ethers.utils._TypedDataEncoder.hash(domain, types, value);
@@ -559,7 +568,7 @@ export function scaleGasLimit(gasLimit: BigNumber): BigNumber {
 
 export async function fetchErc20(
   contractAddress: Address,
-  publicClient: any,
+  publicClient: ethers.providers.ExternalProvider,
   userAddress: Address | undefined
 ): Promise<TokenAmount | undefined> {
   const web3Provider = new ethers.providers.Web3Provider(publicClient, "any");

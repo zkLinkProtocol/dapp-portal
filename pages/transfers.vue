@@ -97,7 +97,7 @@ import { getWaitTime } from "@/data/networks";
 import { useDestinationsStore } from "@/store/destinations";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
-import { getEstmatdDepositDelay, WITHDRAWAL_DELAY } from "@/store/zksync/transactionStatus";
+import { WITHDRAWAL_DELAY } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransfersHistoryStore } from "@/store/zksync/transfersHistory";
 

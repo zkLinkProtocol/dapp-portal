@@ -65,7 +65,7 @@ export class Wallet extends AdapterL2(AdapterL1(ethers.Wallet)) {
     return new Wallet(wallet._signingKey());
   }
 
-  static override createRandom(options?: any) {
+  static override createRandom(options?: unknown) {
     const wallet = super.createRandom(options);
     return new Wallet(wallet._signingKey());
   }

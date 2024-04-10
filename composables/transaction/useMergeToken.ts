@@ -1,8 +1,5 @@
 import MergeTokenPortal from "@/zksync-web3-nova/abi/MergeTokenPortal.json";
 
-import type { Hash } from "@/types";
-import type { BigNumberish } from "ethers";
-import type { PublicClient } from "viem";
 import type { Ref } from "vue";
 
 import { useOnboardStore } from "@/store/onboard";

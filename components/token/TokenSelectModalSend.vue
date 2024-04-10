@@ -79,12 +79,11 @@ import type { Token, TokenAmount } from "@/types";
 import type { Address } from "viem";
 import type { PropType } from "vue";
 
-import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
 import { useSearchtokenStore } from "@/store/searchToken";
 import { useZkSyncEthereumBalanceStore } from "@/store/zksync/ethereumBalance";
 import { groupBalancesByAmount } from "@/utils/mappers";
-import { ETH_ADDRESS, fetchErc20, L2_ETH_TOKEN_ADDRESS } from "~/zksync-web3-nova/src/utils";
+import { fetchErc20 } from "~/zksync-web3-nova/src/utils";
 
 const props = defineProps({
   title: {
@@ -119,7 +118,7 @@ const emit = defineEmits<{
   (eventName: "update:tokenAddress", tokenAddress?: string): void;
   (eventName: "try-again"): void;
 }>();
-const { selectedNetwork } = storeToRefs(useNetworkStore());
+// const { selectedNetwork } = storeToRefs(useNetworkStore());
 const zkSyncEthereumBalance = useZkSyncEthereumBalanceStore();
 
 const search = ref("");

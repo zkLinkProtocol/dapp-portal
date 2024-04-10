@@ -408,7 +408,6 @@ import EthereumTransactionFooter from "@/components/transaction/EthereumTransact
 import useAllowance from "@/composables/transaction/useAllowance";
 import useMergeToken from "@/composables/transaction/useMergeToken";
 import useInterval from "@/composables/useInterval";
-import useNetworks from "@/composables/useNetworks";
 import useEcosystemBanner from "@/composables/zksync/deposit/useEcosystemBanner";
 import useFee from "@/composables/zksync/deposit/useFee";
 import useTransaction from "@/composables/zksync/deposit/useTransaction";
@@ -428,7 +427,7 @@ import { usePreferencesStore } from "@/store/preferences";
 import { useZkSyncEthereumBalanceStore } from "@/store/zksync/ethereumBalance";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncTokensStore } from "@/store/zksync/tokens";
-import { getEstmatdDepositDelay, useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
+import { useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransfersHistoryStore } from "@/store/zksync/transfersHistory";
 import { useZkSyncWalletStore } from "@/store/zksync/wallet";
 import { ETH_TOKEN } from "@/utils/constants";
@@ -439,7 +438,7 @@ import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/
 import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 
-const okxIcon = "/img/okx-cryptopedia.svg";
+// const okxIcon = "/img/okx-cryptopedia.svg";
 const launchIcon = "/img/launch.svg";
 
 const route = useRoute();
@@ -456,7 +455,6 @@ const { destinations } = storeToRefs(useDestinationsStore());
 const { l1BlockExplorerUrl, selectedNetwork } = storeToRefs(useNetworkStore());
 const { l1Tokens, tokensRequestInProgress, tokensRequestError } = storeToRefs(tokensStore);
 const { balance, balanceInProgress, balanceError } = storeToRefs(zkSyncEthereumBalance);
-const { isCustomNode } = useNetworks();
 
 const toNetworkModalOpened = ref(false);
 const fromNetworkModalOpened = ref(false);
@@ -533,9 +531,7 @@ const amountInputTokenAddress = computed({
 const tokenBalance = computed<BigNumberish | undefined>(() => {
   return balance.value?.find((e) => e.address === selectedToken.value?.address)?.amount;
 });
-const { result: mergeTokenInfo, inProgress: mergeTokenInfoInProgress } = useMergeToken(
-  computed(() => selectedToken.value?.l2Address)
-);
+const { result: mergeTokenInfo } = useMergeToken(computed(() => selectedToken.value?.l2Address));
 
 const {
   result: allowance,
@@ -867,7 +863,7 @@ const fetchBalances = async (force = false) => {
 };
 fetchBalances();
 
-const unsubscribeFetchBalance = onboardStore.subscribeOnAccountChange((newAddress: any) => {
+const unsubscribeFetchBalance = onboardStore.subscribeOnAccountChange((newAddress: string | undefined) => {
   if (!newAddress) return;
   estimate();
   fetchBalances();

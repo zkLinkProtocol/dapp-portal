@@ -12,10 +12,8 @@ import type { TransactionDestination } from "@/store/destinations";
 import type { TokenAmount } from "@/types";
 import type { Hash } from "@/types";
 
-import { nexusGoerliNode } from "@/data/networks";
 import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
-import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncWalletStore } from "@/store/zksync/wallet";
 import { Provider } from "@/zksync-web3-nova/src";
 import { PRIMARY_CHAIN_KEY } from "~/zksync-web3-nova/src/utils";
@@ -64,9 +62,7 @@ export type ForwardL2Request = {
 
 export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionStatus", () => {
   const onboardStore = useOnboardStore();
-  const providerStore = useZkSyncProviderStore();
   const { account } = storeToRefs(onboardStore);
-  const { eraNetwork } = storeToRefs(providerStore);
   const eraWalletStore = useZkSyncWalletStore();
 
   const storageSavedTransactions = useStorage<{ [networkKey: string]: TransactionInfo[] }>(
@@ -188,7 +184,7 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
     return transaction;
   };
   const { primaryNetwork, zkSyncNetworks } = useNetworks();
-  const getNetworkInfo = (gateway: any) => {
+  const getNetworkInfo = (gateway: string) => {
     const newNetwork = zkSyncNetworks.find(
       (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === gateway?.toLowerCase()
     );
@@ -197,7 +193,7 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
 
   const { selectedNetwork } = storeToRefs(useNetworkStore());
   let provider: Provider | undefined;
-  const request = (gateway: any) => {
+  const request = (gateway: string) => {
     const eraNetwork = getNetworkInfo(gateway) || selectedNetwork.value;
     if (!provider) {
       provider = new Provider(eraNetwork.rpcUrl);
