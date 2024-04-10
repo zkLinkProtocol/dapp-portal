@@ -1,3 +1,4 @@
+import { WITHDRAWAL_DELAY } from './../store/zksync/transactionStatus';
 import type { Token } from "@/types";
 
 export const ETH_TOKEN: Token = {
@@ -8,3 +9,5 @@ export const ETH_TOKEN: Token = {
   decimals: 18,
   iconUrl: "/img/eth.svg",
 };
+
+export const WITHDRAWAL_DELAY_DAYS = 12
