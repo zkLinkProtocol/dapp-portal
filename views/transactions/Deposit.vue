@@ -118,6 +118,14 @@
             </div>
           </template>
         </CommonInputTransactionAddress>
+        <div class="flex sm:mt-block-gap justify-between gap-3">
+          <CommonButton class="flex-1" :class="{'merge':isMerge}" @click="isMerge = true">
+            Merge <img src="/img/Shape.svg" class="w-3 h-3 ml-2" alt="">
+          </CommonButton>
+          <CommonButton class="flex-1" :class="{'notMerge':!isMerge}" @click="isMerge = false">
+            Not Merge <img src="/img/Shape.svg" class="w-3 h-3 ml-2" alt="">
+          </CommonButton>
+        </div>
         <CommonButton
           v-if="tokenCustomBridge"
           type="submit"
@@ -134,6 +142,12 @@
       <template v-else-if="step === 'confirm'">
         <CommonCardWithLineButtons>
           <TransactionSummaryTokenEntry label="You deposit" :token="transaction!.token" />
+          <TransactionSummaryAddressEntry
+            v-if="isMerge"
+            label="You Receive"
+            :address="transaction!.from.address"
+            :destination="transaction!.from.destination"
+          />
           <TransactionSummaryAddressEntry
             label="From"
             :address="transaction!.from.address"
@@ -432,6 +446,7 @@ const fromNetworkSelected = (networkKey?: string) => {
   }
 };
 const step = ref<"form" | "confirm" | "submitted">("form");
+const isMerge = ref<true | false>(true);
 const destination = computed(() => destinations.value.nova);
 const availableTokens = computed<Token[]>(() => {
   if (balance.value) return balance.value;
@@ -858,6 +873,7 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
   right: 10px;
   top: -30px;
 }
+<<<<<<< HEAD
 
 .okx-tips {
   position: relative;
@@ -913,3 +929,14 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
   }
 }
 </style>
+=======
+.merge{
+  border-radius: 16px;
+  background: rgba(3, 212, 152, 0.50)!important;
+}
+.notMerge{
+  border-radius: 16px;
+  background: rgba(23, 85, 244, 0.25)!important;
+}
+</style>
+>>>>>>> ab5e135 (fix: Adding Page Elements)
