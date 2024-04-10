@@ -38,7 +38,7 @@
           show-close-button
           class="mb-block-padding-1/2 sm:mb-block-gap"
         />
-        <CommonInputTransactionAmount
+        <CommonInputTransactionWithdraw
           v-model="amount"
           v-model:error="amountError"
           v-model:token-address="amountInputTokenAddress"
@@ -63,7 +63,7 @@
               <span>{{ selectedNetwork.l1Network?.name }}</span>
             </CommonButtonDropdown>
           </template>
-        </CommonInputTransactionAmount>
+        </CommonInputTransactionWithdraw>
         <CommonInputTransactionAddress
           v-model="address"
           label="To"

@@ -44,7 +44,7 @@
     <form v-else @submit.prevent="">
       <template v-if="step === 'form'">
         <TransactionWithdrawalsAvailableForClaimAlert />
-        <CommonInputTransactionAmountFree
+        <CommonInputTransactionSend
           v-model="amount"
           v-model:error="amountError"
           v-model:token-address="amountInputTokenAddress"
@@ -74,7 +74,7 @@
               <span class="truncate">{{ destinations.nova.label }}</span>
             </CommonButtonDropdown>
           </template>
-        </CommonInputTransactionAmountFree>
+        </CommonInputTransactionSend>
 
         <CommonInputTransactionAddress
           v-if="type === 'withdrawal'"

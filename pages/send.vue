@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts" setup>
-import TransferView from "@/views/transactions/TransferFree.vue";
+import TransferView from "@/views/transactions/Send.vue";
 </script>
 
 <style lang="scss" scoped></style>
