@@ -20,6 +20,7 @@ export default (getL1Signer: () => Promise<L1Signer | undefined>) => {
       to: string;
       tokenAddress: string;
       amount: BigNumberish;
+      toMerge?: boolean;
     },
     fee: DepositFeeValues
   ) => {

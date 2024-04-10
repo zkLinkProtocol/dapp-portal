@@ -14,6 +14,7 @@ import {
   Contract,
   ContractTransaction,
   Overrides,
+  PayableOverrides,
   CallOverrides,
 } from "@ethersproject/contracts";
 import { BytesLike } from "@ethersproject/bytes";
@@ -23,7 +24,7 @@ import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 interface IL2BridgeInterface extends ethers.utils.Interface {
   functions: {
     "finalizeDeposit(address,address,address,uint256,bytes)": FunctionFragment;
-    "initialize(address,bytes32,address)": FunctionFragment;
+    "finalizeDepositToMerge(address,address,address,uint256,bytes)": FunctionFragment;
     "l1Bridge()": FunctionFragment;
     "l1TokenAddress(address)": FunctionFragment;
     "l2TokenAddress(address)": FunctionFragment;
@@ -35,8 +36,8 @@ interface IL2BridgeInterface extends ethers.utils.Interface {
     values: [string, string, string, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "initialize",
-    values: [string, BytesLike, string]
+    functionFragment: "finalizeDepositToMerge",
+    values: [string, string, string, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(functionFragment: "l1Bridge", values?: undefined): string;
   encodeFunctionData(
@@ -56,7 +57,10 @@ interface IL2BridgeInterface extends ethers.utils.Interface {
     functionFragment: "finalizeDeposit",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "finalizeDepositToMerge",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "l1Bridge", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "l1TokenAddress",
@@ -68,7 +72,15 @@ interface IL2BridgeInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
 
-  events: {};
+  events: {
+    "FinalizeDeposit(address,address,address,uint256)": EventFragment;
+    "FinalizeDepositToMerge(address,address,address,address,uint256)": EventFragment;
+    "WithdrawalInitiated(address,address,address,uint256)": EventFragment;
+  };
+
+  getEvent(nameOrSignatureOrTopic: "FinalizeDeposit"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "FinalizeDepositToMerge"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "WithdrawalInitiated"): EventFragment;
 }
 
 export class IL2Bridge extends Contract {
@@ -91,7 +103,7 @@ export class IL2Bridge extends Contract {
       _l1Token: string,
       _amount: BigNumberish,
       _data: BytesLike,
-      overrides?: Overrides
+      overrides?: PayableOverrides
     ): Promise<ContractTransaction>;
 
     "finalizeDeposit(address,address,address,uint256,bytes)"(
@@ -100,21 +112,25 @@ export class IL2Bridge extends Contract {
       _l1Token: string,
       _amount: BigNumberish,
       _data: BytesLike,
-      overrides?: Overrides
+      overrides?: PayableOverrides
     ): Promise<ContractTransaction>;
 
-    initialize(
-      _l1Bridge: string,
-      _l2TokenProxyBytecodeHash: BytesLike,
-      _governor: string,
-      overrides?: Overrides
+    finalizeDepositToMerge(
+      _l1Sender: string,
+      _l2Receiver: string,
+      _l1Token: string,
+      _amount: BigNumberish,
+      _data: BytesLike,
+      overrides?: PayableOverrides
     ): Promise<ContractTransaction>;
 
-    "initialize(address,bytes32,address)"(
-      _l1Bridge: string,
-      _l2TokenProxyBytecodeHash: BytesLike,
-      _governor: string,
-      overrides?: Overrides
+    "finalizeDepositToMerge(address,address,address,uint256,bytes)"(
+      _l1Sender: string,
+      _l2Receiver: string,
+      _l1Token: string,
+      _amount: BigNumberish,
+      _data: BytesLike,
+      overrides?: PayableOverrides
     ): Promise<ContractTransaction>;
 
     l1Bridge(overrides?: CallOverrides): Promise<{
@@ -174,7 +190,7 @@ export class IL2Bridge extends Contract {
     _l1Token: string,
     _amount: BigNumberish,
     _data: BytesLike,
-    overrides?: Overrides
+    overrides?: PayableOverrides
   ): Promise<ContractTransaction>;
 
   "finalizeDeposit(address,address,address,uint256,bytes)"(
@@ -183,21 +199,25 @@ export class IL2Bridge extends Contract {
     _l1Token: string,
     _amount: BigNumberish,
     _data: BytesLike,
-    overrides?: Overrides
+    overrides?: PayableOverrides
   ): Promise<ContractTransaction>;
 
-  initialize(
-    _l1Bridge: string,
-    _l2TokenProxyBytecodeHash: BytesLike,
-    _governor: string,
-    overrides?: Overrides
+  finalizeDepositToMerge(
+    _l1Sender: string,
+    _l2Receiver: string,
+    _l1Token: string,
+    _amount: BigNumberish,
+    _data: BytesLike,
+    overrides?: PayableOverrides
   ): Promise<ContractTransaction>;
 
-  "initialize(address,bytes32,address)"(
-    _l1Bridge: string,
-    _l2TokenProxyBytecodeHash: BytesLike,
-    _governor: string,
-    overrides?: Overrides
+  "finalizeDepositToMerge(address,address,address,uint256,bytes)"(
+    _l1Sender: string,
+    _l2Receiver: string,
+    _l1Token: string,
+    _amount: BigNumberish,
+    _data: BytesLike,
+    overrides?: PayableOverrides
   ): Promise<ContractTransaction>;
 
   l1Bridge(overrides?: CallOverrides): Promise<string>;
@@ -251,17 +271,21 @@ export class IL2Bridge extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    initialize(
-      _l1Bridge: string,
-      _l2TokenProxyBytecodeHash: BytesLike,
-      _governor: string,
+    finalizeDepositToMerge(
+      _l1Sender: string,
+      _l2Receiver: string,
+      _l1Token: string,
+      _amount: BigNumberish,
+      _data: BytesLike,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "initialize(address,bytes32,address)"(
-      _l1Bridge: string,
-      _l2TokenProxyBytecodeHash: BytesLike,
-      _governor: string,
+    "finalizeDepositToMerge(address,address,address,uint256,bytes)"(
+      _l1Sender: string,
+      _l2Receiver: string,
+      _l1Token: string,
+      _amount: BigNumberish,
+      _data: BytesLike,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -304,7 +328,29 @@ export class IL2Bridge extends Contract {
     ): Promise<void>;
   };
 
-  filters: {};
+  filters: {
+    FinalizeDeposit(
+      l1Sender: string | null,
+      l2Receiver: string | null,
+      l2Token: string | null,
+      amount: null
+    ): EventFilter;
+
+    FinalizeDepositToMerge(
+      l1Sender: string | null,
+      l2Receiver: string | null,
+      l2Token: string | null,
+      mergeToken: null,
+      amount: null
+    ): EventFilter;
+
+    WithdrawalInitiated(
+      l2Sender: string | null,
+      l1Receiver: string | null,
+      l2Token: string | null,
+      amount: null
+    ): EventFilter;
+  };
 
   estimateGas: {
     finalizeDeposit(
@@ -313,7 +359,7 @@ export class IL2Bridge extends Contract {
       _l1Token: string,
       _amount: BigNumberish,
       _data: BytesLike,
-      overrides?: Overrides
+      overrides?: PayableOverrides
     ): Promise<BigNumber>;
 
     "finalizeDeposit(address,address,address,uint256,bytes)"(
@@ -322,21 +368,25 @@ export class IL2Bridge extends Contract {
       _l1Token: string,
       _amount: BigNumberish,
       _data: BytesLike,
-      overrides?: Overrides
+      overrides?: PayableOverrides
     ): Promise<BigNumber>;
 
-    initialize(
-      _l1Bridge: string,
-      _l2TokenProxyBytecodeHash: BytesLike,
-      _governor: string,
-      overrides?: Overrides
+    finalizeDepositToMerge(
+      _l1Sender: string,
+      _l2Receiver: string,
+      _l1Token: string,
+      _amount: BigNumberish,
+      _data: BytesLike,
+      overrides?: PayableOverrides
     ): Promise<BigNumber>;
 
-    "initialize(address,bytes32,address)"(
-      _l1Bridge: string,
-      _l2TokenProxyBytecodeHash: BytesLike,
-      _governor: string,
-      overrides?: Overrides
+    "finalizeDepositToMerge(address,address,address,uint256,bytes)"(
+      _l1Sender: string,
+      _l2Receiver: string,
+      _l1Token: string,
+      _amount: BigNumberish,
+      _data: BytesLike,
+      overrides?: PayableOverrides
     ): Promise<BigNumber>;
 
     l1Bridge(overrides?: CallOverrides): Promise<BigNumber>;
@@ -385,7 +435,7 @@ export class IL2Bridge extends Contract {
       _l1Token: string,
       _amount: BigNumberish,
       _data: BytesLike,
-      overrides?: Overrides
+      overrides?: PayableOverrides
     ): Promise<PopulatedTransaction>;
 
     "finalizeDeposit(address,address,address,uint256,bytes)"(
@@ -394,21 +444,25 @@ export class IL2Bridge extends Contract {
       _l1Token: string,
       _amount: BigNumberish,
       _data: BytesLike,
-      overrides?: Overrides
+      overrides?: PayableOverrides
     ): Promise<PopulatedTransaction>;
 
-    initialize(
-      _l1Bridge: string,
-      _l2TokenProxyBytecodeHash: BytesLike,
-      _governor: string,
-      overrides?: Overrides
+    finalizeDepositToMerge(
+      _l1Sender: string,
+      _l2Receiver: string,
+      _l1Token: string,
+      _amount: BigNumberish,
+      _data: BytesLike,
+      overrides?: PayableOverrides
     ): Promise<PopulatedTransaction>;
 
-    "initialize(address,bytes32,address)"(
-      _l1Bridge: string,
-      _l2TokenProxyBytecodeHash: BytesLike,
-      _governor: string,
-      overrides?: Overrides
+    "finalizeDepositToMerge(address,address,address,uint256,bytes)"(
+      _l1Sender: string,
+      _l2Receiver: string,
+      _l1Token: string,
+      _amount: BigNumberish,
+      _data: BytesLike,
+      overrides?: PayableOverrides
     ): Promise<PopulatedTransaction>;
 
     l1Bridge(overrides?: CallOverrides): Promise<PopulatedTransaction>;
