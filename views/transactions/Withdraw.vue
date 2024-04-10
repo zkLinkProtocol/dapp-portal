@@ -364,7 +364,7 @@ import WithdrawalSubmitted from "@/views/transactions/WithdrawalSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 import { useNetworkStore } from "@/store/network";
 import type { FunctionalComponent } from "vue";
-const showBridge = false;
+const showBridge = true;
 const chainList = [
   // {
   //   "name": "Symbiosis",
