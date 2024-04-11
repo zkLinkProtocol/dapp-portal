@@ -48,6 +48,12 @@ export const mantaSepolia = /*#__PURE__*/ defineChain({
       url: "https://pacific-explorer.sepolia-testnet.manta.network",
     },
   },
+  contracts: {
+    multicall3: {
+      address: "0x5Be4F807e0ae836Fc754dDEDDd72c0F4A28C8d43",
+      blockCreated: 468626,
+    },
+  },
 });
 
 export const l1Networks = {
