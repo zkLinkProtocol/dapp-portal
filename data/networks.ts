@@ -49,6 +49,12 @@ export const blast = /*#__PURE__*/ defineChain({
       url: "https://blastscan.io/",
     },
   },
+  contracts: {
+    multicall3: {
+      address: "0xcA11bde05977b3631167028862bE2a173976CA11",
+      blockCreated: 212929,
+    },
+  },
 });
 
 export const l1Networks = {
