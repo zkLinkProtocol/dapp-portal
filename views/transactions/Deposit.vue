@@ -136,7 +136,7 @@
         <CommonCardWithLineButtons>
           <TransactionSummaryTokenEntry label="You deposit" :token="transaction!.token" />
           <TransactionSummaryAddressEntry
-            v-if="isMerge"
+            v-if="mergeSupported && isMerge"
             label="You Receive"
             :address="mergeTokenInfo?.mergeToken"
             :destination="{iconUrl: transaction!.token.iconUrl}"
