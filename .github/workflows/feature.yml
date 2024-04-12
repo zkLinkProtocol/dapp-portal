@@ -43,7 +43,7 @@ jobs:
       - name: Reorganize Files
         run: |
           mkdir -p dist
-          mv dist/_nuxt dist/_nuxt
+          mv dist/_nuxt dist/
 
       - name: Deploy
         uses: matter-labs/action-hosting-deploy@main
