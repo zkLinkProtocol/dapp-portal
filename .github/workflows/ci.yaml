@@ -18,11 +18,11 @@ jobs:
 
       - name: Run Build Command
         run: |
-          if [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
+          if [[ ${{ github.base_ref }} == 'refs/heads/main' ]]; then
             npm run generate:node:nexus
-          elif [[ ${{ github.ref }} == 'refs/heads/preview' ]]; then
+          elif [[ ${{ github.base_ref }} == 'refs/heads/preview' ]]; then
             npm run generate:node:nexus
-          elif [[ ${{ github.ref }} == 'refs/heads/dev' ]]; then
+          elif [[ ${{ github.base_ref }} == 'refs/heads/dev' ]]; then
             npm run generate:node:nexus-sepolia
           else
             echo "No specific build command for this branch."
