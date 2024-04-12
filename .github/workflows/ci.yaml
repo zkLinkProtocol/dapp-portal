@@ -1,0 +1,29 @@
+name: CI
+on: [push]
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set Node.js 18.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+
+      - name: Run npm install
+        run: npm ci
+
+      - name: Run Build Command
+        run: |
+          if [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
+            npm run generate:node:nexus
+          elif [[ ${{ github.ref }} == 'refs/heads/preview' ]]; then
+            npm run generate:node:nexus
+          elif [[ ${{ github.ref }} == 'refs/heads/dev' ]]; then
+            npm run generate:node:nexus-sepolia
+          else
+            echo "No specific build command for this branch."
+          fi
