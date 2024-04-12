@@ -11,7 +11,7 @@
         </template>
         <template v-else>
           Your funds will be available on <span class="font-medium">{{ transaction.to.destination.label }}</span> after
-          the <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">7-day delay</a>.
+          the <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">{{WITHDRAWAL_DELAY_DAYS}}-day delay</a>.
           During this time, the transaction will be processed
           {{
             withdrawalManualFinalizationRequired
@@ -157,7 +157,7 @@ import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
-
+import { WITHDRAWAL_DELAY_DAYS } from '@/utils/constants'
 const props = defineProps({
   transaction: {
     type: Object as PropType<TransactionInfo>,

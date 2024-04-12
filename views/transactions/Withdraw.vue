@@ -180,7 +180,7 @@
             class="mb-block-padding-1/2 sm:mb-block-gap"
           >
             <p v-if="withdrawalManualFinalizationRequired">
-              You will be able to claim your withdrawal only after a 7-day withdrawal delay.
+              You will be able to claim your withdrawal only after a {{WITHDRAWAL_DELAY_DAYS}}-day withdrawal delay.
               <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">Learn more</a>
             </p>
             <p v-else>
@@ -353,7 +353,7 @@ import { WITHDRAWAL_DELAY } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransfersHistoryStore } from "@/store/zksync/transfersHistory";
 import { useZkSyncWalletStore } from "@/store/zksync/wallet";
-import { ETH_TOKEN } from "@/utils/constants";
+import { ETH_TOKEN, WITHDRAWAL_DELAY_DAYS } from "@/utils/constants";
 import { ZKSYNC_WITHDRAWAL_DELAY } from "@/utils/doc-links";
 import { checksumAddress, decimalToBigNumber, formatRawTokenPrice } from "@/utils/formatters";
 import { calculateFee } from "@/utils/helpers";
@@ -364,7 +364,7 @@ import WithdrawalSubmitted from "@/views/transactions/WithdrawalSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 import { useNetworkStore } from "@/store/network";
 import type { FunctionalComponent } from "vue";
-const showBridge = false;
+const showBridge = true;
 const chainList = [
   // {
   //   "name": "Symbiosis",
@@ -479,6 +479,7 @@ const availableBalances = computed(() => {
   }
   return balance.value;
 });
+console.log('availableTokens: ',availableTokens.value)
 const routeTokenAddress = computed(() => {
   if (!route.query.token || Array.isArray(route.query.token) || !isAddress(route.query.token)) {
     return;
