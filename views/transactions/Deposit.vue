@@ -984,7 +984,7 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
   display: none;
   position: absolute;
   padding: 12px 20px 12px 24px;
-  top: -4.5rem;
+  top: -7.5rem;
   width: 35rem;
   left: -10rem;
   border-radius: 8px;
