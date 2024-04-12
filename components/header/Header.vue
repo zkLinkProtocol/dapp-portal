@@ -106,10 +106,19 @@
       <div>Note: Withdrawals will be enabled before 04/13/2024</div>
     </div> -->
     <div className="banner" v-if="!route.query.s || route.query.s !== 'okx'">
-      <a href="https://app.zklink.io/" target="\_blank">
-        <img src="/img/banner.svg" alt="" className="bannerImg" />
-        <img src="/img/mobile.svg" alt="" className="mobileImg" />
-      </a>
+      <!-- <a href="https://app.zklink.io/" target="\_blank">
+        <img
+          src="/img/banner.svg"
+          alt=""
+          className="bannerImg"
+        />
+        <img
+          src="/img/mobile.svg"
+          alt=""
+          className="mobileImg"
+        />
+      </a> -->
+      <banner />
     </div>
   </div>
 </template>
@@ -134,6 +143,8 @@ import useNetworks from "@/composables/useNetworks";
 import { useRoute } from "#imports";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncWithdrawalsStore } from "@/store/zksync/withdrawals";
+import useNetworks from "@/composables/useNetworks";
+import Banner from "./Banner.vue";
 const { defaultNetwork, isMainnet } = useNetworks();
 
 const route = useRoute();

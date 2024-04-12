@@ -27,7 +27,7 @@ import { useNetworkStore } from "@/store/network";
 
 export const useOnboardStore = defineStore("onboard", () => {
   const { zkSyncNetworks } = useNetworks();
-
+  const runtimeConfig = useRuntimeConfig();
   const createZkLinkNova = (network: ZkSyncNetwork) => {
     return {
       id: network.id,
@@ -40,6 +40,14 @@ export const useOnboardStore = defineStore("onboard", () => {
       },
       blockExplorers: {
         default: { name: "zkLink Nova Explorer", url: "https://explorer.zklink.io" },
+      },
+      contracts: {
+        multicall3: {
+          address:
+            runtimeConfig.public.nodeType === "nexus-goerli"
+              ? "0x6F02406FC2495171dC03c7b6D80c2f327320C3f6"
+              : "0x825267E0fA5CAe92F98540828a54198dcB3Eaeb5",
+        },
       },
     };
   };
