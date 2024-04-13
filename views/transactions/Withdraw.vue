@@ -184,7 +184,7 @@
               <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">Learn more</a>
             </p>
             <p v-else>
-              You will receive funds only after a 7-day withdrawal delay.
+              You will receive funds only after a {{WITHDRAWAL_DELAY_DAYS}}-day withdrawal delay.
               <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">Learn more</a>
             </p>
           </CommonAlert>
@@ -268,15 +268,6 @@
                 @click="buttonContinue()"
               >
                 {{ isMergeTokenSelected ? "Redeem" : "Continue" }}
-              </CommonButton>
-              <CommonButton
-                v-else-if="step === 'confirm'"
-                :disabled="continueButtonDisabled || transactionStatus !== 'not-started'"
-                variant="primary"
-                class="w-full"
-                @click="buttonContinue()"
-              >
-                <span v-if="transactionStatus === 'processing'">Processing...</span>
               </CommonButton>
               <template v-else-if="step === 'confirm'">
                 <transition v-bind="TransitionAlertScaleInOutTransition">
@@ -668,6 +659,10 @@ const withdrawalManualFinalizationRequired = computed(() => {
   );
 });
 
+const isMergeTokenSelected = computed(() => {
+  return isMergeToken(selectedToken.value?.address ?? "")
+})
+
 const feeLoading = computed(() => feeInProgress.value || (!fee.value && balanceInProgress.value));
 const estimate = async () => {
   // estimation fails when token balance is 0
@@ -716,10 +711,6 @@ watch(
   },
   { immediate: true }
 );
-
-const isMergeTokenSelected = computed(() => {
-  return isMergeToken(selectedToken.value?.address ?? "")
-})
 
 const continueButtonDisabled = computed(() => {
   if(isMergeTokenSelected.value) {
@@ -828,6 +819,7 @@ const makeTransaction = async () => {
         query: { network: eraNetwork.value.key },
       }).href
     );
+    walletStore.requestBalance({ force: true }).catch(() => undefined); //refresh balances
     waitForCompletion(transactionInfo.value)
       .then(async (completedTransaction) => {
         transactionInfo.value = completedTransaction;
