@@ -267,7 +267,16 @@
                 class="w-full"
                 @click="buttonContinue()"
               >
-                Continue
+                {{ isMergeTokenSelected ? "Redeem" : "Continue" }}
+              </CommonButton>
+              <CommonButton
+                v-else-if="step === 'confirm'"
+                :disabled="continueButtonDisabled || transactionStatus !== 'not-started'"
+                variant="primary"
+                class="w-full"
+                @click="buttonContinue()"
+              >
+                <span v-if="transactionStatus === 'processing'">Processing...</span>
               </CommonButton>
               <template v-else-if="step === 'confirm'">
                 <transition v-bind="TransitionAlertScaleInOutTransition">
@@ -353,7 +362,7 @@ import { WITHDRAWAL_DELAY } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransfersHistoryStore } from "@/store/zksync/transfersHistory";
 import { useZkSyncWalletStore } from "@/store/zksync/wallet";
-import { ETH_TOKEN, WITHDRAWAL_DELAY_DAYS } from "@/utils/constants";
+import { ETH_TOKEN, WITHDRAWAL_DELAY_DAYS, isMergeToken } from "@/utils/constants";
 import { ZKSYNC_WITHDRAWAL_DELAY } from "@/utils/doc-links";
 import { checksumAddress, decimalToBigNumber, formatRawTokenPrice } from "@/utils/formatters";
 import { calculateFee } from "@/utils/helpers";
@@ -447,6 +456,9 @@ const availableTokens = computed(() => {
   if (!tokens.value) return [];
   if (props.type === "withdrawal") {
     return Object.values(tokens.value).filter((e) => {
+      if(isMergeToken(e.address)) {
+        return true;
+      }
       if (!e.l1Address) {
         return false;
       }
@@ -465,6 +477,9 @@ const availableBalances = computed(() => {
   if (props.type === "withdrawal") {
     if (!tokens.value) return [];
     return balance.value.filter((e) => {
+      if(isMergeToken(e.address)) {
+        return true;
+      }
       if (!e.l1Address) {
         return false;
       }
@@ -503,7 +518,7 @@ const selectedToken = computed<Token | undefined>(() => {
     return undefined;
   }
   if (!selectedTokenAddress.value) {
-    if (!selectedNetwork.value.isEthGasToken) {
+    if (!selectedNetwork.value.isEthGasToken && defaultToken.value?.l1Address === ETH_ADDRESS) {
       return availableTokens.value[1];
     }
     return defaultToken.value;
@@ -512,7 +527,7 @@ const selectedToken = computed<Token | undefined>(() => {
     availableTokens.value.find((e) => e.address === selectedTokenAddress.value) ||
     availableBalances.value.find((e) => e.address === selectedTokenAddress.value) ||
     defaultToken.value;
-  if (!selectedNetwork.value.isEthGasToken) {
+  if (!selectedNetwork.value.isEthGasToken && res.address === ETH_ADDRESS) {
     return availableTokens.value[1];
   }
   return res;
@@ -665,6 +680,10 @@ const estimate = async () => {
   ) {
     return;
   }
+  // skip estimate for merge token
+  if (isMergeTokenSelected.value) {
+    return;
+  }
   await estimateFee({
     type: props.type,
     from: transaction.value.from.address,
@@ -698,7 +717,14 @@ watch(
   { immediate: true }
 );
 
+const isMergeTokenSelected = computed(() => {
+  return isMergeToken(selectedToken.value?.address ?? "")
+})
+
 const continueButtonDisabled = computed(() => {
+  if(isMergeTokenSelected.value) {
+    return false;
+  }
   if (
     !isAddressInputValid.value ||
     !transaction.value ||
@@ -714,6 +740,10 @@ const continueButtonDisabled = computed(() => {
 });
 const buttonContinue = () => {
   if (continueButtonDisabled.value) {
+    return;
+  }
+  if (isMergeTokenSelected.value) {
+    window.open("https://zklink.io/merge", "_blank");
     return;
   }
   if (step.value === "form") {
