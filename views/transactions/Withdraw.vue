@@ -819,7 +819,6 @@ const makeTransaction = async () => {
         query: { network: eraNetwork.value.key },
       }).href
     );
-    walletStore.requestBalance({ force: true }).catch(() => undefined); //refresh balances
     waitForCompletion(transactionInfo.value)
       .then(async (completedTransaction) => {
         transactionInfo.value = completedTransaction;
