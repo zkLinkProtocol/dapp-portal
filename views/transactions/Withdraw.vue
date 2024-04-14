@@ -22,11 +22,6 @@
       Confirm transaction
     </PageTitle>
 
-    <div class="flex warnBox">
-      <div>
-        Note: Withdrawal will be open for a max of 30 days during the campaign, during these period, you can use third party bridge withdraw your fund
-      </div>
-    </div>
     <div v-if="showBridge">
       <NetworkSelectModal
         v-model:opened="fromNetworkModalOpened"
@@ -180,12 +175,12 @@
             class="mb-block-padding-1/2 sm:mb-block-gap"
           >
             <p v-if="withdrawalManualFinalizationRequired">
-              You will be able to claim your withdrawal only after a 7-day withdrawal delay.
-              <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">Learn more</a>
+              You will be able to claim your withdrawal only after a {{WITHDRAWAL_DELAY_DAYS}}-day withdrawal delay.
+              <!-- <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">Learn more</a> -->
             </p>
             <p v-else>
-              You will receive funds only after a 7-day withdrawal delay.
-              <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">Learn more</a>
+              You will receive funds only after a {{WITHDRAWAL_DELAY_DAYS}}-day withdrawal delay.
+              <!-- <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">Learn more</a> -->
             </p>
           </CommonAlert>
 
@@ -267,7 +262,7 @@
                 class="w-full"
                 @click="buttonContinue()"
               >
-                Continue
+                {{ isMergeTokenSelected ? "Redeem" : "Continue" }}
               </CommonButton>
               <template v-else-if="step === 'confirm'">
                 <transition v-bind="TransitionAlertScaleInOutTransition">
@@ -353,7 +348,7 @@ import { WITHDRAWAL_DELAY } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransfersHistoryStore } from "@/store/zksync/transfersHistory";
 import { useZkSyncWalletStore } from "@/store/zksync/wallet";
-import { ETH_TOKEN } from "@/utils/constants";
+import { ETH_TOKEN, WITHDRAWAL_DELAY_DAYS, isMergeToken } from "@/utils/constants";
 import { ZKSYNC_WITHDRAWAL_DELAY } from "@/utils/doc-links";
 import { checksumAddress, decimalToBigNumber, formatRawTokenPrice } from "@/utils/formatters";
 import { calculateFee } from "@/utils/helpers";
@@ -364,7 +359,7 @@ import WithdrawalSubmitted from "@/views/transactions/WithdrawalSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 import { useNetworkStore } from "@/store/network";
 import type { FunctionalComponent } from "vue";
-const showBridge = false;
+const showBridge = true;
 const chainList = [
   // {
   //   "name": "Symbiosis",
@@ -447,6 +442,9 @@ const availableTokens = computed(() => {
   if (!tokens.value) return [];
   if (props.type === "withdrawal") {
     return Object.values(tokens.value).filter((e) => {
+      if(isMergeToken(e.address)) {
+        return true;
+      }
       if (!e.l1Address) {
         return false;
       }
@@ -465,6 +463,9 @@ const availableBalances = computed(() => {
   if (props.type === "withdrawal") {
     if (!tokens.value) return [];
     return balance.value.filter((e) => {
+      if(isMergeToken(e.address)) {
+        return true;
+      }
       if (!e.l1Address) {
         return false;
       }
@@ -479,6 +480,7 @@ const availableBalances = computed(() => {
   }
   return balance.value;
 });
+
 const routeTokenAddress = computed(() => {
   if (!route.query.token || Array.isArray(route.query.token) || !isAddress(route.query.token)) {
     return;
@@ -502,7 +504,7 @@ const selectedToken = computed<Token | undefined>(() => {
     return undefined;
   }
   if (!selectedTokenAddress.value) {
-    if (!selectedNetwork.value.isEthGasToken) {
+    if (!selectedNetwork.value.isEthGasToken && defaultToken.value?.l1Address === ETH_ADDRESS) {
       return availableTokens.value[1];
     }
     return defaultToken.value;
@@ -511,7 +513,7 @@ const selectedToken = computed<Token | undefined>(() => {
     availableTokens.value.find((e) => e.address === selectedTokenAddress.value) ||
     availableBalances.value.find((e) => e.address === selectedTokenAddress.value) ||
     defaultToken.value;
-  if (!selectedNetwork.value.isEthGasToken) {
+  if (!selectedNetwork.value.isEthGasToken && res.address === ETH_ADDRESS) {
     return availableTokens.value[1];
   }
   return res;
@@ -652,6 +654,10 @@ const withdrawalManualFinalizationRequired = computed(() => {
   );
 });
 
+const isMergeTokenSelected = computed(() => {
+  return isMergeToken(selectedToken.value?.address ?? "")
+})
+
 const feeLoading = computed(() => feeInProgress.value || (!fee.value && balanceInProgress.value));
 const estimate = async () => {
   // estimation fails when token balance is 0
@@ -662,6 +668,10 @@ const estimate = async () => {
     !tokenBalance.value ||
     selectedTokenZeroBalance.value
   ) {
+    return;
+  }
+  // skip estimate for merge token
+  if (isMergeTokenSelected.value) {
     return;
   }
   await estimateFee({
@@ -698,6 +708,9 @@ watch(
 );
 
 const continueButtonDisabled = computed(() => {
+  if(isMergeTokenSelected.value) {
+    return false;
+  }
   if (
     !isAddressInputValid.value ||
     !transaction.value ||
@@ -713,6 +726,10 @@ const continueButtonDisabled = computed(() => {
 });
 const buttonContinue = () => {
   if (continueButtonDisabled.value) {
+    return;
+  }
+  if (isMergeTokenSelected.value) {
+    window.open("https://zklink.io/merge", "_blank");
     return;
   }
   if (step.value === "form") {
