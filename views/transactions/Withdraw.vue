@@ -485,7 +485,7 @@ const availableBalances = computed(() => {
   }
   return balance.value;
 });
-console.log('availableTokens: ',availableTokens.value)
+
 const routeTokenAddress = computed(() => {
   if (!route.query.token || Array.isArray(route.query.token) || !isAddress(route.query.token)) {
     return;
