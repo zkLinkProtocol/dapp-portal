@@ -9,7 +9,7 @@ export const ETH_TOKEN: Token = {
   iconUrl: "/img/eth.svg",
 };
 
-export const WITHDRAWAL_DELAY_DAYS = 12;
+export const WITHDRAWAL_DELAY_DAYS = 14;
 
 export const MERGE_TOKENS = [
   {
