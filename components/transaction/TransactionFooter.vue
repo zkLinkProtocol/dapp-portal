@@ -17,7 +17,7 @@
       </CommonButton>
     </div>
     <div v-if="buttonStep === 'network'" class="transaction-footer-row">
-      <CommonButtonTopInfo>222Incorrect network selected in your wallet</CommonButtonTopInfo>
+      <CommonButtonTopInfo>Incorrect network selected in your wallet</CommonButtonTopInfo>
       <CommonButton
         v-if="
           connectorName !== 'WalletConnect' ||
