@@ -37,7 +37,7 @@
     </PageTitle>
 
     <div class="warnBox flex" v-if="!route.query.s || route.query.s !== 'okx'">
-      <div>Note: Your funds will be locked for a max of 30 days during the campaign.</div>
+      <div>Note: The zkLink Portal is currently being upgraded. Deposits made during this period will be arrived after the upgrade is finished.</div>
     </div>
 
     <NetworkSelectModal
