@@ -176,11 +176,11 @@
           >
             <p v-if="withdrawalManualFinalizationRequired">
               You will be able to claim your withdrawal only after a {{WITHDRAWAL_DELAY_DAYS}}-day withdrawal delay.
-              <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">Learn more</a>
+              <!-- <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">Learn more</a> -->
             </p>
             <p v-else>
               You will receive funds only after a {{WITHDRAWAL_DELAY_DAYS}}-day withdrawal delay.
-              <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">Learn more</a>
+              <!-- <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">Learn more</a> -->
             </p>
           </CommonAlert>
 
