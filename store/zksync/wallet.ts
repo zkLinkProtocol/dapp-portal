@@ -173,11 +173,10 @@ export const useZkSyncWalletStore = defineStore("zkSyncWallet", () => {
     return [...knownTokens, ...otherTokens];
   });
 
-  const balanceRef = reactive(balance);
-
   const deductBalance = (tokenAddress: string, amount: BigNumberish) => {
     if (!balance.value) return;
-    const tokenBalance = balanceRef.value.find((balance) => balance.address === tokenAddress);
+    const index = balance.value.findIndex((balance) => balance.address === tokenAddress);
+    const tokenBalance = balance.value[index];
     if (!tokenBalance) return;
     const newBalance = BigNumber.from(tokenBalance.amount).sub(amount);
     tokenBalance.amount = newBalance.isNegative() ? "0" : newBalance.toString();
@@ -221,7 +220,7 @@ export const useZkSyncWalletStore = defineStore("zkSyncWallet", () => {
     getL1VoidSigner,
     getPrimaryL1VoidSigner,
 
-    balance: balanceRef,
+    balance,
     balanceInProgress: computed(() => balanceInProgress.value),
     balanceError: computed(() => balanceError.value),
     requestBalance,
