@@ -17,9 +17,12 @@
       </CommonButton>
     </div>
     <div v-if="buttonStep === 'network'" class="transaction-footer-row">
-      <CommonButtonTopInfo>Incorrect network selected in your wallet</CommonButtonTopInfo>
+      <CommonButtonTopInfo>222Incorrect network selected in your wallet</CommonButtonTopInfo>
       <CommonButton
-        v-if="connectorName !== 'WalletConnect'"
+        v-if="
+          connectorName !== 'WalletConnect' ||
+          (connectorName === 'WalletConnect' && (walletName?.includes('OKX') || walletName?.includes('MetaMask')))
+        "
         type="submit"
         :disabled="switchingNetworkInProgress"
         variant="primary"
