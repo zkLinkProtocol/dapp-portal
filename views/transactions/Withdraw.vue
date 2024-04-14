@@ -252,6 +252,18 @@
             </CommonAlert>
           </transition>
 
+          <DestinationItem v-if="isMergeTokenSelected" as="div">
+              <template #label> Withdrawal of Merged Tokens </template>
+              <template #underline>
+                The zkLink Nova Portal currently doesn't facilitate withdrawing merged tokens. You can redeem your merged tokens back to the source token at https://zklink.io/merge/ and then proceed with the withdrawal.
+              </template>
+              <template #image>
+                <div class="aspect-square h-full w-full rounded-full bg-warning-400 p-3 text-black">
+                  <LockClosedIcon aria-hidden="true" />
+                </div>
+              </template>
+            </DestinationItem>
+
           <TransactionFooter>
             <template #after-checks>
               <CommonButton
@@ -262,7 +274,7 @@
                 class="w-full"
                 @click="buttonContinue()"
               >
-                {{ isMergeTokenSelected ? "Redeem" : "Continue" }}
+                {{ isMergeTokenSelected ? "Redeem Now" : "Continue" }}
               </CommonButton>
               <template v-else-if="step === 'confirm'">
                 <transition v-bind="TransitionAlertScaleInOutTransition">
@@ -319,7 +331,7 @@
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 
-import { ArrowTopRightOnSquareIcon, ExclamationTriangleIcon, InformationCircleIcon } from "@heroicons/vue/24/outline";
+import { ArrowTopRightOnSquareIcon, ExclamationTriangleIcon, InformationCircleIcon, LockClosedIcon } from "@heroicons/vue/24/outline";
 import { useRouteQuery } from "@vueuse/router";
 import { BigNumber } from "ethers";
 import { isAddress } from "ethers/lib/utils";
