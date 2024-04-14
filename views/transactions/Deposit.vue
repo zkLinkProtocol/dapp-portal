@@ -36,10 +36,6 @@
       Confirm transaction
     </PageTitle>
 
-    <div class="warnBox flex" v-if="!route.query.s || route.query.s !== 'okx'">
-      <div>Note: Your funds will be locked for a max of 30 days during the campaign.</div>
-    </div>
-
     <NetworkSelectModal
       v-model:opened="fromNetworkModalOpened"
       title="From"

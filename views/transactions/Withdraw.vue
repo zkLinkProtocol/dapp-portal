@@ -22,11 +22,6 @@
       Confirm transaction
     </PageTitle>
 
-    <div class="flex warnBox">
-      <div>
-        Note: Withdrawal will be open for a max of 30 days during the campaign, during these period, you can use third party bridge withdraw your fund
-      </div>
-    </div>
     <div v-if="showBridge">
       <NetworkSelectModal
         v-model:opened="fromNetworkModalOpened"
