@@ -10,4 +10,35 @@ export const ETH_TOKEN: Token = {
   iconUrl: "/img/eth.svg",
 };
 
-export const WITHDRAWAL_DELAY_DAYS = 12
+export const WITHDRAWAL_DELAY_DAYS = 14;
+
+export const MERGE_TOKENS = [
+  {
+    symbol: "USDT",
+    address: "0x2F8A25ac62179B31D62D7F80884AE57464699059",
+    targetNetworkKeys: ["ethereum", "arbitrum", "zksync", "linea", "manta", "mantle", "optimism"],
+    decimals: 6,
+  },
+  {
+    symbol: "WBTC",
+    address: "0xDa4AaEd3A53962c83B35697Cd138cc6df43aF71f",
+    targetNetworkKeys: ["ethereum", "arbitrum", "zksync", "linea", "manta", "mantle", "optimism"],
+    decimals: 18,
+  },
+  {
+    symbol: "USDC",
+    address: "0x1a1A3b2ff016332e866787B311fcB63928464509",
+    targetNetworkKeys: ["ethereum", "arbitrum", "zksync", "linea", "manta", "mantle", "optimism", "base"],
+    decimals: 6,
+  },
+  {
+    symbol: "DAI",
+    address: "0xF573fA04A73d5AC442F3DEa8741317fEaA3cDeab",
+    targetNetworkKeys: ["ethereum", "arbitrum", "zksync", "linea", "optimism", "base"],
+    decimals: 18,
+  },
+];
+
+export const isMergeToken = (address: string) => {
+  return address && MERGE_TOKENS.some((token) => token.address.toLowerCase() === address.toLowerCase());
+};

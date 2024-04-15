@@ -11,7 +11,7 @@
         </template>
         <template v-else>
           Your funds will be available on <span class="font-medium">{{ transaction.to.destination.label }}</span> after
-          the <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">{{WITHDRAWAL_DELAY_DAYS}}-day delay</a>.
+          the {{WITHDRAWAL_DELAY_DAYS}}-day delay.
           During this time, the transaction will be processed
           {{
             withdrawalManualFinalizationRequired
