@@ -52,6 +52,7 @@
       :expected-complete-timestamp="
         withdrawalFinalizationAvailable ? undefined : transaction.info.expectedCompleteTimestamp
       "
+      :is-withdraw="true"
     >
       <template #to-button v-if="withdrawalFinalizationAvailable">
         <template v-if="!(network.chain?.id === getNetworkInfo().l1Network?.id)">
