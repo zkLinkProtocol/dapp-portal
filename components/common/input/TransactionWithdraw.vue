@@ -57,7 +57,7 @@
                 Input amount exceeds the merge limit.
               </template>
               <template v-else-if="amountError === 'exceeds_merge_withdrawal_limit'">
-                The input amount exceeds the USDC.Arbitrum amount locked in the <a :href="MergeTokenContractUrl" target="_blank" class="underline underline-offset-2">merge token contract.</a>  Consider withdrawing to another network or reducing the input.
+                The input amount exceeds the {{ selectedToken.symbol }}.{{ selectedNetwork.l1Network?.name }} amount locked in the <a :href="MergeTokenContractUrl" target="_blank" class="underline underline-offset-2">merge token contract.</a>  Consider withdrawing to another network or reducing the input.
               </template>
               <template v-else-if="amountError === 'exceeds_max_amount' || amountError === 'exceeds_balance'">
                 Max amount is

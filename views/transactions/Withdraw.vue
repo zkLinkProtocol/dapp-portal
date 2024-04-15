@@ -217,8 +217,12 @@
         </template>
 
         <template v-if="!tokenCustomBridge && (step === 'form' || step === 'confirm')">
-          <CommonErrorBlock v-if="feeError" class="mt-2" @try-again="estimate">
-            Fee estimation error: {{ feeError.message }}
+          <CommonErrorBlock
+            v-if="feeError"
+            class="mt-2"
+            @try-again="isMergeTokenSelected ? estiamteForMergeToken : estimate"
+          >
+           Fee estimation error: {{ feeError.message }}
           </CommonErrorBlock>
           <div class="mt-4 flex items-center gap-4">
             <transition v-bind="TransitionOpacity()">
@@ -253,8 +257,9 @@
             </CommonAlert>
           </transition>
 
-          <CommonHeightTransition>
-            <DestinationItem v-if="enoughAllowance && isMergeTokenSelected" as="div">
+          <CommonHeightTransition v-if="step === 'form'" :opened="enoughAllowance && isMergeTokenSelected">
+            <CommonCardWithLineButtons class="mt-4">
+            <DestinationItem as="div">
               <template #label>
                 Withdrawal of Merged {{ selectedToken?.symbol }} to {{ selectedNetwork.l1Network?.name }}
               </template>
@@ -267,6 +272,9 @@
                   >token merge contract</a
                 >
                 . Therefore, the available withdrawal amount for merged USDC to Linea is {{ mergeTokenLockedBalance }}
+                <p class="warnNote">
+                  Note: All LRT points will continue to be calculated after you request a withdrawal. They will appear in the next few days in dashboard due to the data synchronization process.
+                </p>
               </template>
               <template #image>
                 <div class="aspect-square h-full w-full rounded-full bg-warning-400 p-3 text-black">
@@ -274,6 +282,7 @@
                 </div>
               </template>
             </DestinationItem>
+          </CommonCardWithLineButtons>
           </CommonHeightTransition>
 
           <CommonHeightTransition
@@ -1048,6 +1057,7 @@ const makeTransaction = async () => {
         query: { network: eraNetwork.value.key },
       }).href
     );
+    setTokenAllowance()
     waitForCompletion(transactionInfo.value)
       .then(async (completedTransaction) => {
         transactionInfo.value = completedTransaction;
@@ -1103,6 +1113,13 @@ onBeforeUnmount(() => {
   a {
     color: #0bc48f;
   }
+}
+.warnNote {
+  color: #f29914;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
 }
 .warnBox {
   display: inline-flex;
