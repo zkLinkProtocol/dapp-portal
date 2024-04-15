@@ -39,5 +39,7 @@ export const MERGE_TOKENS = [
 ];
 
 export const isMergeToken = (address: string) => {
-  return address && MERGE_TOKENS.some((token) => token.address.toLowerCase() === address.toLowerCase());
+  return address ? MERGE_TOKENS.some((token) => token.address.toLowerCase() === address.toLowerCase()) : false;
 };
+
+export const MergeTokenContractUrl = "https://explorer.zklink.io/address/0x83FD59FD58C6A5E6eA449e5400D02803875e1104"
