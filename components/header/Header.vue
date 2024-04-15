@@ -75,7 +75,10 @@
         <CommonButton class="hamburger-icon" @click="mobileMainNavigationOpened = true">
           <Bars3Icon class="h-6 w-6" aria-hidden="true" />
           <transition v-bind="TransitionOpacity()">
-            <CommonBadge v-if="withdrawalsAvailableForClaiming && withdrawalsAvailableForClaiming.length" class="action-available-badge">
+            <CommonBadge
+              v-if="withdrawalsAvailableForClaiming && withdrawalsAvailableForClaiming.length"
+              class="action-available-badge"
+            >
               {{ withdrawalsAvailableForClaiming.length }}
             </CommonBadge>
           </transition>
@@ -102,19 +105,8 @@
       </span>
       <div>Note: Withdrawals will be enabled before 04/13/2024</div>
     </div> -->
-    <div className="banner" v-if="!route.query.s || route.query.s !== 'okx'">
-      <a href="https://app.zklink.io/" target="\_blank">
-        <img
-          src="/img/banner.svg"
-          alt=""
-          className="bannerImg"
-        />
-        <img
-          src="/img/mobile.svg"
-          alt=""
-          className="mobileImg"
-        />
-      </a>
+    <div className="banner" v-if="route.query.s !== 'okx' && route.query.s !== 'binance'">
+      <banner />
     </div>
   </div>
 </template>
@@ -138,6 +130,7 @@ import { useRoute } from "#imports";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncWithdrawalsStore } from "@/store/zksync/withdrawals";
 import useNetworks from "@/composables/useNetworks";
+import Banner from "./Banner.vue";
 const { defaultNetwork, isMainnet } = useNetworks();
 
 const route = useRoute();
@@ -217,28 +210,28 @@ const isShowFaucet = computed(() => defaultNetwork.id === 810182);
     height: 18px;
   }
 }
-.banner{
+.banner {
   width: 100%;
   text-align: center;
-  a{
+  a {
     display: inline-block;
     width: 100%;
     min-width: 0px;
     max-width: 700px;
   }
-  .bannerImg{
+  .bannerImg {
     display: inline-block;
     width: 100%;
     height: 80px;
   }
-  .mobileImg{
+  .mobileImg {
     display: none;
   }
   @media screen and (max-width: 640px) {
-    .bannerImg{
+    .bannerImg {
       display: none;
     }
-    .mobileImg{
+    .mobileImg {
       display: none;
       display: inline-block;
       width: 100%;

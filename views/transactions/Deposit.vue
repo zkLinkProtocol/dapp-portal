@@ -1,23 +1,43 @@
 <template>
   <div>
-    <div class="okx-tips mb-[10px]" v-if="route.query?.s === 'okx'">
-      <div class="okx-tips-cover"></div>
+    <div class="cryptopeida-tips okx-cryptopeida mb-[10px]" v-if="route.query?.s === 'okx'">
+      <div class="cryptopeida-tips-cover"></div>
       <!-- <img src="/img/okx-cryptopedia.svg" class="h-[64px] w-[64px] rounded-[8px]" /> -->
       <div class="z-2">
         <a
           href="https://www.okx.com/web3/discover/cryptopedia/event/28"
           target="_blank"
-          class="okx-tips-title z-2 relative flex cursor-pointer items-center gap-[4px]"
+          class="cryptopeida-tips-title z-2 relative flex cursor-pointer items-center gap-[4px]"
         >
           <span>OKX Cryptopedia</span>
           <img :src="launchIcon" />
         </a>
         <div class="mt-[5px]">
-          <p class="okx-tips-desc">
+          <p class="cryptopeida-tips-desc">
             Withdrawals from Nova are locked until April 14th, 10am UTC. During this time, you can use a third-party
             bridge to withdraw your assets.
           </p>
-          <p class="okx-tips-desc">
+          <p class="cryptopeida-tips-desc">
+            Please wait a few minutes for deposits to arrive before verifying the task on OKX Cryptopedia.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="cryptopeida-tips binance-cryptopeida mb-[10px]" v-else-if="route.query?.s === 'binance'">
+      <div class="cryptopeida-tips-cover"></div>
+      <!-- <img src="/img/okx-cryptopedia.svg" class="h-[64px] w-[64px] rounded-[8px]" /> -->
+      <div class="z-2">
+        <a
+          href="https://www.okx.com/web3/discover/cryptopedia/event/28"
+          target="_blank"
+          class="cryptopeida-tips-title z-2 relative flex cursor-pointer items-center gap-[4px]"
+        >
+          <span>Binance Cryptopedia</span>
+          <img :src="launchIcon" />
+        </a>
+        <div class="mt-[5px]">
+          <p class="cryptopeida-tips-desc">
             Please wait a few minutes for deposits to arrive before verifying the task on OKX Cryptopedia.
           </p>
         </div>
@@ -35,10 +55,6 @@
     >
       Confirm transaction
     </PageTitle>
-
-    <div class="warnBox flex" v-if="!route.query.s || route.query.s !== 'okx'">
-      <div>Note: Your funds will be locked for a max of 30 days during the campaign.</div>
-    </div>
 
     <NetworkSelectModal
       v-model:opened="fromNetworkModalOpened"
@@ -212,15 +228,18 @@
             <NuxtLink :to="{ name: 'receive-methods' }" class="alert-link">Receive funds</NuxtLink>
           </CommonAlert>
         </transition>
-        <div class="flex justify-between gap-3 sm:mt-2 mb-1" v-if="mergeSupported">
-          <CommonButtonLabel as="span" class="text-left relative showTip">
-            Merge Token <img src="/img/Shape.svg" class="ml-1 h-3 w-3 inline-block" alt="" />
+        <div class="mb-1 flex justify-between gap-3 sm:mt-2" v-if="mergeSupported">
+          <CommonButtonLabel as="span" class="showTip relative text-left">
+            Merge Token <img src="/img/Shape.svg" class="ml-1 inline-block h-3 w-3" alt="" />
             <div class="tooltip">
-              All supported source tokens with the same entity from different networks can be merged into a single merged token. Holding or using merged token to engage with supported dApps could receive higher multipliers. <a href="https://docs.zklink.io/how-it-works/token-merge" target="_blank">Learn More</a>.
+              All supported source tokens with the same entity from different networks can be merged into a single
+              merged token. Holding or using merged token to engage with supported dApps could receive higher
+              multipliers. <a href="https://docs.zklink.io/how-it-works/token-merge" target="_blank">Learn More</a>.
             </div>
           </CommonButtonLabel>
           <CommonButtonLabel as="span" class="text-right">
-            <span v-if="isMerge">Merge</span>  <Switch
+            <span v-if="isMerge">Merge</span>
+            <Switch
               v-model="isMerge"
               :class="isMerge ? 'bg-blue-900' : 'bg-gray-500'"
               class="relative inline-flex h-4 w-10 items-center rounded-full align-middle"
@@ -645,9 +664,10 @@ const mergeLimitExceeds = computed(() => {
     const exceeds = amountVal.add(mergeTokenInfo.value?.balance).gt(mergeTokenInfo.value?.depositLimit);
     console.log("exceeds: ", exceeds);
     return mergeSupported.value && isMerge.value && exceeds;
-  } catch (e) { // may throw exception when amount exceeds decimals
+  } catch (e) {
+    // may throw exception when amount exceeds decimals
     return false;
-}
+  }
 });
 
 const transaction = computed<
@@ -913,18 +933,24 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
   top: -30px;
 }
 
-.okx-tips {
+.cryptopeida-tips {
   position: relative;
   padding: 16px;
   border-radius: 8px;
   border: 1px solid #262b33;
   background: #000;
-  background-image: url("/img/okx-tips-bg.svg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  &.okx-cryptopeida {
+    background-image: url("/img/okx-tips-bg.svg");
+  }
 
-  .okx-tips-cover {
+  &.binance-cryptopeida {
+    background-image: url("/img/okx-tips-bg.svg");
+  }
+
+  .cryptopeida-tips-cover {
     content: "";
     position: absolute;
     top: 0;
@@ -974,13 +1000,13 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
   border-radius: 16px;
   background: rgba(23, 85, 244, 0.25) !important;
 }
-.showTip:hover{
-  .tooltip{
+.showTip:hover {
+  .tooltip {
     display: block;
     z-index: 100;
   }
 }
-.tooltip{
+.tooltip {
   display: none;
   position: absolute;
   padding: 12px 20px 12px 24px;
@@ -988,9 +1014,9 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
   width: 35rem;
   left: -10rem;
   border-radius: 8px;
-  background: #1F2127;
-  a{
-    color: #1755F4;
+  background: #1f2127;
+  a {
+    color: #1755f4;
   }
 }
 </style>

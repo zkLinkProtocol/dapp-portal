@@ -1,3 +1,4 @@
+import { MERGE_TOKENS } from "./../../utils/constants";
 import { getPublicClient } from "@wagmi/core";
 import { BigNumber, ethers, VoidSigner } from "ethers";
 import { $fetch } from "ofetch";
@@ -13,6 +14,7 @@ import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncTokensStore } from "@/store/zksync/tokens";
 import { L1Signer, L1VoidSigner, Web3Provider } from "@/zksync-web3-nova/src";
+
 export const useZkSyncWalletStore = defineStore("zkSyncWallet", () => {
   const onboardStore = useOnboardStore();
   const providerStore = useZkSyncProviderStore();
@@ -91,7 +93,7 @@ export const useZkSyncWalletStore = defineStore("zkSyncWallet", () => {
     await Promise.all([requestAccountState({ force: true }), tokensStore.requestTokens()]);
     if (!accountState.value) throw new Error("Account state is not available");
     if (!tokens.value) throw new Error("Tokens are not available");
-    return Object.entries(accountState.value.balances)
+    const accountBalances = Object.entries(accountState.value.balances)
       .filter(([, { token }]) => token)
       .map(([, { balance, token }]) => {
         return {
@@ -103,6 +105,21 @@ export const useZkSyncWalletStore = defineStore("zkSyncWallet", () => {
           amount: balance,
         };
       });
+    //add merge tokens
+    for (const token of MERGE_TOKENS) {
+      const find = accountBalances.find((item) => item.address.toLowerCase() === token.address.toLowerCase());
+      if (!find) {
+        accountBalances.push({
+          address: token.address,
+          l1Address: undefined,
+          name: token!.symbol || undefined,
+          symbol: token!.symbol!,
+          decimals: token!.decimals,
+          amount: "0",
+        });
+      }
+    }
+    return accountBalances;
   };
   const getBalancesFromRPC = async (): Promise<TokenAmount[]> => {
     await tokensStore.requestTokens();
@@ -158,7 +175,8 @@ export const useZkSyncWalletStore = defineStore("zkSyncWallet", () => {
 
   const deductBalance = (tokenAddress: string, amount: BigNumberish) => {
     if (!balance.value) return;
-    const tokenBalance = balance.value.find((balance) => balance.address === tokenAddress);
+    const index = balance.value.findIndex((balance) => balance.address === tokenAddress);
+    const tokenBalance = balance.value[index];
     if (!tokenBalance) return;
     const newBalance = BigNumber.from(tokenBalance.amount).sub(amount);
     tokenBalance.amount = newBalance.isNegative() ? "0" : newBalance.toString();
