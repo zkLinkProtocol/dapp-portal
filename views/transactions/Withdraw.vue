@@ -286,14 +286,14 @@
           </CommonHeightTransition>
 
           <CommonHeightTransition
-            v-if="step === 'form'"
-            :opened="(!enoughAllowance && !continueButtonDisabled) || !!setAllowanceReceipt"
+            v-if="isMergeTokenSelected && step === 'form'"
+            :opened="( !enoughAllowance && !continueButtonDisabled) || !!setAllowanceReceipt"
           >
             <CommonCardWithLineButtons class="mt-4">
               <DestinationItem
                 v-if="enoughAllowance && setAllowanceReceipt"
                 as="div"
-                :description="`You can now proceed to deposit`"
+                :description="`You can now proceed to withdraw`"
               >
                 <template #label>
                   {{ selectedToken?.symbol }} allowance approved
@@ -327,10 +327,10 @@
                   </a>
                 </template>
                 <template #underline>
-                  Before depositing you need to give our deposit permission to spend specified amount of
+                  Before withdrawing you need to give our permission to spend specified amount of
                   {{ selectedToken?.symbol }}.
                   <span v-if="allowance && !allowance.isZero()"
-                    >You can deposit up to
+                    >You can withdraw up to
                     <CommonButtonLabel variant="light" @click="setAmountToCurrentAllowance()">
                       {{ parseTokenAmount(allowance!, selectedToken!.decimals) }}
                     </CommonButtonLabel>
@@ -352,7 +352,7 @@
           <TransactionFooter>
             <template #after-checks>
               <template v-if="step === 'form'">
-                <template v-if="!enoughAllowance && !continueButtonDisabled">
+                <template v-if="isMergeTokenSelected && !enoughAllowance && !continueButtonDisabled">
                   <CommonButton
                     type="submit"
                     :disabled="continueButtonDisabled || setAllowanceInProgress"
