@@ -265,13 +265,13 @@
               </template>
               <template #underline>
                 Please be aware that there are currently {{ mergeTokenLockedBalance }} {{ selectedToken?.symbol }}.{{
-                  selectedNetwork.l1Network?.name
+                  selectedNetwork.l1Network?.name.split(' ')[0]
                 }}
                 tokens locked in the
                 <a :href="MergeTokenContractUrl" target="_blacnk" class="underline underline-offset-2"
                   >token merge contract</a
                 >
-                . Therefore, the available withdrawal amount for merged USDC to Linea is {{ mergeTokenLockedBalance }}
+                . Therefore, the available withdrawal amount for merged USDC to {{ selectedNetwork.l1Network?.name }} is {{ mergeTokenLockedBalance }}
                 <p class="warnNote">
                   Note: All LRT points will continue to be calculated after you request a withdrawal. They will appear in the next few days in dashboard due to the data synchronization process.
                 </p>
@@ -286,14 +286,14 @@
           </CommonHeightTransition>
 
           <CommonHeightTransition
-            v-if="step === 'form'"
-            :opened="(!enoughAllowance && !continueButtonDisabled) || !!setAllowanceReceipt"
+            v-if="isMergeTokenSelected && step === 'form'"
+            :opened="( !enoughAllowance && !continueButtonDisabled) || !!setAllowanceReceipt"
           >
             <CommonCardWithLineButtons class="mt-4">
               <DestinationItem
                 v-if="enoughAllowance && setAllowanceReceipt"
                 as="div"
-                :description="`You can now proceed to deposit`"
+                :description="`You can now proceed to withdraw`"
               >
                 <template #label>
                   {{ selectedToken?.symbol }} allowance approved
@@ -327,10 +327,10 @@
                   </a>
                 </template>
                 <template #underline>
-                  Before depositing you need to give our deposit permission to spend specified amount of
+                  Before withdrawing you need to give our permission to spend specified amount of
                   {{ selectedToken?.symbol }}.
                   <span v-if="allowance && !allowance.isZero()"
-                    >You can deposit up to
+                    >You can withdraw up to
                     <CommonButtonLabel variant="light" @click="setAmountToCurrentAllowance()">
                       {{ parseTokenAmount(allowance!, selectedToken!.decimals) }}
                     </CommonButtonLabel>
@@ -352,7 +352,7 @@
           <TransactionFooter>
             <template #after-checks>
               <template v-if="step === 'form'">
-                <template v-if="!enoughAllowance && !continueButtonDisabled">
+                <template v-if="isMergeTokenSelected && !enoughAllowance && !continueButtonDisabled">
                   <CommonButton
                     type="submit"
                     :disabled="continueButtonDisabled || setAllowanceInProgress"
