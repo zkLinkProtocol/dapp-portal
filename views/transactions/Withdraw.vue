@@ -770,7 +770,7 @@ const { result: mergeTokenInfo, inProgress: mergeTokenInfoInProgress } = useMerg
 
 const mergeTokenWithdrawalLimitExceeds = computed(() => {
   try {
-    return totalComputeAmount.value.gt(mergeTokenInfo.value?.balance ?? 0n);
+    return isMergeTokenSelected.value && totalComputeAmount.value.gt(mergeTokenInfo.value?.balance ?? 0n);
   } catch (e) {
     // may throw exception when amount exceeds decimals
     return false;
