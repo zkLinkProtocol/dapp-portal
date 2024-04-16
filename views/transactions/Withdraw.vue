@@ -265,13 +265,13 @@
               </template>
               <template #underline>
                 Please be aware that there are currently {{ mergeTokenLockedBalance }} {{ selectedToken?.symbol }}.{{
-                  selectedNetwork.l1Network?.name
+                  selectedNetwork.l1Network?.name.split(' ')[0]
                 }}
                 tokens locked in the
                 <a :href="MergeTokenContractUrl" target="_blacnk" class="underline underline-offset-2"
                   >token merge contract</a
                 >
-                . Therefore, the available withdrawal amount for merged USDC to Linea is {{ mergeTokenLockedBalance }}
+                . Therefore, the available withdrawal amount for merged USDC to {{ selectedNetwork.l1Network?.name }} is {{ mergeTokenLockedBalance }}
                 <p class="warnNote">
                   Note: All LRT points will continue to be calculated after you request a withdrawal. They will appear in the next few days in dashboard due to the data synchronization process.
                 </p>
