@@ -54,6 +54,7 @@
             :balances="availableBalances"
             :max-amount="maxAmount"
             :loading="tokensRequestInProgress || balanceInProgress"
+            :merge-withdrawal-limit-exceeds="mergeTokenWithdrawalLimitExceeds"
           >
             <template #token-dropdown-bottom v-if="type === 'withdrawal' && account.address">
               <CommonAlert class="sticky bottom-0 mt-3" variant="neutral" :icon="InformationCircleIcon">
@@ -175,11 +176,11 @@
             class="mb-block-padding-1/2 sm:mb-block-gap"
           >
             <p v-if="withdrawalManualFinalizationRequired">
-              You will be able to claim your withdrawal only after a {{WITHDRAWAL_DELAY_DAYS}}-day withdrawal delay.
+              You will be able to claim your withdrawal only after a {{ WITHDRAWAL_DELAY_DAYS }}-day withdrawal delay.
               <!-- <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">Learn more</a> -->
             </p>
             <p v-else>
-              You will receive funds only after a {{WITHDRAWAL_DELAY_DAYS}}-day withdrawal delay.
+              You will receive funds only after a {{ WITHDRAWAL_DELAY_DAYS }}-day withdrawal delay.
               <!-- <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">Learn more</a> -->
             </p>
           </CommonAlert>
@@ -216,8 +217,12 @@
         </template>
 
         <template v-if="!tokenCustomBridge && (step === 'form' || step === 'confirm')">
-          <CommonErrorBlock v-if="feeError" class="mt-2" @try-again="estimate">
-            Fee estimation error: {{ feeError.message }}
+          <CommonErrorBlock
+            v-if="feeError"
+            class="mt-2"
+            @try-again="isMergeTokenSelected ? estiamteForMergeToken : estimate"
+          >
+           Fee estimation error: {{ feeError.message }}
           </CommonErrorBlock>
           <div class="mt-4 flex items-center gap-4">
             <transition v-bind="TransitionOpacity()">
@@ -252,10 +257,24 @@
             </CommonAlert>
           </transition>
 
-          <DestinationItem v-if="isMergeTokenSelected" as="div">
-              <template #label> Withdrawal of Merged Tokens </template>
+          <CommonHeightTransition v-if="step === 'form'" :opened="enoughAllowance && isMergeTokenSelected">
+            <CommonCardWithLineButtons class="mt-4">
+            <DestinationItem as="div">
+              <template #label>
+                Withdrawal of Merged {{ selectedToken?.symbol }} to {{ selectedNetwork.l1Network?.name }}
+              </template>
               <template #underline>
-                The zkLink Nova Portal currently doesn't facilitate withdrawing merged tokens. You can redeem your merged tokens back to the source token at https://zklink.io/merge/ and then proceed with the withdrawal.
+                Please be aware that there are currently {{ mergeTokenLockedBalance }} {{ selectedToken?.symbol }}.{{
+                  selectedNetwork.l1Network?.name
+                }}
+                tokens locked in the
+                <a :href="MergeTokenContractUrl" target="_blacnk" class="underline underline-offset-2"
+                  >token merge contract</a
+                >
+                . Therefore, the available withdrawal amount for merged USDC to Linea is {{ mergeTokenLockedBalance }}
+                <p class="warnNote">
+                  Note: All LRT points will continue to be calculated after you request a withdrawal. They will appear in the next few days in dashboard due to the data synchronization process.
+                </p>
               </template>
               <template #image>
                 <div class="aspect-square h-full w-full rounded-full bg-warning-400 p-3 text-black">
@@ -263,19 +282,111 @@
                 </div>
               </template>
             </DestinationItem>
+          </CommonCardWithLineButtons>
+          </CommonHeightTransition>
+
+          <CommonHeightTransition
+            v-if="step === 'form'"
+            :opened="(!enoughAllowance && !continueButtonDisabled) || !!setAllowanceReceipt"
+          >
+            <CommonCardWithLineButtons class="mt-4">
+              <DestinationItem
+                v-if="enoughAllowance && setAllowanceReceipt"
+                as="div"
+                :description="`You can now proceed to deposit`"
+              >
+                <template #label>
+                  {{ selectedToken?.symbol }} allowance approved
+                  <a
+                    v-if="selectedNetwork"
+                    :href="`${selectedNetwork.blockExplorerUrl}/tx/${setAllowanceReceipt.transactionHash}`"
+                    target="_blank"
+                    class="inline-flex items-center gap-1 underline underline-offset-2"
+                  >
+                    View on Explorer
+                    <ArrowTopRightOnSquareIcon class="h-6 w-6" aria-hidden="true" />
+                  </a>
+                </template>
+                <template #image>
+                  <div class="aspect-square h-full w-full rounded-full bg-success-400 p-3 text-black">
+                    <CheckIcon aria-hidden="true" />
+                  </div>
+                </template>
+              </DestinationItem>
+              <DestinationItem v-else as="div">
+                <template #label>
+                  Approve {{ selectedToken?.symbol }} allowance
+                  <a
+                    v-if="selectedNetwork.blockExplorerUrl && setAllowanceTransactionHash"
+                    :href="`${selectedNetwork.blockExplorerUrl}/tx/${setAllowanceTransactionHash}`"
+                    target="_blank"
+                    class="inline-flex items-center gap-1 underline underline-offset-2"
+                  >
+                    View on Explorer
+                    <ArrowTopRightOnSquareIcon class="h-6 w-6" aria-hidden="true" />
+                  </a>
+                </template>
+                <template #underline>
+                  Before depositing you need to give our deposit permission to spend specified amount of
+                  {{ selectedToken?.symbol }}.
+                  <span v-if="allowance && !allowance.isZero()"
+                    >You can deposit up to
+                    <CommonButtonLabel variant="light" @click="setAmountToCurrentAllowance()">
+                      {{ parseTokenAmount(allowance!, selectedToken!.decimals) }}
+                    </CommonButtonLabel>
+                    {{ selectedToken!.symbol }} without approving a new allowance.
+                  </span>
+                  <CommonButtonLabel variant="light" as="a" :href="TOKEN_ALLOWANCE" target="_blank">
+                    Learn more
+                  </CommonButtonLabel>
+                </template>
+                <template #image>
+                  <div class="aspect-square h-full w-full rounded-full bg-warning-400 p-3 text-black">
+                    <LockClosedIcon aria-hidden="true" />
+                  </div>
+                </template>
+              </DestinationItem>
+            </CommonCardWithLineButtons>
+          </CommonHeightTransition>
 
           <TransactionFooter>
             <template #after-checks>
-              <CommonButton
-                v-if="step === 'form'"
-                type="submit"
-                :disabled="continueButtonDisabled"
-                variant="primary"
-                class="w-full"
-                @click="buttonContinue()"
-              >
-                {{ isMergeTokenSelected ? "Redeem Now" : "Continue" }}
-              </CommonButton>
+              <template v-if="step === 'form'">
+                <template v-if="!enoughAllowance && !continueButtonDisabled">
+                  <CommonButton
+                    type="submit"
+                    :disabled="continueButtonDisabled || setAllowanceInProgress"
+                    variant="primary"
+                    class="w-full"
+                    @click="setTokenAllowance()"
+                  >
+                    <transition v-bind="TransitionPrimaryButtonText" mode="out-in">
+                      <span v-if="setAllowanceStatus === 'processing'">Processing...</span>
+                      <span v-else-if="setAllowanceStatus === 'waiting-for-signature'"
+                        >Waiting for allowance approval confirmation</span
+                      >
+                      <span class="flex items-center" v-else-if="setAllowanceStatus === 'sending'">
+                        <CommonSpinner class="mr-2 h-6 w-6" />
+                        Approving allowance...
+                      </span>
+                      <span v-else>Approve {{ selectedToken?.symbol }} allowance</span>
+                    </transition>
+                  </CommonButton>
+                  <TransactionButtonUnderlineConfirmTransaction
+                    :opened="setAllowanceStatus === 'waiting-for-signature'"
+                  />
+                </template>
+                <CommonButton
+                  v-else
+                  type="submit"
+                  :disabled="continueButtonDisabled"
+                  variant="primary"
+                  class="w-full"
+                  @click="buttonContinue()"
+                >
+                  {{ "Continue" }}
+                </CommonButton>
+              </template>
               <template v-else-if="step === 'confirm'">
                 <transition v-bind="TransitionAlertScaleInOutTransition">
                   <div v-if="!enoughBalanceForTransaction" class="mb-4">
@@ -322,7 +433,10 @@
             </DestinationIconContainer>
           </template>
         </DestinationItem>
-        <ArrowTopRightOnSquareIcon class="transaction-hash-button-icon w-6 absolute top-11 right-8 text-slate-400" aria-hidden="true" />
+        <ArrowTopRightOnSquareIcon
+          class="transaction-hash-button-icon absolute right-8 top-11 w-6 text-slate-400"
+          aria-hidden="true"
+        />
       </CommonCardWithLineButtons>
     </div>
   </div>
@@ -331,12 +445,19 @@
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 
-import { ArrowTopRightOnSquareIcon, ExclamationTriangleIcon, InformationCircleIcon, LockClosedIcon } from "@heroicons/vue/24/outline";
+import {
+  ArrowTopRightOnSquareIcon,
+  ExclamationTriangleIcon,
+  InformationCircleIcon,
+  LockClosedIcon,
+} from "@heroicons/vue/24/outline";
 import { useRouteQuery } from "@vueuse/router";
 import { BigNumber } from "ethers";
 import { isAddress } from "ethers/lib/utils";
 import { storeToRefs } from "pinia";
 
+import useAllowance from "@/composables/transaction/useAllowance";
+import useMergeToken from "@/composables/transaction/useMergeToken";
 import useInterval from "@/composables/useInterval";
 import useNetworks from "@/composables/useNetworks";
 import useFee from "@/composables/zksync/useFee";
@@ -348,10 +469,12 @@ import type { TransactionInfo } from "@/store/zksync/transactionStatus";
 import type { Token, TokenAmount } from "@/types";
 import type { BigNumberish } from "ethers";
 import type { PropType } from "vue";
+import type { FunctionalComponent } from "vue";
 
 import { useRoute, useRouter } from "#app";
 import { customBridgeTokens } from "@/data/customBridgeTokens";
 import { useDestinationsStore } from "@/store/destinations";
+import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
 import { usePreferencesStore } from "@/store/preferences";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
@@ -360,17 +483,15 @@ import { WITHDRAWAL_DELAY } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransfersHistoryStore } from "@/store/zksync/transfersHistory";
 import { useZkSyncWalletStore } from "@/store/zksync/wallet";
-import { ETH_TOKEN, WITHDRAWAL_DELAY_DAYS, isMergeToken } from "@/utils/constants";
+import { ETH_TOKEN, isMergeToken, MergeTokenContractUrl, WITHDRAWAL_DELAY_DAYS } from "@/utils/constants";
 import { ZKSYNC_WITHDRAWAL_DELAY } from "@/utils/doc-links";
-import { checksumAddress, decimalToBigNumber, formatRawTokenPrice } from "@/utils/formatters";
+import { checksumAddress, decimalToBigNumber, formatRawTokenPrice, parseTokenAmount } from "@/utils/formatters";
 import { calculateFee } from "@/utils/helpers";
 import { silentRouterChange } from "@/utils/helpers";
 import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/transitions";
 import TransferSubmitted from "@/views/transactions/TransferSubmitted.vue";
 import WithdrawalSubmitted from "@/views/transactions/WithdrawalSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
-import { useNetworkStore } from "@/store/network";
-import type { FunctionalComponent } from "vue";
 const showBridge = true;
 const chainList = [
   // {
@@ -384,20 +505,20 @@ const chainList = [
   //   "discordUrl": "https://discord.com/invite/YHgDSJ42eG"
   // },
   {
-    "name": "Owlto Finance",
-    "description": "https://owlto.finance/",
-    "logo": "owlto.svg",
-    "bannerImg": "owlto.jpeg",
-    "type": "Infra",
-    "url": "https://owlto.finance/",
-    "tiwwerUrl": "https://twitter.com/Owlto_Finance",
-    "discordUrl": "https://discord.com/invite/owlto",
-    "status": "Live"
-  }
-]
+    name: "Owlto Finance",
+    description: "https://owlto.finance/",
+    logo: "owlto.svg",
+    bannerImg: "owlto.jpeg",
+    type: "Infra",
+    url: "https://owlto.finance/",
+    tiwwerUrl: "https://twitter.com/Owlto_Finance",
+    discordUrl: "https://discord.com/invite/owlto",
+    status: "Live",
+  },
+];
 const thirdChainMethods = computed(() => {
   const methods: { props: Record<string, unknown>; icon?: FunctionalComponent }[] = [];
-    chainList.map((i) => {
+  chainList.map((i) => {
     const obj = {
       props: {
         iconUrl: `/img/${i.logo}`,
@@ -410,7 +531,7 @@ const thirdChainMethods = computed(() => {
     };
     methods.push(obj);
   });
-return methods;
+  return methods;
 });
 const props = defineProps({
   type: {
@@ -454,7 +575,7 @@ const availableTokens = computed(() => {
   if (!tokens.value) return [];
   if (props.type === "withdrawal") {
     return Object.values(tokens.value).filter((e) => {
-      if(isMergeToken(e.address)) {
+      if (isMergeToken(e.address)) {
         return true;
       }
       if (!e.l1Address) {
@@ -475,7 +596,7 @@ const availableBalances = computed(() => {
   if (props.type === "withdrawal") {
     if (!tokens.value) return [];
     return balance.value.filter((e) => {
-      if(isMergeToken(e.address)) {
+      if (isMergeToken(e.address)) {
         return true;
       }
       if (!e.l1Address) {
@@ -530,6 +651,7 @@ const selectedToken = computed<Token | undefined>(() => {
   }
   return res;
 });
+
 const tokenCustomBridge = computed(() => {
   if (props.type !== "withdrawal" && selectedToken.value) {
     return undefined;
@@ -628,6 +750,40 @@ const enoughBalanceForTransaction = computed(() => {
   return BigNumber.from(tokenBalance.value).gte(totalToPay);
 });
 
+const isMergeTokenSelected = computed(() => {
+  return isMergeToken(selectedToken.value?.address ?? "");
+});
+
+const mergeTokenL2Address = computed(() => {
+  if (isMergeTokenSelected.value) {
+    const token = availableTokens.value?.find(
+      (item) => item.symbol === selectedToken.value?.symbol && item.networkKey === selectedNetwork.value.key
+    );
+    if (token) {
+      return token?.l2Address;
+    }
+  }
+  return undefined;
+});
+
+const { result: mergeTokenInfo, inProgress: mergeTokenInfoInProgress } = useMergeToken(mergeTokenL2Address);
+
+const mergeTokenWithdrawalLimitExceeds = computed(() => {
+  try {
+    return isMergeTokenSelected.value && totalComputeAmount.value.gt(mergeTokenInfo.value?.balance ?? 0n);
+  } catch (e) {
+    // may throw exception when amount exceeds decimals
+    return false;
+  }
+});
+
+const mergeTokenLockedBalance = computed(() => {
+  if (!mergeTokenInfo.value || !selectedToken.value) {
+    return 0;
+  }
+  return parseTokenAmount(mergeTokenInfo.value?.balance, selectedToken.value.decimals);
+});
+
 const transaction = computed<
   | {
       type: FeeEstimationParams["type"];
@@ -641,10 +797,12 @@ const transaction = computed<
   if (!toAddress || !selectedToken.value) {
     return undefined;
   }
+  let tokenAddress = mergeTokenL2Address.value ? mergeTokenL2Address.value : selectedToken.value.address;
   return {
     type: props.type,
     token: {
       ...selectedToken.value!,
+      address: tokenAddress,
       amount: totalComputeAmount.value.toString(),
     },
     from: {
@@ -666,14 +824,61 @@ const withdrawalManualFinalizationRequired = computed(() => {
   );
 });
 
-const isMergeTokenSelected = computed(() => {
-  return isMergeToken(selectedToken.value?.address ?? "")
-})
+const getPublicClient = () => onboardStore.getPublicClient(selectedNetwork.value.id);
+const getWallet = () => onboardStore.getWallet(selectedNetwork.value.id);
+const {
+  result: allowance,
+  inProgress: allowanceRequestInProgress,
+  error: allowanceRequestError,
+  requestAllowance,
+
+  setAllowanceTransactionHash,
+  setAllowanceReceipt,
+  setAllowanceStatus,
+  setAllowanceInProgress,
+  setAllowanceError,
+  setAllowance,
+  resetSetAllowance,
+} = useAllowance(
+  computed(() => account.value.address),
+  computed(() => selectedToken.value?.address),
+  async () => (await providerStore.requestProvider().getDefaultBridgeAddresses()).erc20L2,
+  getWallet,
+  getPublicClient
+);
+
+const enoughAllowance = computed(() => {
+  if (!allowance.value || !selectedToken.value) {
+    return true;
+  }
+  return !allowance.value.isZero() && allowance.value.gte(totalComputeAmount.value);
+});
+const setAmountToCurrentAllowance = () => {
+  if (!allowance.value || !selectedToken.value) {
+    return;
+  }
+  amount.value = parseTokenAmount(allowance.value, selectedToken.value.decimals);
+};
+const setTokenAllowance = async () => {
+  await setAllowance(totalComputeAmount.value);
+  await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for balances to be updated on API side
+  await fetchBalances(true);
+};
 
 const feeLoading = computed(() => feeInProgress.value || (!fee.value && balanceInProgress.value));
+const mergeTokenAllowanceEnough = computed(() => {
+  return (
+    isMergeTokenSelected.value &&
+    allowance.value &&
+    !allowance.value.isZero() &&
+    allowance.value.gte(totalComputeAmount.value)
+  );
+});
+
 const estimate = async () => {
   // estimation fails when token balance is 0
   if (
+    isMergeTokenSelected.value ||
     !transaction.value?.from.address ||
     !transaction.value?.to.address ||
     !selectedToken.value ||
@@ -682,15 +887,30 @@ const estimate = async () => {
   ) {
     return;
   }
-  // skip estimate for merge token
-  if (isMergeTokenSelected.value) {
+  await estimateFee({
+    type: props.type,
+    from: transaction.value.from.address,
+    to: transaction.value.to.address,
+    tokenAddress: transaction.value.token.address,
+    isMergeToken: isMergeTokenSelected.value,
+  });
+};
+
+const estiamteForMergeToken = async () => {
+  if (
+    !transaction.value?.from.address ||
+    !transaction.value?.to.address ||
+    !tokenBalance.value ||
+    selectedTokenZeroBalance.value
+  ) {
     return;
   }
   await estimateFee({
     type: props.type,
     from: transaction.value.from.address,
     to: transaction.value.to.address,
-    tokenAddress: selectedToken.value.address,
+    tokenAddress: transaction.value.token.address,
+    isMergeToken: isMergeTokenSelected.value,
   });
 };
 watch(
@@ -698,6 +918,17 @@ watch(
   () => {
     resetFee();
     estimate();
+  },
+  { immediate: true }
+);
+
+watch(
+  [() => mergeTokenAllowanceEnough.value],
+  () => {
+    if (mergeTokenAllowanceEnough.value) {
+      resetFee();
+      estiamteForMergeToken();
+    }
   },
   { immediate: true }
 );
@@ -720,9 +951,8 @@ watch(
 );
 
 const continueButtonDisabled = computed(() => {
-  if(isMergeTokenSelected.value) {
-    return false;
-  }
+  if (mergeTokenWithdrawalLimitExceeds.value) return true;
+  if ((allowanceRequestInProgress.value && !allowance.value) || allowanceRequestError.value) return true;
   if (
     !isAddressInputValid.value ||
     !transaction.value ||
@@ -733,6 +963,7 @@ const continueButtonDisabled = computed(() => {
   ) {
     return true;
   }
+  if (!enoughAllowance.value) return false;
   if (feeLoading.value || !fee.value) return true;
   return false;
 });
@@ -740,8 +971,7 @@ const buttonContinue = () => {
   if (continueButtonDisabled.value) {
     return;
   }
-  if (isMergeTokenSelected.value) {
-    window.open("https://zklink.io/merge", "_blank");
+  if (mergeTokenWithdrawalLimitExceeds.value) {
     return;
   }
   if (step.value === "form") {
@@ -785,6 +1015,7 @@ const makeTransaction = async () => {
       to: transaction.value!.to.address,
       tokenAddress: transaction.value!.token.address,
       amount: transaction.value!.token.amount,
+      isMergeToken: isMergeTokenSelected.value,
     },
     {
       gasLimit: gasLimit.value!,
@@ -826,6 +1057,8 @@ const makeTransaction = async () => {
         query: { network: eraNetwork.value.key },
       }).href
     );
+    await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for balances to be updated on API side
+    await fetchBalances(true);
     waitForCompletion(transactionInfo.value)
       .then(async (completedTransaction) => {
         transactionInfo.value = completedTransaction;
@@ -876,29 +1109,35 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
-
-.warnBox1{
+.warnBox1 {
   display: flex;
-  a{
-    color: #0BC48F;
+  a {
+    color: #0bc48f;
   }
 }
-.warnBox{
-  display: inline-flex;
-  padding: 0 0 16px 0;
-  justify-content: center;
-  color: #F29914;
+.warnNote {
+  color: #f29914;
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
   line-height: normal;
-  img{
+}
+.warnBox {
+  display: inline-flex;
+  padding: 0 0 16px 0;
+  justify-content: center;
+  color: #f29914;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  img {
     width: 21px;
     height: 21px;
     margin-right: 5px;
   }
-  a{
-    color: #0BC48F;
+  a {
+    color: #0bc48f;
   }
 }
 </style>

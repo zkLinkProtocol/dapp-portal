@@ -820,6 +820,7 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
     async withdraw(transaction: {
       token: Address;
       amount: BigNumberish;
+      isMergeToken?: boolean;
       to?: Address;
       bridgeAddress?: Address;
       overrides?: ethers.Overrides;

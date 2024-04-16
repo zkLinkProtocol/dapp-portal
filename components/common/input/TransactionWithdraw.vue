@@ -56,6 +56,9 @@
               <template v-else-if="amountError === 'exceeds_merge_limit'">
                 Input amount exceeds the merge limit.
               </template>
+              <template v-else-if="amountError === 'exceeds_merge_withdrawal_limit'">
+                The input amount exceeds the {{ selectedToken.symbol }}.{{ selectedNetwork.l1Network?.name }} amount locked in the <a :href="MergeTokenContractUrl" target="_blank" class="underline underline-offset-2">merge token contract.</a>  Consider withdrawing to another network or reducing the input.
+              </template>
               <template v-else-if="amountError === 'exceeds_max_amount' || amountError === 'exceeds_balance'">
                 Max amount is
                 <button
@@ -112,6 +115,7 @@ import type { PropType } from "vue";
 import { useNetworkStore } from "@/store/network";
 import { decimalToBigNumber, formatTokenPrice, parseTokenAmount, removeSmallAmountPretty } from "@/utils/formatters";
 import { ETH_ADDRESS, L2_ETH_TOKEN_ADDRESS } from "~/zksync-web3-nova/src/utils";
+import { MergeTokenContractUrl } from '@/utils/constants'
 const { selectedNetwork } = storeToRefs(useNetworkStore());
 const props = defineProps({
   modelValue: {
@@ -149,6 +153,10 @@ const props = defineProps({
     default: false,
   },
   mergeLimitExceeds: {
+    type: Boolean,
+    default: false
+  },
+  mergeWithdrawalLimitExceeds: {
     type: Boolean,
     default: false
   }
@@ -225,6 +233,9 @@ const setMaxAmount = () => {
 const amountError = computed(() => {
   if(props.mergeLimitExceeds) {
     return 'exceeds_merge_limit'
+  }
+  if(props.mergeWithdrawalLimitExceeds) {
+    return 'exceeds_merge_withdrawal_limit'
   }
   if (!selectedToken.value) return;
   if (tokenBalance.value && totalComputeAmount.value.gt(tokenBalance.value.amount)) {

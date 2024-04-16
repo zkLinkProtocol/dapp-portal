@@ -15,6 +15,7 @@ export type FeeEstimationParams = {
   from: string;
   to: string;
   tokenAddress: string;
+  isMergeToken?: boolean;
 };
 
 export default (
@@ -66,6 +67,7 @@ export default (
             to: params.to,
             token: params.tokenAddress === ETH_TOKEN.address ? ETH_TOKEN.l1Address! : params.tokenAddress,
             amount: "1",
+            isMergeToken: params.isMergeToken,
           });
         }),
       ]);
