@@ -242,6 +242,11 @@
           Allowance approval error: {{ setAllowanceError.message }}
         </CommonErrorBlock>
         <CommonHeightTransition
+          v-if="step === 'form'">
+          
+        </CommonHeightTransition>
+
+        <CommonHeightTransition
           v-if="step === 'form'"
           :opened="(!enoughAllowance && !continueButtonDisabled) || !!setAllowanceReceipt"
         >
@@ -408,6 +413,7 @@ import EthereumTransactionFooter from "@/components/transaction/EthereumTransact
 import useAllowance from "@/composables/transaction/useAllowance";
 import useMergeToken from "@/composables/transaction/useMergeToken";
 import useInterval from "@/composables/useInterval";
+import useNetworks from "@/composables/useNetworks";
 import useEcosystemBanner from "@/composables/zksync/deposit/useEcosystemBanner";
 import useFee from "@/composables/zksync/deposit/useFee";
 import useTransaction from "@/composables/zksync/deposit/useTransaction";
@@ -455,6 +461,7 @@ const { destinations } = storeToRefs(useDestinationsStore());
 const { l1BlockExplorerUrl, selectedNetwork } = storeToRefs(useNetworkStore());
 const { l1Tokens, tokensRequestInProgress, tokensRequestError } = storeToRefs(tokensStore);
 const { balance, balanceInProgress, balanceError } = storeToRefs(zkSyncEthereumBalance);
+const { zkSyncNetworks } = useNetworks();
 
 const toNetworkModalOpened = ref(false);
 const fromNetworkModalOpened = ref(false);
@@ -514,6 +521,21 @@ const selectedToken = computed<Token | undefined>(() => {
   }
   return res;
 });
+
+const isMNTSelected = computed(() => {
+  return selectedToken.value?.symbol === "MNT" && selectedNetwork.value.key === "mantle";
+});
+
+const isWETHSelected = computed(() => {
+  let weths: string[] = [];
+  zkSyncNetworks.forEach((item) => {
+    if (item.wethContract) {
+      weths = weths.concat(item.wethContract.map(e => e.toLowerCase()));
+    }
+  });
+  return selectedToken.value?.address && weths.some(item => item === selectedToken.value?.address.toLowerCase());
+});
+
 const tokenCustomBridge = computed(() => {
   if (!selectedToken.value) {
     return undefined;
