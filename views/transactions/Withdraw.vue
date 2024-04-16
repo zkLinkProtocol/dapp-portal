@@ -841,7 +841,7 @@ const {
   resetSetAllowance,
 } = useAllowance(
   computed(() => account.value.address),
-  computed(() => mergeTokenL2Address.value),
+  computed(() => selectedToken.value?.address),
   async () => (await providerStore.requestProvider().getDefaultBridgeAddresses()).erc20L2,
   getWallet,
   getPublicClient
@@ -1057,7 +1057,8 @@ const makeTransaction = async () => {
         query: { network: eraNetwork.value.key },
       }).href
     );
-    setTokenAllowance()
+    await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for balances to be updated on API side
+    await fetchBalances(true);
     waitForCompletion(transactionInfo.value)
       .then(async (completedTransaction) => {
         transactionInfo.value = completedTransaction;
