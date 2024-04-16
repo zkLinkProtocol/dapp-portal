@@ -27,14 +27,8 @@
     <div class="mb-[10px]" v-else-if="route.query?.s === 'binance'">
       <!-- <img src="/img/okx-cryptopedia.svg" class="h-[64px] w-[64px] rounded-[8px]" /> -->
       <div class="z-2">
-        <a
-          href="https://www.okx.com/web3/discover/cryptopedia/event/28"
-          target="_blank"
-          class="z-2 relative cursor-pointer"
-        >
-          <img src="/img/banner-binance@2x.png" class="block w-full hidden md:block" />
-          <img src="/img/banner-binance-mobile@2x.png" class="block w-full block md:hidden" />
-        </a>
+        <img src="/img/banner-binance@2x.png" class="block hidden w-full md:block" />
+        <img src="/img/banner-binance-mobile@2x.png" class="block block w-full md:hidden" />
       </div>
     </div>
 
