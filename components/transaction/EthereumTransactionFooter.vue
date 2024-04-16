@@ -62,6 +62,9 @@
             Change wallet network to {{ l1Network.name }}
           </slot>
         </CommonButton>
+        <template v-if="connectorName === 'WalletConnect'">
+          <CommonButtonUnderlineText :opened="!!walletName?.includes('Binance')">If you're using the Binance Web3 Wallet, please update it to the newest version.</CommonButtonUnderlineText>
+        </template>
       </template>
       <template v-else>
         <CommonButton disabled variant="primary" class="w-full">
