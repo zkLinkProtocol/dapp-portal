@@ -169,6 +169,14 @@ const getl1NetworkName = () => {
         from: eraNetwork.value.name,
         to: eraNetwork.value.name,
       };
+    } else if (type === "withdrawal") {
+      const newNetwork = zkSyncNetworks.find(
+        (item) => item.key && item.key.toLowerCase() === props.transfer.token?.networkKey?.toLowerCase()
+      );
+      return {
+        from: newNetwork?.l1Network?.name,
+        to: newNetwork?.l1Network?.name,
+      };
     } else {
       return {
         from: getNetworkInfo().l1Network?.name,
