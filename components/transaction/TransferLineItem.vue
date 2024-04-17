@@ -172,7 +172,7 @@ const getl1NetworkName = () => {
     } else if (type === "withdrawal") {
       const newNetwork = zkSyncNetworks.find(
         (item) => item.key && item.key.toLowerCase() === (props.transfer.token?.networkKey || 'primary').toLowerCase()
-      );
+      )
       return {
         from: newNetwork?.l1Network?.name,
         to: newNetwork?.l1Network?.name,
