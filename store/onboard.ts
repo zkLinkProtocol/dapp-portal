@@ -143,7 +143,7 @@ export const useOnboardStore = defineStore("onboard", () => {
       console.log("name--------------->", name);
     }
 
-    if (walletName.value.includes("Binance")) {
+    if (walletName.value?.includes("Binance")) {
       walletName.value = "Binance Web3 Wallet";
     }
 
