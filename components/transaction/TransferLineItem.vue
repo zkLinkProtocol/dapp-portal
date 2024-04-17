@@ -217,7 +217,9 @@ const transactionIcon = computed(() => {
   }
 });
 
-const timeAgo = useTimeAgo(props.transfer.timestamp);
+const timeAgo = computed(() => {
+  return useTimeAgo(props.transfer.timestamp).value.replace(/"/g, '');
+})
 </script>
 <style lang="scss" scoped>
 .chain-label-wrap {
