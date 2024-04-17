@@ -1,5 +1,10 @@
 name: CI
-on: [push]
+on:
+  pull_request:
+    branches:
+      - main
+      - preview
+      - dev
 
 jobs:
   build:
@@ -18,11 +23,11 @@ jobs:
 
       - name: Run Build Command
         run: |
-          if [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
+          if [[ ${{ github.event.pull_request.base.ref }} == 'main' ]]; then
             npm run generate:node:nexus
-          elif [[ ${{ github.ref }} == 'refs/heads/preview' ]]; then
+          elif [[ ${{ github.event.pull_request.base.ref }} == 'preview' ]]; then
             npm run generate:node:nexus
-          elif [[ ${{ github.ref }} == 'refs/heads/dev' ]]; then
+          elif [[ ${{ github.event.pull_request.base.ref }} == 'dev' ]]; then
             npm run generate:node:nexus-sepolia
           else
             echo "No specific build command for this branch."

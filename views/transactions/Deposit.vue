@@ -1,26 +1,34 @@
 <template>
   <div>
-    <div class="okx-tips mb-[10px]" v-if="route.query?.s === 'okx'">
-      <div class="okx-tips-cover"></div>
+    <div class="cryptopeida-tips okx-cryptopeida mb-[10px]" v-if="route.query?.s === 'okx'">
+      <div class="cryptopeida-tips-cover"></div>
       <!-- <img src="/img/okx-cryptopedia.svg" class="h-[64px] w-[64px] rounded-[8px]" /> -->
       <div class="z-2">
         <a
           href="https://www.okx.com/web3/discover/cryptopedia/event/28"
           target="_blank"
-          class="okx-tips-title z-2 relative flex cursor-pointer items-center gap-[4px]"
+          class="cryptopeida-tips-title z-2 relative flex cursor-pointer items-center gap-[4px]"
         >
           <span>OKX Cryptopedia</span>
           <img :src="launchIcon" />
         </a>
         <div class="mt-[5px]">
-          <p class="okx-tips-desc">
+          <p class="cryptopeida-tips-desc">
             Withdrawals from Nova are locked until April 14th, 10am UTC. During this time, you can use a third-party
             bridge to withdraw your assets.
           </p>
-          <p class="okx-tips-desc">
+          <p class="cryptopeida-tips-desc">
             Please wait a few minutes for deposits to arrive before verifying the task on OKX Cryptopedia.
           </p>
         </div>
+      </div>
+    </div>
+
+    <div class="mb-[10px]" v-else-if="route.query?.s === 'binance'">
+      <!-- <img src="/img/okx-cryptopedia.svg" class="h-[64px] w-[64px] rounded-[8px]" /> -->
+      <div class="z-2">
+        <img src="/img/banner-binance@2x.png" class="block hidden w-full md:block" />
+        <img src="/img/banner-binance-mobile@2x.png" class="block block w-full md:hidden" />
       </div>
     </div>
 
@@ -35,10 +43,6 @@
     >
       Confirm transaction
     </PageTitle>
-
-    <div class="warnBox flex" v-if="!route.query.s || route.query.s !== 'okx'">
-      <div>Note: Your funds will be locked for a max of 30 days during the campaign.</div>
-    </div>
 
     <NetworkSelectModal
       v-model:opened="fromNetworkModalOpened"
@@ -990,18 +994,20 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
   top: -30px;
 }
 
-.okx-tips {
+.cryptopeida-tips {
   position: relative;
   padding: 16px;
   border-radius: 8px;
   border: 1px solid #262b33;
   background: #000;
-  background-image: url("/img/okx-tips-bg.svg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  &.okx-cryptopeida {
+    background-image: url("/img/okx-tips-bg.svg");
+  }
 
-  .okx-tips-cover {
+  .cryptopeida-tips-cover {
     content: "";
     position: absolute;
     top: 0;
@@ -1061,7 +1067,7 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
   display: none;
   position: absolute;
   padding: 12px 20px 12px 24px;
-  top: -4.5rem;
+  top: -7.5rem;
   width: 35rem;
   left: -10rem;
   border-radius: 8px;

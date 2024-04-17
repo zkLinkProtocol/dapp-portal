@@ -44,7 +44,7 @@ export const getEstmatdDepositDelay = (networkKey: string): number => {
     return ESTIMATED_DEPOSIT_DELAY_SECONDARY;
   }
 };
-export const WITHDRAWAL_DELAY = 7 * 24 * 60 * 60 * 1000; // 7 * 24 hours
+export const WITHDRAWAL_DELAY = 14 * 24 * 60 * 60 * 1000; // 7 * 24 hours
 export type Address = Hash;
 export type ForwardL2Request = {
   gateway: Address;
