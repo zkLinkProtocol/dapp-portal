@@ -163,20 +163,26 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       );
     }
 
-    async depositMNT(amount: BigNumberish) {
+    async depositMNT(amount: BigNumberish, cb?: () => void) {
       const wmntContract = new ethers.Contract(WMNT_CONTRACT, WrappedMNTAbi, this._signerL1());
       const { hash } = await wmntContract.deposit({ value: amount });
+      if (cb) {
+        cb();
+      }
       const res = await this._providerL1().waitForTransaction(hash);
       console.log("approve mnt res: ", res);
     }
 
-    async unwrapWETH(token: Address, amount: BigNumberish) {
+    async unwrapWETH(token: Address, amount: BigNumberish, cb?: () => void) {
       const weths = await this._providerL2().getWETHContractAddress();
       if (!weths.map((item) => item.toLowerCase().includes(token.toLowerCase()))) {
         return;
       }
       const wethContract = new ethers.Contract(token, WethAbi, this._signerL1());
       const { hash } = await wethContract.withdraw(amount);
+      if (cb) {
+        cb();
+      }
       await this._providerL1().waitForTransaction(hash);
     }
 
@@ -193,19 +199,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       overrides?: ethers.PayableOverrides;
       approveOverrides?: ethers.Overrides;
     }): Promise<PriorityOpResponse> {
-      // handle mnt deposit
-      let isMntDeposit = false;
-      if (this._providerL2().isMantleChain() && transaction.token == ETH_ADDRESS) {
-        isMntDeposit = true;
-        await this.depositMNT(transaction.amount);
-        transaction.token = WMNT_CONTRACT;
-        transaction.approveERC20 = true;
-      }
-      const weths = await this._providerL2().getWETHContractAddress();
-      if (weths.map((item) => item.toLowerCase()).includes(transaction.token.toLowerCase())) {
-        await this.unwrapWETH(transaction.token, transaction.amount);
-        transaction.token = ETH_ADDRESS;
-      }
       const depositTx = await this.getDepositTx(transaction);
 
       if (transaction.token == ETH_ADDRESS) {
@@ -233,9 +226,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           const baseGasLimit = await this._providerL1().estimateGas(depositTx);
           const gasLimit = scaleGasLimit(baseGasLimit);
           depositTx.gasLimit = gasLimit;
-        }
-        if (depositTx.gasLimit && isMntDeposit) {
-          depositTx.gasLimit = depositTx.gasLimit.mul(2); // or the tx would fail
         }
 
         if (this._providerL2().isZkSyncChain()) {

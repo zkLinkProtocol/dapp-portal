@@ -241,14 +241,28 @@
         <CommonErrorBlock v-else-if="setAllowanceError" class="mt-2" @try-again="setTokenAllowance">
           Allowance approval error: {{ setAllowanceError.message }}
         </CommonErrorBlock>
-        <CommonHeightTransition
-          v-if="step === 'form'">
-          
+
+        <!--MNT and WETH Tips-->
+        <CommonHeightTransition v-if="step === 'form'" :opened="!!isMNTOrWETH">
+          <CommonCardWithLineButtons class="mt-4">
+            <DestinationItem as="div">
+              <template #label>
+                {{ warpTipsTitle }}
+              </template>
+              <template #underline> {{ warpTipsDesc }} </template>
+              <template #image>
+                <div class="aspect-square h-full w-full rounded-full bg-warning-400 p-3 text-black">
+                  <LockClosedIcon aria-hidden="true" />
+                </div>
+              </template>
+            </DestinationItem>
+          </CommonCardWithLineButtons>
         </CommonHeightTransition>
+        <!-- MNT and WETH Tips end-->
 
         <CommonHeightTransition
           v-if="step === 'form'"
-          :opened="(!enoughAllowance && !continueButtonDisabled) || !!setAllowanceReceipt"
+          :opened="((!enoughAllowance && !continueButtonDisabled) || !!setAllowanceReceipt) && !isMNTOrWETH.value"
         >
           <CommonCardWithLineButtons class="mt-4">
             <DestinationItem
@@ -338,6 +352,24 @@
                 />
               </template>
               <CommonButton
+                v-else-if="!!isMNTOrWETH"
+                type="submit"
+                :disabled="continueButtonDisabled || wrapStatus !== 'not-started'"
+                variant="primary"
+                class="w-full"
+                @click="buttonWrap()"
+              >
+                <transition v-bind="TransitionPrimaryButtonText" mode="out-in">
+                  <span v-if="wrapStatus === 'processing'">Processing...</span>
+                  <span v-else-if="wrapStatus === 'waiting-for-signature'">Waiting for confirmation</span>
+                  <span class="flex items-center" v-else-if="wrapStatus === 'sending'">
+                    <CommonSpinner class="mr-2 h-6 w-6" />
+                    {{ isMNTSelected ? "Wrapping..." : "Unwrapping..." }}
+                  </span>
+                  <span v-else> {{ wrapBtnText }}</span>
+                </transition>
+              </CommonButton>
+              <CommonButton
                 v-else
                 type="submit"
                 :disabled="continueButtonDisabled"
@@ -413,9 +445,9 @@ import EthereumTransactionFooter from "@/components/transaction/EthereumTransact
 import useAllowance from "@/composables/transaction/useAllowance";
 import useMergeToken from "@/composables/transaction/useMergeToken";
 import useInterval from "@/composables/useInterval";
-import useNetworks from "@/composables/useNetworks";
 import useEcosystemBanner from "@/composables/zksync/deposit/useEcosystemBanner";
 import useFee from "@/composables/zksync/deposit/useFee";
+import useMntAndWeth from "@/composables/zksync/deposit/useMntAndWeth";
 import useTransaction from "@/composables/zksync/deposit/useTransaction";
 
 import type { TransactionDestination } from "@/store/destinations";
@@ -442,7 +474,7 @@ import { checksumAddress, decimalToBigNumber, formatRawTokenPrice, parseTokenAmo
 import { silentRouterChange } from "@/utils/helpers";
 import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/transitions";
 import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
-import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
+import { ETH_ADDRESS, WMNT_CONTRACT } from "@/zksync-web3-nova/src/utils";
 
 // const okxIcon = "/img/okx-cryptopedia.svg";
 const launchIcon = "/img/launch.svg";
@@ -461,7 +493,6 @@ const { destinations } = storeToRefs(useDestinationsStore());
 const { l1BlockExplorerUrl, selectedNetwork } = storeToRefs(useNetworkStore());
 const { l1Tokens, tokensRequestInProgress, tokensRequestError } = storeToRefs(tokensStore);
 const { balance, balanceInProgress, balanceError } = storeToRefs(zkSyncEthereumBalance);
-const { zkSyncNetworks } = useNetworks();
 
 const toNetworkModalOpened = ref(false);
 const fromNetworkModalOpened = ref(false);
@@ -522,19 +553,8 @@ const selectedToken = computed<Token | undefined>(() => {
   return res;
 });
 
-const isMNTSelected = computed(() => {
-  return selectedToken.value?.symbol === "MNT" && selectedNetwork.value.key === "mantle";
-});
-
-const isWETHSelected = computed(() => {
-  let weths: string[] = [];
-  zkSyncNetworks.forEach((item) => {
-    if (item.wethContract) {
-      weths = weths.concat(item.wethContract.map(e => e.toLowerCase()));
-    }
-  });
-  return selectedToken.value?.address && weths.some(item => item === selectedToken.value?.address.toLowerCase());
-});
+const { isMNTSelected, isWETHSelected, isMNTOrWETH, warpTipsTitle, warpTipsDesc, wrapBtnText } =
+  useMntAndWeth(selectedToken);
 
 const tokenCustomBridge = computed(() => {
   if (!selectedToken.value) {
@@ -780,13 +800,24 @@ const buttonContinue = () => {
   }
 };
 
+const buttonWrap = () => {
+  if (continueButtonDisabled.value) {
+    return;
+  }
+  if (step.value === "form") {
+    makeTransactionWrap();
+  }
+};
+
 /* Transaction signing and submitting */
 const transfersHistoryStore = useZkSyncTransfersHistoryStore();
 const { previousTransactionAddress } = storeToRefs(usePreferencesStore());
 const {
+  wrapStatus,
   status: transactionStatus,
   error: transactionError,
   commitTransaction,
+  wrapTransaction,
 } = useTransaction(eraWalletStore.getL1Signer);
 const { recentlyBridged, ecosystemBannerVisible } = useEcosystemBanner();
 const { saveTransaction, waitForCompletion } = useZkSyncTransactionStatusStore();
@@ -862,11 +893,33 @@ const makeTransaction = async () => {
   }
 };
 
+const makeTransactionWrap = async () => {
+  if (continueButtonDisabled.value) return;
+
+  await wrapTransaction({
+    to: transaction.value!.to.address,
+    tokenAddress: transaction.value!.token.address,
+    amount: transaction.value!.token.amount,
+  });
+
+  if (wrapStatus.value === "done") {
+    if (isMNTSelected) {
+      selectedTokenAddress.value = WMNT_CONTRACT;
+    } else if (isWETHSelected) {
+      selectedTokenAddress.value = ETH_ADDRESS;
+    }
+    wrapStatus.value = "not-started";
+    fetchBalances(true).catch(() => undefined);
+    console.log("wrap done");
+  }
+};
+
 const resetForm = () => {
   address.value = "";
   amount.value = "";
   step.value = "form";
   transactionStatus.value = "not-started";
+  wrapStatus.value = "not-started";
   transactionInfo.value = undefined;
   resetSetAllowance();
   requestAllowance();
