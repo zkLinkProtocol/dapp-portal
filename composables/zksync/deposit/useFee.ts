@@ -70,6 +70,7 @@ export default (
         address: res.address,
         symbol: "MNT",
         decimals: res.decimals,
+        iconUrl: "/img/mantle.svg",
       };
     }
     return res;
