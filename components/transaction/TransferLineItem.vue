@@ -29,7 +29,7 @@
             <span>{{ chainsLabel.to }}</span
             >.
           </div>
-          <span v-else>{{ chainsLabel.from }} .</span>
+          <span v-else>{{ chainsLabel.from }}&nbsp</span>
         </template>
       </template>
       <span>{{ timeAgo }}</span>
@@ -168,6 +168,14 @@ const getl1NetworkName = () => {
       return {
         from: eraNetwork.value.name,
         to: eraNetwork.value.name,
+      };
+    } else if (type === "withdrawal") {
+      const newNetwork = zkSyncNetworks.find(
+        (item) => item.key && item.key.toLowerCase() === (props.transfer.token?.networkKey || 'primary').toLowerCase()
+      )
+      return {
+        from: newNetwork?.l1Network?.name,
+        to: newNetwork?.l1Network?.name,
       };
     } else {
       return {
