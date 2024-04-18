@@ -1,5 +1,5 @@
 import { getPublicClient } from "@wagmi/core";
-import { BigNumber, BigNumberish, BytesLike, Contract, ethers, utils } from "ethers";
+import { ethers } from "ethers";
 import { $fetch } from "ofetch";
 
 import useNetworks from "@/composables/useNetworks";
@@ -8,13 +8,11 @@ import type { ZkSyncNetwork } from "@/data/networks";
 import type { Api } from "@/types";
 import type { Config } from "@wagmi/core";
 
-import { nexusGoerliNode } from "@/data/networks";
 import { useDestinationsStore } from "@/store/destinations";
 import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncTransactionStatusStore, WITHDRAWAL_DELAY } from "@/store/zksync/transactionStatus";
-import { useZkSyncWalletStore } from "@/store/zksync/wallet";
 import { Provider } from "@/zksync-web3-nova/src";
 import { Wallet } from "@/zksync-web3-nova/src";
 
@@ -34,7 +32,7 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
   function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
-  const setStatus = async (obj: { transactionHash: any; status: string; gateway: string }) => {
+  const setStatus = async (obj: { transactionHash: ethers.utils.BytesLike; status: string; gateway: string }) => {
     const { primaryNetwork, zkSyncNetworks } = useNetworks();
 
     const getNetworkInfo = () => {
@@ -56,13 +54,16 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
         erc20BridgeL1: eraNetwork.erc20BridgeL1,
         erc20BridgeL2: eraNetwork.erc20BridgeL2,
         l1Gateway: eraNetwork.l1Gateway,
+        wethContract: eraNetwork.wethContract,
       });
       provider.setIsEthGasToken(eraNetwork.isEthGasToken ?? true);
       return provider;
     };
 
     const web3Provider = new ethers.providers.Web3Provider(
-      getPublicClient(onboardStore.wagmiConfig as Config, { chainId: getNetworkInfo().l1Network?.id }) as any,
+      getPublicClient(onboardStore.wagmiConfig as Config, {
+        chainId: getNetworkInfo().l1Network?.id,
+      }) as ethers.providers.ExternalProvider,
       "any"
     );
     const wallet = new Wallet(
@@ -80,6 +81,7 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
     if (!eraNetwork.value.blockExplorerApi)
       throw new Error(`Block Explorer API is not available on ${eraNetwork.value.name}`);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const transfers: { items: any[] } = await $fetch(
       `${eraNetwork.value.blockExplorerApi}/address/${
         account.value.address
@@ -141,6 +143,7 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
           erc20BridgeL1: eraNetworks.erc20BridgeL1,
           erc20BridgeL2: eraNetworks.erc20BridgeL2,
           l1Gateway: eraNetworks.l1Gateway,
+          wethContract: eraNetworks.wethContract,
         });
         provider.setIsEthGasToken(eraNetworks.isEthGasToken ?? true);
         return provider;

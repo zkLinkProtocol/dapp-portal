@@ -25,6 +25,8 @@ import { useRuntimeConfig } from "#imports";
 import { confirmedSupportedWallets, disabledWallets } from "@/data/wallets";
 import { useNetworkStore } from "@/store/network";
 
+const isMobile = () => window.innerWidth < 800; // simple way to detect mobile device
+
 export const useOnboardStore = defineStore("onboard", () => {
   const { zkSyncNetworks } = useNetworks();
   const runtimeConfig = useRuntimeConfig();
@@ -129,7 +131,7 @@ export const useOnboardStore = defineStore("onboard", () => {
     connectorName.value = connector?.name;
     let name = "";
     if (connections?.[0]?.connector.getProvider) {
-      const provider: any = await connections?.[0]?.connector.getProvider();
+      const provider: unknown = await connections?.[0]?.connector.getProvider();
       name = provider?.session?.peer?.metadata?.name;
     } else {
       name = connector?.name;
@@ -155,20 +157,42 @@ export const useOnboardStore = defineStore("onboard", () => {
     }
   };
   identifyWalletName();
+
+  const autoConnectInBinanceWeb3 = async () => {
+    const connectors = getConnectors(wagmiConfig);
+    const injected = connectors.find((item) => item.id === "injected");
+    if (injected && !account.value?.address && window.innerWidth < 800) {
+      await injected.connect();
+      reconnect(wagmiConfig);
+    }
+  };
+
+  const BinanceWalletId = "8a0ee50d1f22f6651afcae7eb4253e52a3310b90af5daef78a8c4929a9bb99d4";
+  const excludeWalletIds = ["bc949c5d968ae81310268bf9193f9c9fb7bb4e1283e1284af8f2bd4992535fd6"];
+  if (isMobile()) {
+    excludeWalletIds.push(BinanceWalletId);
+  }
+  const featuredWalletIds = [
+    // "1ae92b26df02f0abca6304df07debccd18262fdf5fe82daa81593582dac9a369",rainbow
+    "971e689d0a5be527bac79629b4ee9b925e82208e5168b733496a09c0faed0709", // okx wallet
+    // "8a0ee50d1f22f6651afcae7eb4253e52a3310b90af5daef78a8c4929a9bb99d4", // binance web3 wallet
+    "ad2eff108bf828a39e5cb41331d95861c9cc516aede9cb6a95d75d98c206e204", // Gate.io Wallet
+    "c7708575a2c3c9e6a8ab493d56cdcc56748f03956051d021b8cd8d697d9a3fd2", // fox wallet
+    // "aba1f652e61fd536e8a7a5cd5e0319c9047c435ef8f7e907717361ff33bb3588",
+    // "38f5d18bd8522c244bdd70cb4a68e0e718865155811c043f052fb9f1c51de662",//bitget
+  ];
+  if (!isMobile()) {
+    featuredWalletIds.unshift(BinanceWalletId);
+  }
+
   const web3modal = createWeb3Modal({
     wagmiConfig,
     projectId: env.walletConnectProjectID,
-    connectorImages: {},
-    excludeWalletIds: ["bc949c5d968ae81310268bf9193f9c9fb7bb4e1283e1284af8f2bd4992535fd6"],
-    featuredWalletIds: [
-      // "1ae92b26df02f0abca6304df07debccd18262fdf5fe82daa81593582dac9a369",rainbow
-      "971e689d0a5be527bac79629b4ee9b925e82208e5168b733496a09c0faed0709", // okx wallet
-      "8a0ee50d1f22f6651afcae7eb4253e52a3310b90af5daef78a8c4929a9bb99d4", // binance web3 wallet
-      "ad2eff108bf828a39e5cb41331d95861c9cc516aede9cb6a95d75d98c206e204", // Gate.io Wallet
-      "c7708575a2c3c9e6a8ab493d56cdcc56748f03956051d021b8cd8d697d9a3fd2", // fox wallet
-      // "aba1f652e61fd536e8a7a5cd5e0319c9047c435ef8f7e907717361ff33bb3588",
-      // "38f5d18bd8522c244bdd70cb4a68e0e718865155811c043f052fb9f1c51de662",//bitget
-    ],
+    connectorImages: {
+      injected: "/img-browser-wallet.png",
+    },
+    excludeWalletIds,
+    featuredWalletIds,
     // termsConditionsUrl: "https://zksync.io/terms",
     // privacyPolicyUrl: "https://zksync.io/privacy",
     themeMode: selectedColorMode.value,
@@ -233,6 +257,7 @@ export const useOnboardStore = defineStore("onboard", () => {
   const {
     inProgress: switchingNetworkInProgress,
     error: switchingNetworkError,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     execute: switchNetwork,
   } = usePromise(
     async () => {
@@ -241,7 +266,7 @@ export const useOnboardStore = defineStore("onboard", () => {
     },
     { cache: false }
   );
-  const setCorrectNetwork = async (id: any) => {
+  const setCorrectNetwork = async (id: number) => {
     return await switchNetworkById(id).catch(() => undefined);
   };
 
@@ -294,11 +319,11 @@ export const useOnboardStore = defineStore("onboard", () => {
     switchNetworkById,
 
     getWallet,
-    getPublicClient: (chainId: any = "") => {
+    getPublicClient: (chainId?: number) => {
       if (!l1Network.value) throw new Error(`L1 network is not available on ${selectedNetwork.value.name}`);
       return getPublicClient(wagmiConfig, { chainId: chainId || l1Network.value?.id });
     },
-
+    autoConnectInBinanceWeb3,
     subscribeOnAccountChange,
     subscribeOnNetworkChange,
   };

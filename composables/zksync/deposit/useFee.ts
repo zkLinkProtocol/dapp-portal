@@ -1,20 +1,21 @@
 import { computed, ref } from "vue";
 
+import { suggestMaxPriorityFee } from "@rainbow-me/fee-suggestions";
 import { BigNumber } from "ethers";
 import { parseEther } from "ethers/lib/utils";
+
 import useTimedCache from "@/composables/useTimedCache";
 
 import type { Token, TokenAmount } from "@/types";
-import type { PublicClient } from "viem";
-import type { BigNumberish } from "ethers";
-import type { Ref } from "vue";
 import type { L1Signer } from "@/zksync-web3-nova/src";
+import type { BigNumberish } from "ethers";
+import type { PublicClient } from "viem";
+import type { Ref } from "vue";
+import type { UsePromiseExecuteOptions } from "~/composables/usePromise";
 
+import { useNetworkStore } from "@/store/network";
 import { retry } from "@/utils/helpers";
 import { calculateFee } from "@/utils/helpers";
-import { useNetworkStore } from "@/store/network";
-import { suggestMaxPriorityFee } from "@rainbow-me/fee-suggestions";
-import { UsePromiseExecuteOptions } from "~/composables/usePromise";
 export type DepositFeeValues = {
   maxFeePerGas?: BigNumber;
   maxPriorityFeePerGas?: BigNumber;
@@ -144,7 +145,7 @@ export default (
       try {
         signer = await getL1Signer({ force: true });
       } catch (err) {
-        console.log(err)
+        console.log(err);
         if (err instanceof Error && err.message.indexOf("Incorrect wallet network selected") >= 0) {
           console.log("Incorrect wallet network selected");
 
@@ -156,7 +157,7 @@ export default (
         }
       }
       if (!signer) {
-        if(totalResetFeeImmediately < 2){
+        if (totalResetFeeImmediately < 2) {
           totalResetFeeImmediately++;
           setTimeout(resetFeeImmediately, 1000);
           return;

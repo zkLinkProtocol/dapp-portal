@@ -1,5 +1,6 @@
 import { BigNumber, ethers } from "ethers";
-import { TransactionRequest } from "viem";
+
+import type { TransactionRequest } from "viem";
 
 /** Represents the transaction fee parameters. */
 export interface Fee {

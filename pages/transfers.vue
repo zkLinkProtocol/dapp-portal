@@ -93,13 +93,13 @@ import useSingleLoading from "@/composables/useSingleLoading";
 
 import type { Transfer } from "@/utils/mappers";
 
+import { getWaitTime } from "@/data/networks";
 import { useDestinationsStore } from "@/store/destinations";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
-import { WITHDRAWAL_DELAY, getEstmatdDepositDelay } from "@/store/zksync/transactionStatus";
+import { WITHDRAWAL_DELAY } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransfersHistoryStore } from "@/store/zksync/transfersHistory";
-import { getWaitTime } from "@/data/networks";
 
 const onboardStore = useOnboardStore();
 const { eraNetwork } = storeToRefs(useZkSyncProviderStore());

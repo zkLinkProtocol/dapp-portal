@@ -41,8 +41,8 @@ import { storeToRefs } from "pinia";
 import type { TokenPrice } from "@/types";
 import type { Component, PropType } from "vue";
 
-import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { iconsList } from "@/data/iconlists";
+import { useZkSyncProviderStore } from "@/store/zksync/provider";
 
 defineProps({
   as: {

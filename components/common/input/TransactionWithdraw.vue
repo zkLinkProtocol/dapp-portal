@@ -72,7 +72,6 @@
               <template v-else-if="amountError === 'exceeds_decimals'">
                 Max decimal length for {{ selectedToken?.symbol }} is {{ selectedToken?.decimals }}
               </template>
-             
             </CommonInputErrorMessage>
             <CommonButtonLabel v-else-if="inputted" as="div" variant="light" class="-mb-6 mt-1 text-right text-sm">
               {{ totalAmountPrice }}
@@ -108,10 +107,12 @@ import { computed, ref, watch } from "vue";
 
 import { LockClosedIcon } from "@heroicons/vue/24/outline";
 import { BigNumber } from "ethers";
+import { storeToRefs } from "pinia";
 
 import type { Token, TokenAmount } from "@/types";
 import type { BigNumberish } from "ethers";
 import type { PropType } from "vue";
+
 import { useNetworkStore } from "@/store/network";
 import { decimalToBigNumber, formatTokenPrice, parseTokenAmount, removeSmallAmountPretty } from "@/utils/formatters";
 import { ETH_ADDRESS, L2_ETH_TOKEN_ADDRESS } from "~/zksync-web3-nova/src/utils";
@@ -174,7 +175,13 @@ const selectedTokenAddress = computed({
 });
 const selectedToken = computed(() => {
   const tokens = props.balances.length ? props.balances : props.tokens;
-  return tokens.filter((e)=> selectedNetwork.value.isEthGasToken || (e.address !== ETH_ADDRESS && e.address.toLowerCase() !== L2_ETH_TOKEN_ADDRESS)).find((e) => e.address === props.tokenAddress);
+  return tokens
+    .filter(
+      (e) =>
+        selectedNetwork.value.isEthGasToken ||
+        (e.address !== ETH_ADDRESS && e.address.toLowerCase() !== L2_ETH_TOKEN_ADDRESS)
+    )
+    .find((e) => e.address === props.tokenAddress);
 });
 const tokenBalance = computed(() => {
   if (!props.balances.length || !selectedToken.value) {
@@ -231,8 +238,8 @@ const setMaxAmount = () => {
 };
 
 const amountError = computed(() => {
-  if(props.mergeLimitExceeds) {
-    return 'exceeds_merge_limit'
+  if (props.mergeLimitExceeds) {
+    return "exceeds_merge_limit";
   }
   if(props.mergeWithdrawalLimitExceeds) {
     return 'exceeds_merge_withdrawal_limit'

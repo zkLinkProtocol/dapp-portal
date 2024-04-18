@@ -27,14 +27,8 @@
     <div class="mb-[10px]" v-else-if="route.query?.s === 'binance'">
       <!-- <img src="/img/okx-cryptopedia.svg" class="h-[64px] w-[64px] rounded-[8px]" /> -->
       <div class="z-2">
-        <a
-          href="https://www.okx.com/web3/discover/cryptopedia/event/28"
-          target="_blank"
-          class="z-2 relative cursor-pointer"
-        >
-          <img src="/img/banner-binance@2x.png" class="block w-full hidden md:block" />
-          <img src="/img/banner-binance-mobile@2x.png" class="block w-full block md:hidden" />
-        </a>
+        <img src="/img/banner-binance@2x.png" class="block hidden w-full md:block" />
+        <img src="/img/banner-binance-mobile@2x.png" class="block block w-full md:hidden" />
       </div>
     </div>
 
@@ -251,9 +245,28 @@
         <CommonErrorBlock v-else-if="setAllowanceError" class="mt-2" @try-again="setTokenAllowance">
           Allowance approval error: {{ setAllowanceError.message }}
         </CommonErrorBlock>
+
+        <!--MNT and WETH Tips-->
+        <CommonHeightTransition v-if="step === 'form'" :opened="!!isMNTOrWETH">
+          <CommonCardWithLineButtons class="mt-4">
+            <DestinationItem as="div">
+              <template #label>
+                {{ warpTipsTitle }}
+              </template>
+              <template #underline> {{ warpTipsDesc }} </template>
+              <template #image>
+                <div class="aspect-square h-full w-full rounded-full bg-warning-400 p-3 text-black">
+                  <LockClosedIcon aria-hidden="true" />
+                </div>
+              </template>
+            </DestinationItem>
+          </CommonCardWithLineButtons>
+        </CommonHeightTransition>
+        <!-- MNT and WETH Tips end-->
+
         <CommonHeightTransition
           v-if="step === 'form'"
-          :opened="(!enoughAllowance && !continueButtonDisabled) || !!setAllowanceReceipt"
+          :opened="((!enoughAllowance && !continueButtonDisabled) || !!setAllowanceReceipt) && !isMNTOrWETH.value"
         >
           <CommonCardWithLineButtons class="mt-4">
             <DestinationItem
@@ -343,6 +356,24 @@
                 />
               </template>
               <CommonButton
+                v-else-if="!!isMNTOrWETH"
+                type="submit"
+                :disabled="continueButtonDisabled || wrapStatus !== 'not-started'"
+                variant="primary"
+                class="w-full"
+                @click="buttonWrap()"
+              >
+                <transition v-bind="TransitionPrimaryButtonText" mode="out-in">
+                  <span v-if="wrapStatus === 'processing'">Processing...</span>
+                  <span v-else-if="wrapStatus === 'waiting-for-signature'">Waiting for confirmation</span>
+                  <span class="flex items-center" v-else-if="wrapStatus === 'sending'">
+                    <CommonSpinner class="mr-2 h-6 w-6" />
+                    {{ isMNTSelected ? "Wrapping..." : "Unwrapping..." }}
+                  </span>
+                  <span v-else> {{ wrapBtnText }}</span>
+                </transition>
+              </CommonButton>
+              <CommonButton
                 v-else
                 type="submit"
                 :disabled="continueButtonDisabled"
@@ -401,6 +432,7 @@
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 
+import { Switch } from "@headlessui/vue";
 import {
   ArrowTopRightOnSquareIcon,
   CheckIcon,
@@ -417,9 +449,9 @@ import EthereumTransactionFooter from "@/components/transaction/EthereumTransact
 import useAllowance from "@/composables/transaction/useAllowance";
 import useMergeToken from "@/composables/transaction/useMergeToken";
 import useInterval from "@/composables/useInterval";
-import useNetworks from "@/composables/useNetworks";
 import useEcosystemBanner from "@/composables/zksync/deposit/useEcosystemBanner";
 import useFee from "@/composables/zksync/deposit/useFee";
+import useMntAndWeth from "@/composables/zksync/deposit/useMntAndWeth";
 import useTransaction from "@/composables/zksync/deposit/useTransaction";
 
 import type { TransactionDestination } from "@/store/destinations";
@@ -437,18 +469,18 @@ import { usePreferencesStore } from "@/store/preferences";
 import { useZkSyncEthereumBalanceStore } from "@/store/zksync/ethereumBalance";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncTokensStore } from "@/store/zksync/tokens";
-import { getEstmatdDepositDelay, useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
+import { useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransfersHistoryStore } from "@/store/zksync/transfersHistory";
 import { useZkSyncWalletStore } from "@/store/zksync/wallet";
+import { ETH_TOKEN } from "@/utils/constants";
 import { TOKEN_ALLOWANCE } from "@/utils/doc-links";
 import { checksumAddress, decimalToBigNumber, formatRawTokenPrice, parseTokenAmount } from "@/utils/formatters";
 import { silentRouterChange } from "@/utils/helpers";
 import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/transitions";
 import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
-import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
-import { Switch } from "@headlessui/vue";
+import { ETH_ADDRESS, WMNT_CONTRACT } from "@/zksync-web3-nova/src/utils";
 
-const okxIcon = "/img/okx-cryptopedia.svg";
+// const okxIcon = "/img/okx-cryptopedia.svg";
 const launchIcon = "/img/launch.svg";
 
 const route = useRoute();
@@ -465,7 +497,6 @@ const { destinations } = storeToRefs(useDestinationsStore());
 const { l1BlockExplorerUrl, selectedNetwork } = storeToRefs(useNetworkStore());
 const { l1Tokens, tokensRequestInProgress, tokensRequestError } = storeToRefs(tokensStore);
 const { balance, balanceInProgress, balanceError } = storeToRefs(zkSyncEthereumBalance);
-const { isCustomNode } = useNetworks();
 
 const toNetworkModalOpened = ref(false);
 const fromNetworkModalOpened = ref(false);
@@ -525,6 +556,10 @@ const selectedToken = computed<Token | undefined>(() => {
   }
   return res;
 });
+
+const { isMNTSelected, isWETHSelected, isMNTOrWETH, warpTipsTitle, warpTipsDesc, wrapBtnText } =
+  useMntAndWeth(selectedToken);
+
 const tokenCustomBridge = computed(() => {
   if (!selectedToken.value) {
     return undefined;
@@ -542,9 +577,7 @@ const amountInputTokenAddress = computed({
 const tokenBalance = computed<BigNumberish | undefined>(() => {
   return balance.value?.find((e) => e.address === selectedToken.value?.address)?.amount;
 });
-const { result: mergeTokenInfo, inProgress: mergeTokenInfoInProgress } = useMergeToken(
-  computed(() => selectedToken.value?.l2Address)
-);
+const { result: mergeTokenInfo } = useMergeToken(computed(() => selectedToken.value?.l2Address));
 
 const {
   result: allowance,
@@ -667,7 +700,7 @@ const mergeLimitExceeds = computed(() => {
 const transaction = computed<
   | {
       token: TokenAmount;
-      from: { address: string; destination: TransactionDestinfonboardStoreation };
+      from: { address: string; destination: TransactionDestination };
       to: { address: string; destination: TransactionDestination };
       toMerge?: boolean;
     }
@@ -771,13 +804,24 @@ const buttonContinue = () => {
   }
 };
 
+const buttonWrap = () => {
+  if (continueButtonDisabled.value) {
+    return;
+  }
+  if (step.value === "form") {
+    makeTransactionWrap();
+  }
+};
+
 /* Transaction signing and submitting */
 const transfersHistoryStore = useZkSyncTransfersHistoryStore();
 const { previousTransactionAddress } = storeToRefs(usePreferencesStore());
 const {
+  wrapStatus,
   status: transactionStatus,
   error: transactionError,
   commitTransaction,
+  wrapTransaction,
 } = useTransaction(eraWalletStore.getL1Signer);
 const { recentlyBridged, ecosystemBannerVisible } = useEcosystemBanner();
 const { saveTransaction, waitForCompletion } = useZkSyncTransactionStatusStore();
@@ -846,9 +890,31 @@ const makeTransaction = async () => {
         }, 2000);
       })
       .catch((err) => {
+        console.log(err);
         transactionError.value = err as Error;
         transactionStatus.value = "not-started";
       });
+  }
+};
+
+const makeTransactionWrap = async () => {
+  if (continueButtonDisabled.value) return;
+
+  await wrapTransaction({
+    to: transaction.value!.to.address,
+    tokenAddress: transaction.value!.token.address,
+    amount: transaction.value!.token.amount,
+  });
+
+  if (wrapStatus.value === "done") {
+    if (isMNTSelected) {
+      selectedTokenAddress.value = WMNT_CONTRACT;
+    } else if (isWETHSelected) {
+      selectedTokenAddress.value = ETH_ADDRESS;
+    }
+    wrapStatus.value = "not-started";
+    fetchBalances(true).catch(() => undefined);
+    console.log("wrap done");
   }
 };
 
@@ -857,6 +923,7 @@ const resetForm = () => {
   amount.value = "";
   step.value = "form";
   transactionStatus.value = "not-started";
+  wrapStatus.value = "not-started";
   transactionInfo.value = undefined;
   resetSetAllowance();
   requestAllowance();
@@ -875,7 +942,7 @@ const fetchBalances = async (force = false) => {
 };
 fetchBalances();
 
-const unsubscribeFetchBalance = onboardStore.subscribeOnAccountChange((newAddress: any) => {
+const unsubscribeFetchBalance = onboardStore.subscribeOnAccountChange((newAddress: string | undefined) => {
   if (!newAddress) return;
   estimate();
   fetchBalances();

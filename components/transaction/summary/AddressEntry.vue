@@ -48,14 +48,14 @@ const props = defineProps({
   },
   addressLabel: {
     type: String,
-    required: false
-  }
+    required: false,
+  },
 });
 
 const { account } = storeToRefs(useOnboardStore());
 
 const accountLabel = computed(() => {
-  if(props.addressLabel) {
+  if (props.addressLabel) {
     return props.addressLabel;
   }
   if (props.address === account.value.address) {

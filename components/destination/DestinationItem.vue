@@ -1,5 +1,11 @@
 <template>
-  <CommonButtonLineWithImg :as="as" :icon="icon" class="destination-item" :class="{ 'disable': disabled }" v-tooltip="disabled&&'Withdrawal from Nova will be enable in April.'">
+  <CommonButtonLineWithImg
+    :as="as"
+    :icon="icon"
+    class="destination-item"
+    :class="{ disable: disabled }"
+    v-tooltip="disabled && 'Withdrawal from Nova will be enable in April.'"
+  >
     <template #image>
       <slot name="image">
         <CommonImageLoader class="destination-item-icon" :src="iconUrl" />
@@ -50,18 +56,18 @@ defineProps({
   disabled: {
     type: Boolean,
     default: false,
-  }
+  },
 });
 </script>
 
 <style lang="scss">
-.marginLeft{
+.marginLeft {
   display: inline-block;
   position: absolute;
   right: 10px;
   color: #999a9c;
 }
-.disable{
+.disable {
   background: #252628 !important;
   color: #999a9c !important;
   position: relative;
