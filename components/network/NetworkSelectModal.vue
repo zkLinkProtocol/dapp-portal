@@ -75,9 +75,10 @@ const emit = defineEmits<{
 }>();
 
 const { zkSyncNetworks } = useNetworks();
-const zkSyncNetwork = zkSyncNetworks.filter((e) => !e.hidden);
-let arr: Record<string, string | undefined>[] = [];
-zkSyncNetwork.map((i) => {
+const zkSyncNetwork = zkSyncNetworks.filter((e) => !e.hidden)
+let arr : any[] = [];
+zkSyncNetwork.map((i)=> {
+  if (route.path === '/' && i.key === "blast") return; // hide blast on deposit
   const obj = {
     iconUrl: i.logoUrl,
     key: i.key,

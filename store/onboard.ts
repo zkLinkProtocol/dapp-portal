@@ -188,9 +188,11 @@ export const useOnboardStore = defineStore("onboard", () => {
   const web3modal = createWeb3Modal({
     wagmiConfig,
     projectId: env.walletConnectProjectID,
-    connectorImages: {
-      injected: "/img-browser-wallet.png",
-    },
+    connectorImages: isMobile()
+      ? {
+          injected: "/img-browser-wallet.png",
+        }
+      : undefined,
     excludeWalletIds,
     featuredWalletIds,
     // termsConditionsUrl: "https://zksync.io/terms",

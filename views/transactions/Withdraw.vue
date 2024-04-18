@@ -488,7 +488,7 @@ import { WITHDRAWAL_DELAY } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransfersHistoryStore } from "@/store/zksync/transfersHistory";
 import { useZkSyncWalletStore } from "@/store/zksync/wallet";
-import { ETH_TOKEN, isMergeToken, MergeTokenContractUrl, WITHDRAWAL_DELAY_DAYS } from "@/utils/constants";
+import { ETH_TOKEN, isMergeToken, isSupportedMergeToken, MergeTokenContractUrl, WITHDRAWAL_DELAY_DAYS } from "@/utils/constants";
 import { ZKSYNC_WITHDRAWAL_DELAY } from "@/utils/doc-links";
 import { checksumAddress, decimalToBigNumber, formatRawTokenPrice, parseTokenAmount } from "@/utils/formatters";
 import { calculateFee } from "@/utils/helpers";
@@ -580,7 +580,7 @@ const availableTokens = computed(() => {
   if (!tokens.value) return [];
   if (props.type === "withdrawal") {
     return Object.values(tokens.value).filter((e) => {
-      if (isMergeToken(e.address)) {
+      if (isSupportedMergeToken(e.address, selectedNetwork.value.key)) {
         return true;
       }
       if (!e.l1Address) {
@@ -601,7 +601,7 @@ const availableBalances = computed(() => {
   if (props.type === "withdrawal") {
     if (!tokens.value) return [];
     return balance.value.filter((e) => {
-      if (isMergeToken(e.address)) {
+      if (isSupportedMergeToken(e.address, selectedNetwork.value.key)) {
         return true;
       }
       if (!e.l1Address) {
