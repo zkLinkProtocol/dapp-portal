@@ -135,6 +135,7 @@ import { computed, mergeProps, ref, watch } from "vue";
 
 import { LockClosedIcon } from "@heroicons/vue/24/outline";
 import { BigNumber } from "ethers";
+import { storeToRefs } from "pinia";
 
 import type { Token, TokenAmount } from "@/types";
 import type { BigNumberish } from "ethers";

@@ -1,6 +1,5 @@
 import { useMemoize } from "@vueuse/core";
-import { BigNumber, type BigNumberish } from "ethers";
-import { parseEther } from "ethers/lib/utils";
+import { type BigNumberish } from "ethers";
 
 import useScreening from "@/composables/useScreening";
 

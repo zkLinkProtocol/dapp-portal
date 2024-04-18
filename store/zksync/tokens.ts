@@ -5,12 +5,11 @@ import type { Token } from "@/types";
 
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { mapApiToken } from "@/utils/mappers";
-import { useRoute } from "#vue-router";
 
 export const useZkSyncTokensStore = defineStore("zkSyncTokens", () => {
   const providerStore = useZkSyncProviderStore();
   const { eraNetwork } = storeToRefs(providerStore);
-  const route = useRoute();
+  // const route = useRoute();
   const {
     result: tokensRaw,
     inProgress: tokensRequestInProgress,

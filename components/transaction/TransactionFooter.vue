@@ -39,7 +39,7 @@
       </template>
 
       <CommonButton v-else-if="walletName === 'Binance Web3'" disabled variant="primary" class="w-full">
-          The current version of your {{ walletName }} wallet may not support {{ eraNetwork.name }}
+        The current version of your {{ walletName }} wallet may not support {{ eraNetwork.name }}
       </CommonButton>
     </div>
     <div v-else-if="buttonStep === 'continue'" class="transaction-footer-row">

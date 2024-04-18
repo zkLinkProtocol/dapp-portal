@@ -6,7 +6,6 @@ import type { Hash } from "@/types";
 import type { BigNumberish } from "ethers";
 import type { PublicClient, WalletClient } from "viem";
 import type { Ref } from "vue";
-import { WriteContractParameters } from "@wagmi/core";
 
 export default (
   accountAddress: Ref<string | undefined>,

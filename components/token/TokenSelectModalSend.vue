@@ -69,21 +69,21 @@
 
 <script lang="ts" setup>
 import { computed, ref } from "vue";
-import { ethers } from "ethers";
 
 import { Combobox } from "@headlessui/vue";
 import { MagnifyingGlassIcon } from "@heroicons/vue/24/outline";
+import { ethers } from "ethers";
+import { storeToRefs } from "pinia";
 
 import type { Token, TokenAmount } from "@/types";
+import type { Address } from "viem";
 import type { PropType } from "vue";
 
-import { groupBalancesByAmount } from "@/utils/mappers";
-import { Address } from "viem";
-import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
 import { useSearchtokenStore } from "@/store/searchToken";
 import { useZkSyncEthereumBalanceStore } from "@/store/zksync/ethereumBalance";
-import { ETH_ADDRESS, L2_ETH_TOKEN_ADDRESS, fetchErc20 } from "~/zksync-web3-nova/src/utils";
+import { groupBalancesByAmount } from "@/utils/mappers";
+import { fetchErc20 } from "~/zksync-web3-nova/src/utils";
 
 const props = defineProps({
   title: {
@@ -118,7 +118,7 @@ const emit = defineEmits<{
   (eventName: "update:tokenAddress", tokenAddress?: string): void;
   (eventName: "try-again"): void;
 }>();
-const { selectedNetwork } = storeToRefs(useNetworkStore());
+// const { selectedNetwork } = storeToRefs(useNetworkStore());
 const zkSyncEthereumBalance = useZkSyncEthereumBalanceStore();
 
 const search = ref("");

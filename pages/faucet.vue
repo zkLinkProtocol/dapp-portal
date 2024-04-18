@@ -13,7 +13,6 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { ArrowTopRightOnSquareIcon } from "@heroicons/vue/24/outline";
 const links = [
   {
     iconUrl: "/img/chainstack-faucet-logo.png",
