@@ -459,6 +459,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   async getWithdrawTx(transaction: {
     token: Address;
     amount: BigNumberish;
+    isMergeToken?: boolean;
     from?: Address;
     to?: Address;
     bridgeAddress?: Address;
@@ -509,12 +510,15 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     }
 
     const bridge = IL2BridgeFactory.connect(tx.bridgeAddress!, this);
-    return bridge.populateTransaction.withdraw(tx.to!, tx.token, tx.amount, tx.overrides);
+    return transaction.isMergeToken
+      ? bridge.populateTransaction.withdrawFromMerge(tx.to!, tx.token, tx.amount, tx.overrides)
+      : bridge.populateTransaction.withdraw(tx.to!, tx.token, tx.amount, tx.overrides);
   }
 
   async estimateGasWithdraw(transaction: {
     token: Address;
     amount: BigNumberish;
+    isMergeToken?: boolean;
     from?: Address;
     to?: Address;
     bridgeAddress?: Address;

@@ -14,6 +14,7 @@ type TransactionParams = {
   to: string;
   tokenAddress: string;
   amount: BigNumberish;
+  isMergeToken?: boolean;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -58,6 +59,7 @@ export default (getSigner: () => Promise<Signer | undefined>, getProvider: () =>
         to: transaction.to,
         token: transaction.tokenAddress === ETH_TOKEN.address ? ETH_TOKEN.l1Address! : transaction.tokenAddress,
         amount: transaction.amount,
+        isMergeToken: transaction.isMergeToken,
         bridgeAddress,
         overrides: {
           gasPrice: fee.gasPrice,

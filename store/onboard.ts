@@ -145,6 +145,10 @@ export const useOnboardStore = defineStore("onboard", () => {
       console.log("name--------------->", name);
     }
 
+    if (walletName.value?.includes("Binance")) {
+      walletName.value = "Binance Web3 Wallet";
+    }
+
     if (walletName.value && connector) {
       const isWalletDisabled = !!disabledWallets.find(
         (wallet) => wallet.walletName === walletName.value && wallet.type === connector?.type
