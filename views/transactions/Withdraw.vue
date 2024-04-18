@@ -22,6 +22,10 @@
       Confirm transaction
     </PageTitle>
 
+    <div class="warnBox flex" v-if="!route.query.s || route.query.s !== 'okx'">
+      <div>Note: All LRT points will continue to be calculated after you request a withdrawal. They will appear in the next few days in dashboard due to the data synchronization process.</div>
+    </div>
+
     <div v-if="showBridge">
       <NetworkSelectModal
         v-model:opened="fromNetworkModalOpened"
@@ -55,6 +59,7 @@
             :max-amount="maxAmount"
             :loading="tokensRequestInProgress || balanceInProgress"
             :merge-withdrawal-limit-exceeds="mergeTokenWithdrawalLimitExceeds"
+            :merge-withdrawal-limit="mergeTokenLockedBalance"
           >
             <template #token-dropdown-bottom v-if="type === 'withdrawal' && account.address">
               <CommonAlert class="sticky bottom-0 mt-3" variant="neutral" :icon="InformationCircleIcon">
@@ -257,7 +262,7 @@
             </CommonAlert>
           </transition>
 
-          <CommonHeightTransition v-if="step === 'form'" :opened="enoughAllowance && isMergeTokenSelected">
+          <!-- <CommonHeightTransition v-if="step === 'form'" :opened="enoughAllowance && isMergeTokenSelected">
             <CommonCardWithLineButtons class="mt-4">
             <DestinationItem as="div">
               <template #label>
@@ -283,7 +288,7 @@
               </template>
             </DestinationItem>
           </CommonCardWithLineButtons>
-          </CommonHeightTransition>
+          </CommonHeightTransition> -->
 
           <CommonHeightTransition
             v-if="isMergeTokenSelected && step === 'form'"
@@ -779,7 +784,7 @@ const mergeTokenWithdrawalLimitExceeds = computed(() => {
 
 const mergeTokenLockedBalance = computed(() => {
   if (!mergeTokenInfo.value || !selectedToken.value) {
-    return 0;
+    return undefined;
   }
   return parseTokenAmount(mergeTokenInfo.value?.balance, selectedToken.value.decimals);
 });
