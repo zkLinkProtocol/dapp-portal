@@ -26,7 +26,9 @@ import { confirmedSupportedWallets, disabledWallets } from "@/data/wallets";
 import { useNetworkStore } from "@/store/network";
 
 const isMobile = () => window.innerWidth < 800; // simple way to detect mobile device
-
+const isMobileBrowser = () => {
+  return /Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent) && !window.ethereum;
+};
 export const useOnboardStore = defineStore("onboard", () => {
   const { zkSyncNetworks } = useNetworks();
   const runtimeConfig = useRuntimeConfig();
@@ -165,7 +167,7 @@ export const useOnboardStore = defineStore("onboard", () => {
 
   const BinanceWalletId = "8a0ee50d1f22f6651afcae7eb4253e52a3310b90af5daef78a8c4929a9bb99d4";
   const excludeWalletIds = ["bc949c5d968ae81310268bf9193f9c9fb7bb4e1283e1284af8f2bd4992535fd6"];
-  if (isMobile()) {
+  if (isMobile() && !isMobileBrowser()) {
     excludeWalletIds.push(BinanceWalletId);
   }
   const featuredWalletIds = [
@@ -177,7 +179,7 @@ export const useOnboardStore = defineStore("onboard", () => {
     // "aba1f652e61fd536e8a7a5cd5e0319c9047c435ef8f7e907717361ff33bb3588",
     // "38f5d18bd8522c244bdd70cb4a68e0e718865155811c043f052fb9f1c51de662",//bitget
   ];
-  if (!isMobile()) {
+  if (!isMobile() || isMobileBrowser()) {
     featuredWalletIds.unshift(BinanceWalletId);
   }
 
