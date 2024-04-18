@@ -247,7 +247,7 @@
         </CommonErrorBlock>
 
         <!--MNT and WETH Tips-->
-        <CommonHeightTransition v-if="step === 'form'" :opened="!!isMNTOrWETH">
+        <CommonHeightTransition v-if="step === 'form'" :opened="!!isMNTOrWETH && enoughAllowance">
           <CommonCardWithLineButtons class="mt-4">
             <DestinationItem as="div">
               <template #label>
@@ -266,7 +266,7 @@
 
         <CommonHeightTransition
           v-if="step === 'form'"
-          :opened="((!enoughAllowance && !continueButtonDisabled) || !!setAllowanceReceipt) && !isMNTOrWETH.value"
+          :opened="(!enoughAllowance && !continueButtonDisabled) || !!setAllowanceReceipt"
         >
           <CommonCardWithLineButtons class="mt-4">
             <DestinationItem

@@ -18,11 +18,12 @@ export default (selectedToken: Ref<Token | undefined>) => {
         weths = weths.concat(item.wethContract.map((e) => e.toLowerCase()));
       }
     });
-    console.log(
-      "isWETHSelected",
-      selectedToken.value?.address && weths.some((item) => item === selectedToken.value?.address.toLowerCase())
+  
+    return (
+      selectedNetwork.value?.key !== "mantle" &&
+      selectedToken.value?.address &&
+      weths.some((item) => item === selectedToken.value?.address.toLowerCase())
     );
-    return selectedToken.value?.address && weths.some((item) => item === selectedToken.value?.address.toLowerCase());
   });
 
   const isMNTOrWETH = computed(() => {
