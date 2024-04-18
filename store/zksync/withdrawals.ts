@@ -148,7 +148,6 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
         provider.setIsEthGasToken(eraNetworks.isEthGasToken ?? true);
         return provider;
       };
-
       if (!withdrawalTransfer) continue;
       if (new Date(withdrawalTransfer.timestamp).getTime() < Date.now() - FETCH_TIME_LIMIT) break;
       const transactionDetails = await retry(() => request().getTransactionDetails(withdrawal.transactionHash));

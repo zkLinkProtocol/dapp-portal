@@ -29,7 +29,7 @@
             <span>{{ chainsLabel.to }}</span
             >.
           </div>
-          <span v-else>{{ chainsLabel.from }} .</span>
+          <span v-else>{{ chainsLabel.from }}&nbsp</span>
         </template>
       </template>
       <span>{{ timeAgo }}</span>
