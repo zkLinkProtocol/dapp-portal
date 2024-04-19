@@ -19,23 +19,10 @@ import useNetworks from "@/composables/useNetworks";
 
 const { eraNetwork } = storeToRefs(useZkSyncProviderStore());
 const { withdrawalsAvailableForClaiming } = storeToRefs(useZkSyncWithdrawalsStore());
-const { primaryNetwork, zkSyncNetworks } = useNetworks();
-const getNetworkInfo = () => {
-  const newNetwork = zkSyncNetworks.find(
-    (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === withdrawalsAvailableForClaiming.value[0].gateway?.toLowerCase()
-  );
-  return newNetwork ?? primaryNetwork;
-};
+const { primaryNetwork, zkSyncNetworks,getNetworkInfo } = useNetworks();
 const newNetwork = computed(() => {
   if (withdrawalsAvailableForClaiming.value.length> 0) {
-    if (withdrawalsAvailableForClaiming.value[0].gateway) {
-      getNetworkInfo()
-    } else {
-      let obj = zkSyncNetworks.find(
-        (item) => item.key && item.key.toLowerCase() === (withdrawalsAvailableForClaiming.value[0].token?.networkKey || 'primary').toLowerCase()
-      )
-      return obj ?? primaryNetwork;
-    }
+    return getNetworkInfo(withdrawalsAvailableForClaiming.value[0])
   }
 })
 </script>
