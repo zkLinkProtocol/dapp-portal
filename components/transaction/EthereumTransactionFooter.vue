@@ -62,6 +62,9 @@
             Change wallet network to {{ l1Network.name }}
           </slot>
         </CommonButton>
+        <template v-if="connectorName === 'WalletConnect'">
+          <CommonButtonUnderlineText :opened="!!walletName?.includes('Binance')">If you're using the Binance Web3 Wallet, please update it to the newest version.</CommonButtonUnderlineText>
+        </template>
       </template>
       <template v-else>
         <CommonButton disabled variant="primary" class="w-full">
@@ -97,6 +100,7 @@ const props = defineProps({
     required: true,
   },
 });
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const emit = defineEmits<{
   (eventName: "update:opened", value: boolean): void;
   (eventName: "update:networkKey", networkKey?: string): void;
@@ -105,7 +109,6 @@ const onboardStore = useOnboardStore();
 const {
   account,
   isConnectingWallet,
-  isCorrectNetworkSet,
   switchingNetworkInProgress,
   switchingNetworkError,
   connectorName,

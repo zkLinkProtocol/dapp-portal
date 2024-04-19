@@ -1,48 +1,56 @@
-import { ethers, BigNumber, BigNumberish, utils, providers, BytesLike, Contract } from "ethers";
-import Formatter = providers.Formatter;
-import { ExternalProvider } from "@ethersproject/providers";
-import { ConnectionInfo, poll } from "@ethersproject/web";
-import { IERC20MetadataFactory, IEthTokenFactory, IL2BridgeFactory } from "../typechain";
-import {
-  Address,
-  EventFilter,
-  BlockTag,
-  TransactionResponse,
-  TransactionRequest,
-  TransactionStatus,
-  Token,
-  PriorityOpResponse,
-  BalancesMap,
-  MessageProof,
-  TransactionReceipt,
-  Block,
-  BlockWithTransactions,
-  Log,
-  TransactionDetails,
-  BlockDetails,
-  ContractAccountInfo,
-} from "./types";
-import {
-  isETH,
-  getL2HashFromPriorityOp,
-  EIP712_TX_TYPE,
-  CONTRACT_DEPLOYER_ADDRESS,
-  CONTRACT_DEPLOYER,
-  ETH_ADDRESS,
-  parseTransaction,
-  sleep,
-  L2_ETH_TOKEN_ADDRESS,
-  REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
-  PRIMARY_CHAIN_KEY,
-} from "./utils";
-import { Signer } from "./signer";
+import { poll } from "@ethersproject/web";
+import { BigNumber, Contract, ethers, providers, utils } from "ethers";
 import { AbiCoder } from "ethers/lib/utils";
+
+import { Signer } from "./signer";
+import { TransactionStatus } from "./types";
+import {
+  CONTRACT_DEPLOYER,
+  CONTRACT_DEPLOYER_ADDRESS,
+  EIP712_TX_TYPE,
+  ETH_ADDRESS,
+  getL2HashFromPriorityOp,
+  isETH,
+  L2_ETH_TOKEN_ADDRESS,
+  parseTransaction,
+  PRIMARY_CHAIN_KEY,
+  REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
+  sleep,
+} from "./utils";
+import { IERC20MetadataFactory, IEthTokenFactory, IL2BridgeFactory } from "../typechain";
+
+// eslint-disable-next-line import/order
+import type { ExternalProvider } from "@ethersproject/providers";
+
+import Formatter = providers.Formatter;
+
+import type {
+  Address,
+  BalancesMap,
+  Block,
+  BlockDetails,
+  BlockTag,
+  BlockWithTransactions,
+  ContractAccountInfo,
+  EventFilter,
+  Log,
+  MessageProof,
+  PriorityOpResponse,
+  Token,
+  TransactionDetails,
+  TransactionReceipt,
+  TransactionRequest,
+  TransactionResponse,
+} from "./types";
+import type { ConnectionInfo } from "@ethersproject/web";
+import type { BigNumberish, BytesLike } from "ethers";
 let defaultFormatter: Formatter = null;
 export type ContractAddresses = {
   mainContract?: Address;
   erc20BridgeL1?: Address;
   erc20BridgeL2?: Address;
   l1Gateway?: Address;
+  wethContract?: Address[];
 };
 export class Provider extends ethers.providers.JsonRpcProvider {
   protected contractAddressesMap: Map<string, ContractAddresses>;
@@ -88,7 +96,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
           // receipt is not ready
           return undefined;
         } else {
-          const receipt: any = this.formatter.receipt(result);
+          const receipt = this.formatter.receipt(result);
           if (receipt.blockNumber == null) {
             receipt.confirmations = 0;
           } else if (receipt.confirmations == null) {
@@ -128,6 +136,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
 
       defaultFormatter.formats.receiptLog.l1BatchNumber = Formatter.allowNull(number);
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (defaultFormatter.formats as any).l2Tol1Log = {
         blockNumber: number,
         blockHash: hash,
@@ -145,6 +154,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       defaultFormatter.formats.receipt.l1BatchNumber = Formatter.allowNull(number);
       defaultFormatter.formats.receipt.l1BatchTxIndex = Formatter.allowNull(number);
       defaultFormatter.formats.receipt.l2ToL1Logs = Formatter.arrayOf((value) =>
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         Formatter.check((defaultFormatter.formats as any).l2Tol1Log, value)
       );
 
@@ -167,7 +177,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       return await super.getBalance(address, tag);
     } else {
       try {
-        let token = IERC20MetadataFactory.connect(tokenAddress, this);
+        const token = IERC20MetadataFactory.connect(tokenAddress, this);
         return await token.balanceOf(address, { blockTag: tag });
       } catch {
         return BigNumber.from(0);
@@ -213,9 +223,11 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     }
     result.eip712Meta = {
       gasPerPubdata: utils.hexValue(transaction.customData.gasPerPubdata ?? 0),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
     transaction.type = EIP712_TX_TYPE;
     if (transaction.customData.factoryDeps) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       result.eip712Meta.factoryDeps = transaction.customData.factoryDeps.map((dep: ethers.BytesLike) =>
         // TODO (SMA-1605): we arraify instead of hexlifying because server expects Vec<u8>.
@@ -224,6 +236,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       );
     }
     if (transaction.customData.paymasterParams) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       result.eip712Meta.paymasterParams = {
         paymaster: utils.hexlify(transaction.customData.paymasterParams.paymaster),
@@ -239,6 +252,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       transaction: this._getTransactionRequest(transaction),
     });
     if (transaction.customData != null) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       params.transaction.customData = transaction.customData;
     }
@@ -256,6 +270,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
       transaction: this._getTransactionRequest(transaction),
     });
     if (transaction.customData != null) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       params.transaction.customData = transaction.customData;
     }
@@ -280,7 +295,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     this.pollingInterval = 500;
 
     const blockTag = this.formatter.blockTag.bind(this.formatter);
-    this.formatter.blockTag = (tag: any) => {
+    this.formatter.blockTag = (tag) => {
       if (tag == "committed" || tag == "finalized") {
         return tag;
       }
@@ -311,7 +326,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     return this.networkKey === "blast";
   }
   isLineaChain(): boolean {
-    return this.isPrimaryChain()
+    return this.isPrimaryChain();
   }
   isZkSyncChain(): boolean {
     return this.networkKey === "zksync";
@@ -367,7 +382,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   }
 
   async getMainContractAddress(): Promise<Address> {
-    let contractAddresses = this.contractAddressesMap.get(this.networkKey);
+    const contractAddresses = this.contractAddressesMap.get(this.networkKey);
     if (!contractAddresses) {
       throw new Error("networkKey: " + this.networkKey + " is undefined");
     }
@@ -377,6 +392,17 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     return contractAddresses.mainContract!;
   }
 
+  async getWETHContractAddress(): Promise<Address[]> {
+    const contractAddresses = this.contractAddressesMap.get(this.networkKey);
+    if (!contractAddresses) {
+      throw new Error("networkKey: " + this.networkKey + " is undefined");
+    }
+    // if (!contractAddresses.mainContract) {
+    // contractAddresses.mainContract = await this.send("zks_getMainContract", []);
+    // }
+    return contractAddresses.wethContract!;
+  }
+
   async getTestnetPaymasterAddress(): Promise<Address | null> {
     // Unlike contract's addresses, the testnet paymaster is not cached, since it can be trivially changed
     // on the fly by the server and should not be relied to be constant
@@ -384,7 +410,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   }
 
   async getDefaultBridgeAddresses() {
-    let contractAddresses = this.contractAddressesMap.get(this.networkKey);
+    const contractAddresses = this.contractAddressesMap.get(this.networkKey);
     if (!contractAddresses) {
       throw new Error("networkKey: " + this.networkKey + " is undefined");
     }
@@ -395,7 +421,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     };
   }
 
-  async getConfirmedTokens(start: number = 0, limit: number = 255): Promise<Token[]> {
+  async getConfirmedTokens(start = 0, limit = 255): Promise<Token[]> {
     const tokens: Token[] = await this.send("zks_getConfirmedTokens", [start, limit]);
     return tokens.map((token) => ({ address: token.l2Address, ...token }));
   }
@@ -405,8 +431,8 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   }
 
   async getAllAccountBalances(address: Address): Promise<BalancesMap> {
-    let balances = await this.send("zks_getAllAccountBalances", [address]);
-    for (let token in balances) {
+    const balances = await this.send("zks_getAllAccountBalances", [address]);
+    for (const token in balances) {
       balances[token] = BigNumber.from(balances[token]);
     }
     return balances;
@@ -433,6 +459,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
   async getWithdrawTx(transaction: {
     token: Address;
     amount: BigNumberish;
+    isMergeToken?: boolean;
     from?: Address;
     to?: Address;
     bridgeAddress?: Address;
@@ -483,12 +510,15 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     }
 
     const bridge = IL2BridgeFactory.connect(tx.bridgeAddress!, this);
-    return bridge.populateTransaction.withdraw(tx.to!, tx.token, tx.amount, tx.overrides);
+    return transaction.isMergeToken
+      ? bridge.populateTransaction.withdrawFromMerge(tx.to!, tx.token, tx.amount, tx.overrides)
+      : bridge.populateTransaction.withdraw(tx.to!, tx.token, tx.amount, tx.overrides);
   }
 
   async estimateGasWithdraw(transaction: {
     token: Address;
     amount: BigNumberish;
+    isMergeToken?: boolean;
     from?: Address;
     to?: Address;
     bridgeAddress?: Address;
@@ -564,6 +594,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
     return this._parseLogs(logs);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected _parseLogs(logs: any[]): Array<Log> {
     return Formatter.arrayOf(this.formatter.filterLog.bind(this.formatter))(logs);
   }
@@ -581,6 +612,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
 
     response.waitFinalize = async () => {
       const receipt = await response.wait();
+      // eslint-disable-next-line no-constant-condition
       while (true) {
         const block = await this.getBlock("finalized");
         if (receipt.blockNumber <= block.number) {
@@ -713,12 +745,13 @@ export class Web3Provider extends Provider {
       throw new Error("provider must implement eip-1193");
     }
 
-    let path = provider.host || provider.path || (provider.isMetaMask ? "metamask" : "eip-1193:");
+    const path = provider.host || provider.path || (provider.isMetaMask ? "metamask" : "eip-1193:");
     super(path, network, networkKey);
     super.setContractAddresses(networkKey!, contractAddresses!);
     this.provider = provider;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   override async send(method: string, params?: Array<any>): Promise<any> {
     params ??= [];
     // Metamask complains about eth_sign (and on some versions hangs)
@@ -731,6 +764,7 @@ export class Web3Provider extends Provider {
   }
 
   override getSigner(addressOrIndex?: number | string): Signer {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return Signer.from(super.getSigner(addressOrIndex) as any);
   }
 

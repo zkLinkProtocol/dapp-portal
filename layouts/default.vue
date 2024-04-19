@@ -15,13 +15,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
-import { storeToRefs } from "pinia";
-
-import { useOnboardStore } from "@/store/onboard";
-
-const { isConnectingWallet } = storeToRefs(useOnboardStore());
-</script>
+<script lang="ts" setup></script>
 
 <style lang="scss" scoped>
 .app-layout {

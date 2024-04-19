@@ -1,5 +1,5 @@
 <template>
-  <CommonButton class="dropdown-button" :class="noChevron?'noClick':''">
+  <CommonButton class="dropdown-button" :class="noChevron ? 'noClick' : ''">
     <div v-if="$slots['left-icon']" class="left-icon-container">
       <slot name="left-icon" />
     </div>
@@ -46,10 +46,10 @@ defineProps({
   }
 }
 
-.noClick{
+.noClick {
   background: transparent !important;
-  :hover{
-  background: transparent !important;
+  :hover {
+    background: transparent !important;
   }
 }
 </style>

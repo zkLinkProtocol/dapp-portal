@@ -4,6 +4,17 @@
   "sourceName": "cache-zk/solpp-generated-contracts/bridge/interfaces/IL2Bridge.sol",
   "abi": [
     {
+      "inputs": [
+        {
+          "internalType": "contract IMergeTokenPortal",
+          "name": "_mergeTokenPortal",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
       "inputs": [],
       "name": "FunctionNotSupported",
       "type": "error"
@@ -80,6 +91,19 @@
       "anonymous": false,
       "inputs": [
         {
+          "indexed": false,
+          "internalType": "uint8",
+          "name": "version",
+          "type": "uint8"
+        }
+      ],
+      "name": "Initialized",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
           "indexed": true,
           "internalType": "address",
           "name": "l2Sender",
@@ -106,6 +130,42 @@
       ],
       "name": "WithdrawalInitiated",
       "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "MERGE_TOKEN_PORTAL",
+      "outputs": [
+        {
+          "internalType": "contract IMergeTokenPortal",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_l2Token",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "_l2Receiver",
+          "type": "address"
+        }
+      ],
+      "name": "depositToMerge",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
       "inputs": [
@@ -174,6 +234,29 @@
       "type": "function"
     },
     {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_l1Bridge",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "_l2TokenProxyBytecodeHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "_governor",
+          "type": "address"
+        }
+      ],
+      "name": "initialize",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
       "inputs": [],
       "name": "l1Bridge",
       "outputs": [
@@ -190,7 +273,7 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "_l2Token",
+          "name": "l2TokenAddress",
           "type": "address"
         }
       ],
@@ -198,7 +281,7 @@
       "outputs": [
         {
           "internalType": "address",
-          "name": "",
+          "name": "l1TokenAddress",
           "type": "address"
         }
       ],
@@ -225,6 +308,19 @@
       "type": "function"
     },
     {
+      "inputs": [],
+      "name": "l2TokenBeacon",
+      "outputs": [
+        {
+          "internalType": "contract UpgradeableBeacon",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "address",
@@ -243,6 +339,29 @@
         }
       ],
       "name": "withdraw",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_l1Receiver",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_l2Token",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "withdrawFromMerge",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"

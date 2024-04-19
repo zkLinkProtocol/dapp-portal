@@ -4,7 +4,7 @@
       <CommonButtonDropdown :toggled="open">
         <template #left-icon>
           <!-- <IconsEra /> -->
-          <img class="image-loader-image loaded" :src="selectedNetwork.logoUrl">
+          <img class="image-loader-image loaded" :src="selectedNetwork.logoUrl" />
         </template>
         <span>{{ selectedNetwork.l1Network?.name }}</span>
       </CommonButtonDropdown>
@@ -27,7 +27,7 @@
           >
             <template #left-icon>
               <!-- <IconsEra /> -->
-            <img class="image-loader-image loaded" :src="item.logoUrl">
+              <img class="image-loader-image loaded" :src="item.logoUrl" />
             </template>
             <span>{{ item.l1Network?.name }}</span>
             <template #right-icon>

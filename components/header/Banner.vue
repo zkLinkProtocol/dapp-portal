@@ -35,18 +35,15 @@
   </div>
 </template>
 <script>
-// Import Swiper Vue.js components
-import { Swiper, SwiperSlide } from "swiper/vue";
-
-// Import Swiper styles
-import "swiper/css";
-
 // import "swiper/css/pagination";
 // import "swiper/css/navigation";
 
 // import required modules
-import { Autoplay, Pagination, Navigation } from "swiper/modules";
-
+import { Autoplay, Navigation, Pagination } from "swiper/modules";
+// Import Swiper Vue.js components
+import { Swiper, SwiperSlide } from "swiper/vue";
+// Import Swiper styles
+import "swiper/css";
 export default {
   components: {
     Swiper,

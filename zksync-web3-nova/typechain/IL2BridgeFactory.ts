@@ -147,4 +147,27 @@ const _abi = [
     stateMutability: "nonpayable",
     type: "function",
   },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_l1Receiver",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_l2Token",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "_amount",
+        type: "uint256",
+      },
+    ],
+    name: "withdrawFromMerge",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
 ];

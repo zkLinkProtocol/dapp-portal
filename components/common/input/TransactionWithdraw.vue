@@ -47,34 +47,64 @@
             autocomplete="off"
             autofocus
           />
-          <transition v-bind="TransitionOpacity()" mode="default">
-            <CommonInputErrorMessage v-if="amountError">
-              <template v-if="amountError === 'insufficient_balance' || maxDecimalAmount === '0'">
-                Insufficient balance
-              </template>
-              <template v-else-if="amountError === 'exceeds_balance' && !maxAmount">Amount exceeds balance</template>
-              <template v-else-if="amountError === 'exceeds_merge_limit'">
-                Input amount exceeds the merge limit.
-              </template>
-              <template v-else-if="amountError === 'exceeds_max_amount' || amountError === 'exceeds_balance'">
-                Max amount is
-                <button
-                  type="button"
-                  class="cursor-pointer font-medium underline underline-offset-2"
-                  @click.prevent="setMaxAmount()"
+          <div class="flex justify-between">
+            <transition v-bind="TransitionOpacity()" mode="default">
+              <div class="mr-5">
+                <CommonButtonLabel
+                  v-if="mergeWithdrawalLimit !== undefined"
+                  as="div"
+                  variant="light"
+                  class="mt-1 text-left text-sm"
                 >
-                  {{ maxDecimalAmount }}
-                </button>
-              </template>
-              <template v-else-if="amountError === 'exceeds_decimals'">
-                Max decimal length for {{ selectedToken?.symbol }} is {{ selectedToken?.decimals }}
-              </template>
-             
-            </CommonInputErrorMessage>
-            <CommonButtonLabel v-else-if="inputted" as="div" variant="light" class="-mb-6 mt-1 text-right text-sm">
-              {{ totalAmountPrice }}
-            </CommonButtonLabel>
-          </transition>
+                  Available for redemption: {{ mergeWithdrawalLimit }}
+                </CommonButtonLabel>
+                <CommonInputErrorMessage v-if="amountError">
+                  <template v-if="amountError === 'insufficient_balance' || maxDecimalAmount === '0'">
+                    Insufficient balance
+                  </template>
+                  <template v-else-if="amountError === 'exceeds_balance' && !maxAmount"
+                    >Amount exceeds balance</template
+                  >
+                  <template v-else-if="amountError === 'exceeds_merge_limit'">
+                    Input amount exceeds the merge limit.
+                  </template>
+                  <template v-else-if="amountError === 'exceeds_merge_withdrawal_limit'">
+                    The input amount exceeds the {{ selectedToken.symbol }}.{{
+                      selectedNetwork.l1Network?.name.split(" ")[0]
+                    }}
+                    amount locked in the
+                    <a :href="MergeTokenContractUrl" target="_blank" class="underline underline-offset-2"
+                      >Nova merge token contract.</a
+                    >
+                    You may want to consider withdrawing to another network or reducing the input.
+                  </template>
+                  <template v-else-if="amountError === 'exceeds_max_amount' || amountError === 'exceeds_balance'">
+                    Max amount is
+                    <button
+                      type="button"
+                      class="cursor-pointer font-medium underline underline-offset-2"
+                      @click.prevent="setMaxAmount()"
+                    >
+                      {{ maxDecimalAmount }}
+                    </button>
+                  </template>
+                  <template v-else-if="amountError === 'exceeds_decimals'">
+                    Max decimal length for {{ selectedToken?.symbol }} is {{ selectedToken?.decimals }}
+                  </template>
+                </CommonInputErrorMessage>
+              </div>
+            </transition>
+            <transition>
+              <CommonButtonLabel
+                v-if="!amountError && inputted"
+                as="div"
+                variant="light"
+                class="-mb-6 mt-1 text-right text-sm"
+              >
+                {{ totalAmountPrice }}
+              </CommonButtonLabel>
+            </transition>
+          </div>
         </div>
 
         <transition v-bind="TransitionOpacity(300)">
@@ -101,15 +131,18 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from "vue";
+import { computed, mergeProps, ref, watch } from "vue";
 
 import { LockClosedIcon } from "@heroicons/vue/24/outline";
 import { BigNumber } from "ethers";
+import { storeToRefs } from "pinia";
 
 import type { Token, TokenAmount } from "@/types";
 import type { BigNumberish } from "ethers";
 import type { PropType } from "vue";
+
 import { useNetworkStore } from "@/store/network";
+import { MergeTokenContractUrl } from "@/utils/constants";
 import { decimalToBigNumber, formatTokenPrice, parseTokenAmount, removeSmallAmountPretty } from "@/utils/formatters";
 import { ETH_ADDRESS, L2_ETH_TOKEN_ADDRESS } from "~/zksync-web3-nova/src/utils";
 const { selectedNetwork } = storeToRefs(useNetworkStore());
@@ -150,8 +183,15 @@ const props = defineProps({
   },
   mergeLimitExceeds: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
+  mergeWithdrawalLimitExceeds: {
+    type: Boolean,
+    default: false,
+  },
+  mergeWithdrawalLimit: {
+    type: String,
+  },
 });
 
 const emit = defineEmits<{
@@ -166,7 +206,13 @@ const selectedTokenAddress = computed({
 });
 const selectedToken = computed(() => {
   const tokens = props.balances.length ? props.balances : props.tokens;
-  return tokens.filter((e)=> selectedNetwork.value.isEthGasToken || (e.address !== ETH_ADDRESS && e.address.toLowerCase() !== L2_ETH_TOKEN_ADDRESS)).find((e) => e.address === props.tokenAddress);
+  return tokens
+    .filter(
+      (e) =>
+        selectedNetwork.value.isEthGasToken ||
+        (e.address !== ETH_ADDRESS && e.address.toLowerCase() !== L2_ETH_TOKEN_ADDRESS)
+    )
+    .find((e) => e.address === props.tokenAddress);
 });
 const tokenBalance = computed(() => {
   if (!props.balances.length || !selectedToken.value) {
@@ -223,8 +269,11 @@ const setMaxAmount = () => {
 };
 
 const amountError = computed(() => {
-  if(props.mergeLimitExceeds) {
-    return 'exceeds_merge_limit'
+  if (props.mergeLimitExceeds) {
+    return "exceeds_merge_limit";
+  }
+  if (props.mergeWithdrawalLimitExceeds) {
+    return "exceeds_merge_withdrawal_limit";
   }
   if (!selectedToken.value) return;
   if (tokenBalance.value && totalComputeAmount.value.gt(tokenBalance.value.amount)) {

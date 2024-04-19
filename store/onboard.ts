@@ -131,7 +131,7 @@ export const useOnboardStore = defineStore("onboard", () => {
     connectorName.value = connector?.name;
     let name = "";
     if (connections?.[0]?.connector.getProvider) {
-      const provider: any = await connections?.[0]?.connector.getProvider();
+      const provider: unknown = await connections?.[0]?.connector.getProvider();
       name = provider?.session?.peer?.metadata?.name;
     } else {
       name = connector?.name;
@@ -143,6 +143,10 @@ export const useOnboardStore = defineStore("onboard", () => {
     } else {
       walletName.value = name?.replace(/ Wallet$/, "").trim();
       console.log("name--------------->", name);
+    }
+
+    if (walletName.value?.includes("Binance")) {
+      walletName.value = "Binance Web3 Wallet";
     }
 
     if (walletName.value && connector) {
@@ -256,6 +260,7 @@ export const useOnboardStore = defineStore("onboard", () => {
   const {
     inProgress: switchingNetworkInProgress,
     error: switchingNetworkError,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     execute: switchNetwork,
   } = usePromise(
     async () => {
@@ -264,7 +269,7 @@ export const useOnboardStore = defineStore("onboard", () => {
     },
     { cache: false }
   );
-  const setCorrectNetwork = async (id: any) => {
+  const setCorrectNetwork = async (id: number) => {
     return await switchNetworkById(id).catch(() => undefined);
   };
 
@@ -317,7 +322,7 @@ export const useOnboardStore = defineStore("onboard", () => {
     switchNetworkById,
 
     getWallet,
-    getPublicClient: (chainId: any = "") => {
+    getPublicClient: (chainId?: number) => {
       if (!l1Network.value) throw new Error(`L1 network is not available on ${selectedNetwork.value.name}`);
       return getPublicClient(wagmiConfig, { chainId: chainId || l1Network.value?.id });
     },

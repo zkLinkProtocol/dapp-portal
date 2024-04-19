@@ -55,22 +55,21 @@ import {
   MinusIcon,
   PlusIcon,
 } from "@heroicons/vue/24/outline";
-import { useNetwork, useTimeAgo } from "@vueuse/core";
+import { useTimeAgo } from "@vueuse/core";
 import { BigNumber } from "ethers";
 import { storeToRefs } from "pinia";
 
 import TokenAmount from "@/components/transaction/lineItem/TokenAmount.vue";
 import TotalPrice from "@/components/transaction/lineItem/TotalPrice.vue";
 
-import type { NetworkLayer, Transfer } from "@/utils/mappers";
+import useNetworks from "@/composables/useNetworks";
+
+import type { Transfer } from "@/utils/mappers";
 import type { Component, PropType } from "vue";
 
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { shortenAddress } from "@/utils/formatters";
-import { iconsList } from "@/data/iconlists";
-import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
-import useNetworks from "@/composables/useNetworks";
 
 const props = defineProps({
   as: {
@@ -134,10 +133,6 @@ const label = computed(() => {
   }
   return props.transfer.type || "Unknown";
 });
-const chainIconUrl = computed(() => {
-  // return props.transfer.token?.chainIconUrl;
-  return getNetworkInfo()?.logoUrl;
-});
 
 const { primaryNetwork, zkSyncNetworks } = useNetworks();
 
@@ -177,7 +172,7 @@ const getl1NetworkName = () => {
         from: newNetwork?.l1Network?.name,
         to: newNetwork?.l1Network?.name,
       };
-    } else {
+    }  else {
       return {
         from: getNetworkInfo().l1Network?.name,
         to: getNetworkInfo().l1Network?.name,
@@ -217,7 +212,9 @@ const transactionIcon = computed(() => {
   }
 });
 
-const timeAgo = useTimeAgo(props.transfer.timestamp);
+const timeAgo = computed(() => {
+  return useTimeAgo(props.transfer.timestamp).value.replace(/"/g, '');
+})
 </script>
 <style lang="scss" scoped>
 .chain-label-wrap {
