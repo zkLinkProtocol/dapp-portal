@@ -53,13 +53,7 @@ export const mantaSepolia = /*#__PURE__*/ defineChain({
       address: "0x5Be4F807e0ae836Fc754dDEDDd72c0F4A28C8d43",
       blockCreated: 468626,
     },
-  },
-  contracts: {
-    multicall3: {
-      address: "0xcA11bde05977b3631167028862bE2a173976CA11",
-      blockCreated: 212929,
-    },
-  },
+  }
 });
 
 export const l1Networks = {
