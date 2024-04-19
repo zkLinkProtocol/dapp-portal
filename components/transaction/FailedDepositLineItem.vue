@@ -2,8 +2,7 @@
   <CommonButtonLine class="transaction-withdrawal-line-item">
     <div class="line-button-with-img-image">
       <DestinationIconContainer>
-        <CommonSpinner v-if="inProgress" variant="dark" />
-        <MinusIcon v-else aria-hidden="true" />
+        <img src="/img/icon-cross.svg" class="w-9 h-9"/>
       </DestinationIconContainer>
     </div>
     <div class="withdrawal-line-body">
@@ -11,7 +10,7 @@
         <div class="line-button-with-img-body">
           <CommonButtonLineBodyInfo class="text-left">
             <template #label>
-              {{ label }}
+              Failed Deposit
             </template>
             <template #underline>
               <template v-if="chainsLabel">
@@ -74,25 +73,23 @@ import { storeToRefs } from "pinia";
 
 import TokenAmount from "@/components/transaction/lineItem/TokenAmount.vue";
 import TotalPrice from "@/components/transaction/lineItem/TotalPrice.vue";
-import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 
-import type { NetworkLayer, Transfer } from "@/utils/mappers";
+import useNetworks from "@/composables/useNetworks";
+
+import type { NetworkLayer, Transaction } from "@/utils/mappers";
 import type { PropType } from "vue";
 
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { shortenAddress } from "@/utils/formatters";
-import useNetworks from "@/composables/useNetworks";
+import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 
 const props = defineProps({
   transfer: {
-    type: Object as PropType<Transfer>,
+    type: Object as PropType<Transaction>,
     required: true,
   },
-  inProgress: {
-    type: Boolean,
-    default: false,
-  },
+
 });
 
 const { primaryNetwork, zkSyncNetworks } = useNetworks();
@@ -104,16 +101,6 @@ const getNetworkInfo = () => {
 };
 const { account } = storeToRefs(useOnboardStore());
 const eraNetwork = getNetworkInfo();
-const label = computed(() => {
-  if(props.transfer.status === 'failed') {
-    return 'Failed Deposit'
-  }
-  const article = 'Withdraw';
-  if (props.transfer.to === account.value.address) {
-    return article;
-  }
-  return `${article} to ${formatAddress(props.transfer.to)}`;
-});
 
 const formatAddress = (address: string) => {
   if (address === account.value.address) {
@@ -121,10 +108,7 @@ const formatAddress = (address: string) => {
   }
   return shortenAddress(address);
 };
-const chainIconUrl = computed(() => {
-  // return props.transfer.token?.chainIconUrl;
-  return getNetworkInfo()?.logoUrl;
-});
+
 const getl1NetworkName = () => {
   const { type, gateway } = props.transfer;
   // other chain
@@ -165,7 +149,7 @@ const token = computed(() => {
   return props.transfer.token;
 });
 
-const timeAgo = useTimeAgo(props.transfer.timestamp);
+const timeAgo = useTimeAgo(props.transfer.receivedAt);
 </script>
 
 <style lang="scss" scoped>
