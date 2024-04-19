@@ -24,23 +24,11 @@
       </div>
     </div>
 
-    <div class="cryptopeida-tips binance-cryptopeida mb-[10px]" v-else-if="route.query?.s === 'binance'">
-      <div class="cryptopeida-tips-cover"></div>
+    <div class="mb-[10px]" v-else-if="route.query?.s === 'binance'">
       <!-- <img src="/img/okx-cryptopedia.svg" class="h-[64px] w-[64px] rounded-[8px]" /> -->
       <div class="z-2">
-        <a
-          href="https://www.okx.com/web3/discover/cryptopedia/event/28"
-          target="_blank"
-          class="cryptopeida-tips-title z-2 relative flex cursor-pointer items-center gap-[4px]"
-        >
-          <span>Binance Cryptopedia</span>
-          <img :src="launchIcon" />
-        </a>
-        <div class="mt-[5px]">
-          <p class="cryptopeida-tips-desc">
-            Please wait a few minutes for deposits to arrive before verifying the task on OKX Cryptopedia.
-          </p>
-        </div>
+        <img src="/img/banner-binance@2x.png" class="block hidden w-full md:block" />
+        <img src="/img/banner-binance-mobile@2x.png" class="block block w-full md:hidden" />
       </div>
     </div>
 
@@ -943,10 +931,6 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
   background-position: center;
   background-repeat: no-repeat;
   &.okx-cryptopeida {
-    background-image: url("/img/okx-tips-bg.svg");
-  }
-
-  &.binance-cryptopeida {
     background-image: url("/img/okx-tips-bg.svg");
   }
 

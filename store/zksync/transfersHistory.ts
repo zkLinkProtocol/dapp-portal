@@ -6,6 +6,7 @@ import type { Transfer } from "@/utils/mappers";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { mapApiTransfer } from "@/utils/mappers";
+import { useZkSyncWithdrawalsStore } from "@/store/zksync/withdrawals";
 
 const TRANSACTIONS_FETCH_LIMIT = 50;
 
@@ -78,6 +79,7 @@ export const useZkSyncTransfersHistoryStore = defineStore("zkSyncTransfersHistor
       }
       const response = await loadNext();
       const mappedTransfers = response.items.map(mapApiTransfer);
+      useZkSyncWithdrawalsStore().updateWithdrawals();
       transfers.value = filterOutDuplicateTransfers(mappedTransfers);
     },
     { cache: 30000 }
