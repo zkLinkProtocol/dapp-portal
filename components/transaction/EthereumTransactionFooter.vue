@@ -117,15 +117,21 @@ const {
 } = storeToRefs(onboardStore);
 const { selectedNetwork, l1Network } = storeToRefs(useNetworkStore());
 const { primaryNetwork, zkSyncNetworks } = useNetworks();
-console.log("l1Netowrk: ", l1Network.value);
 const getNetworkInfo = () => {
-  const newNetwork = zkSyncNetworks.find(
-    (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === props.transaction?.gateway?.toLowerCase()
-  );
-  const obj = { l1Network: { id: l1Network.value?.id } };
-  return props.transaction ? newNetwork ?? primaryNetwork : obj;
+  if (props.transaction?.gateway) {
+    const newNetwork = zkSyncNetworks.find(
+      (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === props.transaction?.gateway?.toLowerCase()
+    );
+    const obj = { l1Network: { id: l1Network.value?.id } };
+    return props.transaction ? newNetwork ?? primaryNetwork : obj;
+  } else {
+    let obj = zkSyncNetworks.find(
+      (item) => item.key && item.key.toLowerCase() === (props.transaction?.token?.networkKey || 'primary').toLowerCase()
+    )
+    const objs = { l1Network: { id: l1Network.value?.id } };
+    return props.transaction ? obj ?? primaryNetwork : objs;
+  }
 };
-
 const isGateWalletUnsupportedChain = computed(() => {
   const supprotedChainIds = [
     l1Networks.mainnet.id,

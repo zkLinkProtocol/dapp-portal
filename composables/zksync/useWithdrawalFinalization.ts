@@ -25,19 +25,12 @@ export default (transactionInfo: ComputedRef<TransactionInfo>) => {
   const tokensStore = useZkSyncTokensStore();
   const { isCorrectNetworkSet, network } = storeToRefs(onboardStore);
   const { tokens } = storeToRefs(tokensStore);
-  const { primaryNetwork, zkSyncNetworks } = useNetworks();
-
-  const getNetworkInfo = () => {
-    const newNetwork = zkSyncNetworks.find(
-      (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === transactionInfo.value.gateway?.toLowerCase()
-    );
-    return newNetwork ?? primaryNetwork;
-  };
+  const { primaryNetwork, zkSyncNetworks,getNetworkInfo } = useNetworks();
 
   const { selectedNetwork } = storeToRefs(useNetworkStore());
   let provider: Provider | undefined;
   const request = () => {
-    const eraNetwork = getNetworkInfo() || selectedNetwork.value;
+    const eraNetwork = getNetworkInfo(transactionInfo.value) || selectedNetwork.value;
     if (!provider) {
       provider = new Provider(eraNetwork.rpcUrl);
     }
@@ -163,10 +156,10 @@ export default (transactionInfo: ComputedRef<TransactionInfo>) => {
       error.value = undefined;
 
       status.value = "processing";
-      if (!(network.value.chain?.id === getNetworkInfo().l1Network?.id)) {
-        await onboardStore.setCorrectNetwork(getNetworkInfo().l1Network?.id);
+      if (!(network.value.chain?.id === getNetworkInfo(transactionInfo.value).l1Network?.id)) {
+        await onboardStore.setCorrectNetwork(getNetworkInfo(transactionInfo.value).l1Network?.id);
       }
-      const wallet = await onboardStore.getWallet(getNetworkInfo().l1Network?.id);
+      const wallet = await onboardStore.getWallet(getNetworkInfo(transactionInfo.value).l1Network?.id);
       const { transactionParams, gasLimit, gasPrice } = (await estimateFee())!;
       status.value = "waiting-for-signature";
       transactionHash.value = await wallet.writeContract({

@@ -179,11 +179,19 @@ const { primaryNetwork, zkSyncNetworks } = useNetworks();
 
 const { selectedNetwork, l1Network, l1BlockExplorerUrl } = storeToRefs(useNetworkStore());
 const getNetworkInfo = () => {
-  const newNetwork = zkSyncNetworks.find(
-    (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === props.transaction?.gateway?.toLowerCase()
-  );
-  const obj = { l1Network: { id: l1Network.value?.id, blockExplorers: { default: { url: l1BlockExplorerUrl } } } };
-  return props.transaction ? newNetwork ?? primaryNetwork : obj;
+  if (props.transaction?.gateway) {
+    const newNetwork = zkSyncNetworks.find(
+      (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === props.transaction?.gateway?.toLowerCase()
+    );
+    const obj = { l1Network: { id: l1Network.value?.id, blockExplorers: { default: { url: l1BlockExplorerUrl } } } };
+    return props.transaction ? newNetwork ?? primaryNetwork : obj;
+  } else {
+    let objs = zkSyncNetworks.find(
+      (item) => item.key && item.key.toLowerCase() === (props.transaction?.token?.networkKey || 'primary').toLowerCase()
+    )
+    const obj = { l1Network: { id: l1Network.value?.id, blockExplorers: { default: { url: l1BlockExplorerUrl } } } };
+    return props.transaction ? objs ?? primaryNetwork : obj;
+  }
 };
 const l1BlockExplorerUrls = getNetworkInfo().l1Network?.blockExplorers?.default.url;
 const onboardStore = useOnboardStore();
