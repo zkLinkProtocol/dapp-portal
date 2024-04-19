@@ -134,14 +134,8 @@ const label = computed(() => {
   return props.transfer.type || "Unknown";
 });
 
-const { primaryNetwork, zkSyncNetworks } = useNetworks();
+const { primaryNetwork, zkSyncNetworks,getNetworkInfo } = useNetworks();
 
-const getNetworkInfo = () => {
-  const newNetwork = zkSyncNetworks.find(
-    (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === props.transfer.gateway?.toLowerCase()
-  );
-  return newNetwork ?? primaryNetwork;
-};
 const getl1NetworkName = () => {
   const { type, gateway } = props.transfer;
   // other chain
@@ -149,11 +143,11 @@ const getl1NetworkName = () => {
     if (type === "withdrawal") {
       return {
         from: "",
-        to: getNetworkInfo().l1Network?.name,
+        to: getNetworkInfo(props.transfer).l1Network?.name,
       };
     } else if (type === "deposit") {
       return {
-        from: getNetworkInfo().l1Network?.name,
+        from: getNetworkInfo(props.transfer).l1Network?.name,
         to: "",
       };
     }
@@ -174,8 +168,8 @@ const getl1NetworkName = () => {
       };
     }  else {
       return {
-        from: getNetworkInfo().l1Network?.name,
-        to: getNetworkInfo().l1Network?.name,
+        from: getNetworkInfo(props.transfer).l1Network?.name,
+        to: getNetworkInfo(props.transfer).l1Network?.name,
       };
     }
   }
