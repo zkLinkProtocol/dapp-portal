@@ -10,6 +10,7 @@ import {
   switchChain as switchWalletNetwork,
   disconnect as walletDisconnect,
   watchAccount,
+  createConfig,
 } from "@wagmi/core";
 import { createWeb3Modal, defaultWagmiConfig } from "@web3modal/wagmi";
 import { type Chain, createClient } from "viem";
@@ -83,7 +84,7 @@ export const useOnboardStore = defineStore("onboard", () => {
   };
   console.log("extendedChains", extendedChains);
   console.log("selectedNetwork", selectedNetwork.value);
-  const wagmiConfig = defaultWagmiConfig({
+  const wagmiConfig = createConfig({
     chains: extendedChains,
     projectId: env.walletConnectProjectID,
     metadata,
