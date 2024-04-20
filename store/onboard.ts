@@ -1,5 +1,6 @@
 import { injected, safe, walletConnect } from "@wagmi/connectors";
 import {
+  createConfig,
   getAccount,
   getConnections,
   getConnectors,
@@ -83,12 +84,23 @@ export const useOnboardStore = defineStore("onboard", () => {
   };
   console.log("extendedChains", extendedChains);
   console.log("selectedNetwork", selectedNetwork.value);
-  const wagmiConfig = defaultWagmiConfig({
+  const wagmiConfig = createConfig({
     chains: extendedChains,
     projectId: env.walletConnectProjectID,
     metadata,
     connectors: [
-      injected(),
+      isBinanceWeb3App()
+        ? injected({
+            target() {
+              return {
+                id: "Binance Web3 Wallet",
+                name: "Binance Web3 Wallet",
+                provider: window.ethereum,
+                icon: "/img-binance-web3-wallet.png",
+              };
+            },
+          })
+        : injected(),
       safe({
         allowedDomains: [/app.safe.global$/],
         debug: true,
@@ -184,12 +196,6 @@ export const useOnboardStore = defineStore("onboard", () => {
   const web3modal = createWeb3Modal({
     wagmiConfig,
     projectId: env.walletConnectProjectID,
-    connectorImages:
-      isMobile() && isBinanceWeb3App()
-        ? {
-            injected: "/img-browser-wallet.png",
-          }
-        : undefined,
     excludeWalletIds,
     featuredWalletIds,
     // termsConditionsUrl: "https://zksync.io/terms",
