@@ -9,21 +9,6 @@
       <template v-if="!loading && recentBridgeOperations.length">
         <TypographyCategoryLabel>Recent bridge operations</TypographyCategoryLabel>
         <div v-if="actionRequiredBridgeTransactions.length" class="space-y-block-gap">
-
-          <CommonCardWithLineButtons :class="{ 'mt-block-gap': failedTransfers.length }">
-              <FailedDepositLineItem
-                v-for="(item, index) in failedTransfers"
-                :key="index"
-                :transfer="item"
-                :in-progress="false"
-                as="RouterLink"
-                :to="{
-                  name: 'transaction-hash',
-                  params: { hash: item.identifierTransactionHash },
-                  query: { network: eraNetwork.key },
-                }"
-              />
-            </CommonCardWithLineButtons>
           <CommonCardWithLineButtons v-for="(item, index) in actionRequiredBridgeTransactions" :key="index">
             <TransactionTransferWithdrawalLineItem
               :transfer="item"
@@ -54,26 +39,23 @@
             }"
           />
         </CommonCardWithLineButtons>
-        <template v-if="failedTransfers.length">
-          <TypographyCategoryLabel >Failed Deposit xxx</TypographyCategoryLabel>
-          <div class="space-y-block-gap">
-            xxx
-            <CommonCardWithLineButtons :class="{ 'mt-block-gap': failedTransfers.length }">
-              <TransactionTransferWithdrawalLineItem
-                v-for="(item, index) in failedTransfers"
-                :key="index"
-                :transfer="item"
-                :in-progress="!item.completed"
-                as="RouterLink"
-                :to="{
-                  name: 'transaction-hash',
-                  params: { hash: item.identifierTransactionHash },
-                  query: { network: eraNetwork.key },
-                }"
-              />
-            </CommonCardWithLineButtons>
-          </div>
-        </template>
+      </template>
+      <template v-if="failedTransfers.length">
+        <TypographyCategoryLabel>Failed Deposit </TypographyCategoryLabel>
+
+        <CommonCardWithLineButtons>
+          <FailedDepositLineItem
+            v-for="(item, index) in failedTransfers"
+            :key="index"
+            :transfer="item"
+            as="RouterLink"
+            :to="{
+              name: 'transaction-hash',
+              params: { hash: item.hash },
+              query: { network: eraNetwork.key },
+            }"
+          />
+        </CommonCardWithLineButtons>
         <TypographyCategoryLabel v-if="!hasOnlyRecentBridgeOperations">Completed transfers</TypographyCategoryLabel>
       </template>
 
@@ -127,14 +109,14 @@ import useSingleLoading from "@/composables/useSingleLoading";
 
 import type { Transfer } from "@/utils/mappers";
 
+import { getWaitTime } from "@/data/networks";
 import { useDestinationsStore } from "@/store/destinations";
 import { useOnboardStore } from "@/store/onboard";
-import { useFailedDepositHistoryStore} from '@/store/zksync/failedDepositHistory' 
+import { useFailedDepositHistoryStore } from "@/store/zksync/failedDepositHistory";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
-import { WITHDRAWAL_DELAY, getEstmatdDepositDelay } from "@/store/zksync/transactionStatus";
+import { getEstmatdDepositDelay, WITHDRAWAL_DELAY } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransfersHistoryStore } from "@/store/zksync/transfersHistory";
-import { getWaitTime } from "@/data/networks";
 import FailedDepositLineItem from "~/components/transaction/FailedDepositLineItem.vue";
 
 const onboardStore = useOnboardStore();
@@ -150,11 +132,9 @@ const {
   previousTransfersRequestInProgress,
   previousTransfersRequestError,
 } = storeToRefs(transfersHistoryStore);
-const {
-  failedTransfers,
-} = storeToRefs(failedDepositHistory);
+const { failedTransfers } = storeToRefs(failedDepositHistory);
 
-console.log('failedTransfers : ', failedTransfers.value)
+console.log("failedTransfers : ", failedTransfers.value);
 const { destinations } = storeToRefs(useDestinationsStore());
 const { userTransactions } = storeToRefs(useZkSyncTransactionStatusStore());
 type RecentBridgeOperation = Transfer & {
@@ -214,7 +194,7 @@ const { loading, reset: resetSingleLoading } = useSingleLoading(recentTransfersR
 const fetch = () => {
   if (!isConnected.value) return;
   transfersHistoryStore.requestRecentTransfers();
-  failedDepositHistory.requestFailedDepositTransfers()
+  failedDepositHistory.requestFailedDepositTransfers();
 };
 fetch();
 
@@ -227,7 +207,7 @@ const unsubscribe = onboardStore.subscribeOnAccountChange((newAddress) => {
 const loadMoreEl = ref(null);
 const fetchMore = () => {
   transfersHistoryStore.requestPreviousTransfers();
-  failedDepositHistory.requestFailedDepositTransfers()
+  failedDepositHistory.requestFailedDepositTransfers();
 };
 const { stop: stopLoadMoreObserver } = useIntersectionObserver(loadMoreEl, ([{ isIntersecting }]) => {
   if (isIntersecting) {

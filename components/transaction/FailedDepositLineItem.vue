@@ -14,50 +14,31 @@
             </template>
             <template #underline>
               <template v-if="chainsLabel">
-                <div v-if="transfer.type == 'deposit'">
+                <div >
                   From:
                   <!-- <img v-if="chainIconUrl" class="chain-icon left" :src="chainIconUrl" /> -->
                   <span>{{ chainsLabel.from }}</span
                   >.
                 </div>
-                <div v-else-if="transfer.type == 'withdrawal'">
-                  To:
-                  <!-- <img v-if="chainIconUrl" class="chain-icon" :src="chainIconUrl" /> -->
-                  <span>{{ chainsLabel.to }}</span
-                  >.
-                </div>
-                <template v-else>
-                  <div v-if="chainsLabel.from !== chainsLabel.to" class="chain-label-wrap">
-                    <span>{{ chainsLabel.from }}</span>
-                    <ArrowRightIcon class="relative -top-px mx-1 inline h-4 w-4" aria-hidden="true" />
-                    <span>{{ chainsLabel.to }}</span
-                    >.
-                  </div>
-                  <span v-else>{{ chainsLabel.from }} .</span>
-                </template>
+                
               </template>
               <span>{{ timeAgo }}</span>
             </template>
           </CommonButtonLineBodyInfo>
-          <div class="flex flex-wrap items-center gap-x-2 sm:hidden">
-            <TokenAmount v-if="token" :token="token" :amount="computeAmount" />
-          </div>
         </div>
         <div class="line-button-with-img-right">
           <CommonButtonLineBodyInfo ref="el" class="hidden text-right sm:block">
             <template #secondary>
-              <TokenAmount v-if="token" :token="token" :amount="computeAmount" />
+              <!-- <TokenAmount v-if="token" :token="token" :amount="computeAmount" /> -->
             </template>
             <template #underline>
-              <TotalPrice v-if="token" :token="token" :amount="computeAmount" />
+              <div class="flex flex-col">
+                <span>Claim on source chain</span>
+                <span>~{{ 8 }} days left</span>
+              </div>
             </template>
           </CommonButtonLineBodyInfo>
         </div>
-      </div>
-      <div class="withdrawal-line-separator"></div>
-      <div class="withdrawal-line-bottom">
-        <div>Withdrawal is available for claiming on the {{ eraNetwork.l1Network?.name }} network</div>
-        <CommonButton variant="primary" class="withdrawal-claim-button">Go to claim</CommonButton>
       </div>
     </div>
   </CommonButtonLine>
@@ -72,7 +53,6 @@ import { BigNumber } from "ethers";
 import { storeToRefs } from "pinia";
 
 import TokenAmount from "@/components/transaction/lineItem/TokenAmount.vue";
-import TotalPrice from "@/components/transaction/lineItem/TotalPrice.vue";
 
 import useNetworks from "@/composables/useNetworks";
 
