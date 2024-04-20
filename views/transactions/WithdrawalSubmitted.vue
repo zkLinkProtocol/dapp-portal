@@ -189,10 +189,14 @@ const getNetworkInfo = () => {
 };
 const l1BlockExplorerUrls = getNetworkInfo().l1Network?.blockExplorers?.default.url;
 const onboardStore = useOnboardStore();
-const network = onboardStore.network;
+// const network = onboardStore.network;
 const transactionStatusStore = useZkSyncTransactionStatusStore();
 const { eraNetwork, blockExplorerUrl } = storeToRefs(useZkSyncProviderStore());
 const { connectorName } = storeToRefs(onboardStore);
+
+const network = computed(() => {
+  return onboardStore.network;
+})
 
 const withdrawalManualFinalizationRequired = computed(() => {
   return (
