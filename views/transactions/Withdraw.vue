@@ -23,7 +23,10 @@
     </PageTitle>
 
     <div class="warnBox flex" v-if="!route.query.s || route.query.s !== 'okx'">
-      <div>Note: All LRT points will continue to be calculated after you request a withdrawal. They will appear in the next few days in dashboard due to the data synchronization process.</div>
+      <div>
+        Note: All LRT points will continue to be calculated after you request a withdrawal. They will appear in the next
+        few days in dashboard due to the data synchronization process.
+      </div>
     </div>
 
     <div v-if="showBridge">
@@ -227,7 +230,7 @@
             class="mt-2"
             @try-again="isMergeTokenSelected ? estiamteForMergeToken : estimate"
           >
-           Fee estimation error: {{ feeError.message }}
+            Fee estimation error: {{ feeError.message }}
           </CommonErrorBlock>
           <div class="mt-4 flex items-center gap-4">
             <transition v-bind="TransitionOpacity()">
@@ -292,7 +295,7 @@
 
           <CommonHeightTransition
             v-if="isMergeTokenSelected && step === 'form'"
-            :opened="( !enoughAllowance && !continueButtonDisabled) || !!setAllowanceReceipt"
+            :opened="(!enoughAllowance && !continueButtonDisabled) || !!setAllowanceReceipt"
           >
             <CommonCardWithLineButtons class="mt-4">
               <DestinationItem
@@ -429,7 +432,7 @@
         </template>
       </form>
     </div>
-    <div class="flex flex-col gap-block-gap mt-6" >
+    <div class="mt-6 flex flex-col gap-block-gap">
       <CommonCardWithLineButtons v-for="(item, index) in thirdChainMethods" :key="index" class="relative">
         <DestinationItem v-bind="item.props">
           <template #image v-if="item.icon">
@@ -488,7 +491,13 @@ import { WITHDRAWAL_DELAY } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransfersHistoryStore } from "@/store/zksync/transfersHistory";
 import { useZkSyncWalletStore } from "@/store/zksync/wallet";
-import { ETH_TOKEN, isMergeToken, isSupportedMergeToken, MergeTokenContractUrl, WITHDRAWAL_DELAY_DAYS } from "@/utils/constants";
+import {
+  ETH_TOKEN,
+  isMergeToken,
+  isSupportedMergeToken,
+  MergeTokenContractUrl,
+  WITHDRAWAL_DELAY_DAYS,
+} from "@/utils/constants";
 import { ZKSYNC_WITHDRAWAL_DELAY } from "@/utils/doc-links";
 import { checksumAddress, decimalToBigNumber, formatRawTokenPrice, parseTokenAmount } from "@/utils/formatters";
 import { calculateFee } from "@/utils/helpers";
@@ -500,14 +509,24 @@ import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 const showBridge = true;
 const chainList = [
   {
-    "name": "Symbiosis",
-    "description": "https://symbiosis.finance/",
-    "logo": "Symbiosys.svg",
-    "bannerImg": "Symbiosys.jpg",
-    "type": "Defi",
-    "url": "https://symbiosis.finance/",
-    "tiwwerUrl": "https://twitter.com/symbiosis_fi",
-    "discordUrl": "https://discord.com/invite/YHgDSJ42eG"
+    name: "Meson Finance",
+    description: "https://meson.fi/",
+    logo: "Meson.svg",
+    bannerImg: "Meson.jpg",
+    type: "Infra",
+    url: "https://meson.fi/",
+    tiwwerUrl: "https://twitter.com/mesonfi",
+    discordUrl: "https://discord.com/invite/meson",
+  },
+  {
+    name: "Symbiosis",
+    description: "https://symbiosis.finance/",
+    logo: "Symbiosys.svg",
+    bannerImg: "Symbiosys.jpg",
+    type: "Defi",
+    url: "https://symbiosis.finance/",
+    tiwwerUrl: "https://twitter.com/symbiosis_fi",
+    discordUrl: "https://discord.com/invite/YHgDSJ42eG",
   },
   {
     name: "Owlto Finance",
