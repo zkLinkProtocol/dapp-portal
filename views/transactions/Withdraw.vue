@@ -429,7 +429,7 @@
         </template>
       </form>
     </div>
-    <div class="flex flex-col gap-block-gap" v-else>
+    <div class="flex flex-col gap-block-gap mt-6" >
       <CommonCardWithLineButtons v-for="(item, index) in thirdChainMethods" :key="index" class="relative">
         <DestinationItem v-bind="item.props">
           <template #image v-if="item.icon">
@@ -499,16 +499,16 @@ import WithdrawalSubmitted from "@/views/transactions/WithdrawalSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 const showBridge = true;
 const chainList = [
-  // {
-  //   "name": "Symbiosis",
-  //   "description": "https://symbiosis.finance/",
-  //   "logo": "Symbiosys.svg",
-  //   "bannerImg": "Symbiosys.jpg",
-  //   "type": "Defi",
-  //   "url": "https://symbiosis.finance/",
-  //   "tiwwerUrl": "https://twitter.com/symbiosis_fi",
-  //   "discordUrl": "https://discord.com/invite/YHgDSJ42eG"
-  // },
+  {
+    "name": "Symbiosis",
+    "description": "https://symbiosis.finance/",
+    "logo": "Symbiosys.svg",
+    "bannerImg": "Symbiosys.jpg",
+    "type": "Defi",
+    "url": "https://symbiosis.finance/",
+    "tiwwerUrl": "https://twitter.com/symbiosis_fi",
+    "discordUrl": "https://discord.com/invite/YHgDSJ42eG"
+  },
   {
     name: "Owlto Finance",
     description: "https://owlto.finance/",
