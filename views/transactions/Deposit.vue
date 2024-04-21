@@ -430,7 +430,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 
 import { Switch } from "@headlessui/vue";
 import {
@@ -449,6 +449,7 @@ import EthereumTransactionFooter from "@/components/transaction/EthereumTransact
 import useAllowance from "@/composables/transaction/useAllowance";
 import useMergeToken from "@/composables/transaction/useMergeToken";
 import useInterval from "@/composables/useInterval";
+import useNetworks from "@/composables/useNetworks";
 import useEcosystemBanner from "@/composables/zksync/deposit/useEcosystemBanner";
 import useFee from "@/composables/zksync/deposit/useFee";
 import useMntAndWeth from "@/composables/zksync/deposit/useMntAndWeth";
@@ -482,6 +483,7 @@ import { ETH_ADDRESS, WMNT_CONTRACT } from "@/zksync-web3-nova/src/utils";
 
 // const okxIcon = "/img/okx-cryptopedia.svg";
 const launchIcon = "/img/launch.svg";
+const { zkSyncNetworks } = useNetworks();
 
 const route = useRoute();
 const router = useRouter();
@@ -494,7 +496,7 @@ const eraWalletStore = useZkSyncWalletStore();
 const { account, isConnected } = storeToRefs(onboardStore);
 const { eraNetwork } = storeToRefs(providerStore);
 const { destinations } = storeToRefs(useDestinationsStore());
-const { l1BlockExplorerUrl, selectedNetwork } = storeToRefs(useNetworkStore());
+const { l1BlockExplorerUrl, selectedNetwork, selectedNetworkKey } = storeToRefs(useNetworkStore());
 const { l1Tokens, tokensRequestInProgress, tokensRequestError } = storeToRefs(tokensStore);
 const { balance, balanceInProgress, balanceError } = storeToRefs(zkSyncEthereumBalance);
 
@@ -957,6 +959,12 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
   if (!newchainId) return;
   resetFeeImmediately();
 });
+
+onMounted(() => {
+  if (selectedNetworkKey.value === "blast") {
+    selectedNetworkKey.value = zkSyncNetworks[0].key;
+  }
+})
 </script>
 
 <style lang="scss" scoped>
