@@ -16,6 +16,10 @@ const props = defineProps({
     type: String,
     default: "hh:mm:ss", // 'hh:mm:ss' for "00:00:00", 'human-readable' for "1 hour 30 minutes"
   },
+  onlyDays: {
+    type: Boolean,
+    default: false,
+  },
 });
 const emit = defineEmits<{
   (eventName: "finish"): void;
@@ -37,13 +41,16 @@ watch(
 
 let intervalId: ReturnType<typeof setInterval> | undefined = undefined;
 
-const formatTimeDiff = (diff: number): string => {
+const formatTimeDiff = (diff: number, onlyDays = false): string => {
   const day = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor(diff % (1000 * 60 * 60 * 24) / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
   const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
   if (props.format === "human-readable") {
+    if (onlyDays) {
+      return `~ ${day} day${day !== 1 ? "s" : ""}`
+    }
     let formattedString = "";
     if (hours > 0) formattedString += `${day} day ${hours} hour${hours > 1 ? "s" : ""} `;
     if (minutes > 0) formattedString += `${minutes} minute${minutes > 1 ? "s" : ""} `;
@@ -61,7 +68,8 @@ const updateTimer = () => {
   const currentTime = new Date().getTime();
   const targetTime = new Date(props.futureDate).getTime();
   diff.value = Math.max(targetTime - currentTime, 0);
-  timer.value = formatTimeDiff(diff.value);
+  timer.value = formatTimeDiff(diff.value, props.onlyDays);
+
 
   if (diff.value === 0) {
     clearInterval(intervalId);

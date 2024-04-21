@@ -1,6 +1,6 @@
 import usePaginatedRequest from "@/composables/zksync/usePaginatedRequest";
 
-import type { Api } from "@/types";
+import type { Api, Token } from "@/types";
 
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
@@ -57,8 +57,10 @@ export const useFailedDepositHistoryStore = defineStore("failedDepositHistory", 
     ]);
     return {
       address: token,
-      symbol,
-      amount: parseTokenAmount(amount, decimals ?? 18),
+      symbol: symbol!,
+      amount,
+      decimals: decimals!,
+      l2Address: "",
     };
   };
   const {
@@ -76,7 +78,7 @@ export const useFailedDepositHistoryStore = defineStore("failedDepositHistory", 
       const mappedTransfers = response.items;
 
       const l2Provider = await providerStore.requestProvider();
-      mappedTransfers.forEach(async (tx) => {
+      const tokens = mappedTransfers.map((tx) => {
         const l2BridgeAddress = tx.to;
         const l2Bridge = IL2BridgeFactory.connect(l2BridgeAddress, l2Provider);
         let calldata;
@@ -89,11 +91,17 @@ export const useFailedDepositHistoryStore = defineStore("failedDepositHistory", 
         console.log("calldata: ", calldata);
         const amount = calldata._amount as BigNumberish;
         const token = calldata._l1Token as Address;
-        const tokenFormatted = await formatErc20(token, amount, tx.networkKey);
-        console.log("tokenSymbol: ", tokenFormatted);
-        tx.token = tokenFormatted;
-        transfers.value = [...mappedTransfers];
+        return {
+          amount,
+          token,
+          networkKey: tx.networkKey,
+        };
       });
+      const tokenDatas = await Promise.all(tokens.map((item) => formatErc20(item.token, item.amount, item.networkKey)));
+      mappedTransfers.forEach((transfer, index) => {
+        transfer.token = tokenDatas[index];
+      });
+      transfers.value = [...mappedTransfers];
     },
     { cache: 30000 }
   );

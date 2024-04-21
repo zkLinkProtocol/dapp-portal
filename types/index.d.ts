@@ -79,11 +79,7 @@ export declare namespace Api {
       transactionIndex: number;
       receivedAt: string;
       networkKey: "ethereum";
-      token: {
-        address: string;
-        amount: string;
-        symbol: string;
-      };
+      token: TokenAmount;
     };
 
     type TokenAddress = {

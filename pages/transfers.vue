@@ -44,17 +44,7 @@
         <TypographyCategoryLabel>Failed Deposit </TypographyCategoryLabel>
 
         <CommonCardWithLineButtons>
-          <FailedDepositLineItem
-            v-for="(item, index) in failedTransfers"
-            :key="index"
-            :transfer="item"
-            as="RouterLink"
-            :to="{
-              name: 'transaction-hash',
-              params: { hash: item.hash },
-              query: { network: eraNetwork.key },
-            }"
-          />
+          <FailedDepositLineItem v-for="(item, index) in failedTransfers" :key="index" :transfer="item" as="a" />
         </CommonCardWithLineButtons>
         <TypographyCategoryLabel v-if="!hasOnlyRecentBridgeOperations">Completed transfers</TypographyCategoryLabel>
       </template>
