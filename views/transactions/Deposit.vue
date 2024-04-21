@@ -449,6 +449,7 @@ import EthereumTransactionFooter from "@/components/transaction/EthereumTransact
 import useAllowance from "@/composables/transaction/useAllowance";
 import useMergeToken from "@/composables/transaction/useMergeToken";
 import useInterval from "@/composables/useInterval";
+import useNetworks from "@/composables/useNetworks";
 import useEcosystemBanner from "@/composables/zksync/deposit/useEcosystemBanner";
 import useFee from "@/composables/zksync/deposit/useFee";
 import useMntAndWeth from "@/composables/zksync/deposit/useMntAndWeth";
@@ -461,7 +462,7 @@ import type { BigNumberish } from "ethers";
 
 import { useRoute, useRouter } from "#app";
 import { customBridgeTokens } from "@/data/customBridgeTokens";
-import { getWaitTime, zkSyncNetworks } from "@/data/networks";
+import { getWaitTime } from "@/data/networks";
 import { useDestinationsStore } from "@/store/destinations";
 import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
@@ -482,6 +483,7 @@ import { ETH_ADDRESS, WMNT_CONTRACT } from "@/zksync-web3-nova/src/utils";
 
 // const okxIcon = "/img/okx-cryptopedia.svg";
 const launchIcon = "/img/launch.svg";
+const { zkSyncNetworks } = useNetworks();
 
 const route = useRoute();
 const router = useRouter();
