@@ -25,7 +25,7 @@
               variant="light"
               size="sm"
               @click="
-                buttonClicked(zkSyncNetwork[groupIndex]);
+                buttonClicked(zkSyncNetwork.find(item => item.key === group.key)!);
                 selectedNetworkKey = group.key!;
               "
             />
