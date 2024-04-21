@@ -430,7 +430,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 
 import { Switch } from "@headlessui/vue";
 import {
@@ -494,7 +494,7 @@ const eraWalletStore = useZkSyncWalletStore();
 const { account, isConnected } = storeToRefs(onboardStore);
 const { eraNetwork } = storeToRefs(providerStore);
 const { destinations } = storeToRefs(useDestinationsStore());
-const { l1BlockExplorerUrl, selectedNetwork } = storeToRefs(useNetworkStore());
+const { l1BlockExplorerUrl, selectedNetwork, selectedNetworkKey } = storeToRefs(useNetworkStore());
 const { l1Tokens, tokensRequestInProgress, tokensRequestError } = storeToRefs(tokensStore);
 const { balance, balanceInProgress, balanceError } = storeToRefs(zkSyncEthereumBalance);
 
@@ -957,6 +957,12 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
   if (!newchainId) return;
   resetFeeImmediately();
 });
+
+onMounted(() => {
+  if (selectedNetworkKey.value === "blast") {
+    selectedNetworkKey.value = "ethereum";
+  }
+})
 </script>
 
 <style lang="scss" scoped>
