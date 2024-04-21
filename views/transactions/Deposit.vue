@@ -461,7 +461,7 @@ import type { BigNumberish } from "ethers";
 
 import { useRoute, useRouter } from "#app";
 import { customBridgeTokens } from "@/data/customBridgeTokens";
-import { getWaitTime } from "@/data/networks";
+import { getWaitTime, zkSyncNetworks } from "@/data/networks";
 import { useDestinationsStore } from "@/store/destinations";
 import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
@@ -960,7 +960,7 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
 
 onMounted(() => {
   if (selectedNetworkKey.value === "blast") {
-    selectedNetworkKey.value = "ethereum";
+    selectedNetworkKey.value = zkSyncNetworks[0].key;
   }
 })
 </script>
