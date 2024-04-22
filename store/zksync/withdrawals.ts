@@ -86,6 +86,26 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
 
       const transactionFromStorage = transactionStatusStore.getTransaction(withdrawal.transactionHash);
       if (transactionFromStorage) {
+        // check if tx.to.destination is matching with tx.token.networkKey for erc20
+        if (
+          transactionFromStorage.to.destination.key !== transactionFromStorage.token.networkKey &&
+          transactionFromStorage.token.symbol !== "ETH"
+        ) {
+          const { selectedNetwork } = storeToRefs(useNetworkStore());
+          const eraNetworks = getNetworkInfo(withdrawal) || selectedNetwork.value;
+          const obj = {
+            iconUrl: eraNetworks.logoUrl!,
+            key: "nova",
+            label: eraNetworks?.l1Network?.name ?? "",
+          };
+          transactionStatusStore.updateTransactionData(withdrawal.transactionHash, {
+            ...transactionFromStorage,
+            to: {
+              ...transactionFromStorage.to,
+              destination: obj,
+            },
+          });
+        }
         if (!transactionFromStorage.info.completed) {
           await setStatus(withdrawal);
           await sleep(200);
