@@ -9,7 +9,13 @@ export const ETH_TOKEN: Token = {
   iconUrl: "/img/eth.svg",
 };
 
-export const WITHDRAWAL_DELAY_DAYS = 14;
+export const WITHDRAWAL_DELAY_DAYS = 7;
+
+// Last syncL2Requests tx on blast: Apr-20-2024 09:45:31 AM +UTC;
+// deposit before this time , estimate withdraw time is 14 days;
+// deposit after this time, estimate withdraw time is :
+// ( 14 days - (deposit time - this time)) < 7days ? 7days : ( 14 days - (deposit time - this time));
+export const LAST_BLAST_SYNCL2_TIME = 1713606331000;
 
 export const MERGE_TOKENS = [
   {
