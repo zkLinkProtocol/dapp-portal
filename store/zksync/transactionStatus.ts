@@ -9,6 +9,9 @@ import ZkSyncContractInterface from "@/zksync-web3-nova/abi/IZkSync.json";
 
 import type { FeeEstimationParams } from "@/composables/zksync/useFee";
 import type { TransactionDestination } from "@/store/destinations";
+
+import { useZkSyncWithdrawalsStore } from "@/store/zksync/withdrawals";
+
 import type { TokenAmount } from "@/types";
 import type { Hash } from "@/types";
 
@@ -64,7 +67,7 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
   const onboardStore = useOnboardStore();
   const { account } = storeToRefs(onboardStore);
   const eraWalletStore = useZkSyncWalletStore();
-
+  const { checkWithdrawalFinalizeAvailable } = useZkSyncWithdrawalsStore();
   const storageSavedTransactions = useStorage<{ [networkKey: string]: TransactionInfo[] }>(
     "zksync-bridge-transactions",
     {}
@@ -183,7 +186,7 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
     transaction.info.completed = true;
     return transaction;
   };
-  const { primaryNetwork, zkSyncNetworks,getNetworkInfo } = useNetworks();
+  const { primaryNetwork, zkSyncNetworks, getNetworkInfo } = useNetworks();
   const { selectedNetwork } = storeToRefs(useNetworkStore());
   let provider: Provider | undefined;
   const request = (transaction: any) => {
@@ -210,11 +213,16 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
         return transaction;
       }
     }
+    if (!checkWithdrawalFinalizeAvailable) {
+      return transaction;
+    }
     const isFinalized = await useZkSyncWalletStore()
       .getL1VoidSigner(true)
       ?.isWithdrawalFinalized(transaction.transactionHash)
       .catch(() => false);
-    transaction.info.withdrawalFinalizationAvailable = true;
+    // transaction.info.withdrawalFinalizationAvailable = true;
+    const claimable = await checkWithdrawalFinalizeAvailable(transaction);
+    transaction.info.withdrawalFinalizationAvailable = claimable;
     transaction.info.completed = isFinalized;
     return transaction;
   };
