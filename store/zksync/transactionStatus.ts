@@ -177,24 +177,17 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
       transactionHash = await getDepositL2TransactionHash(transaction.transactionHash);
     }
 
-    const transactionReceipt = await request(transaction.gateway).getTransactionReceipt(transactionHash);
+    const transactionReceipt = await request(transaction).getTransactionReceipt(transactionHash);
     if (!transactionReceipt) return transaction;
     transaction.info.toTransactionHash = transactionHash;
     transaction.info.completed = true;
     return transaction;
   };
-  const { primaryNetwork, zkSyncNetworks } = useNetworks();
-  const getNetworkInfo = (gateway: string) => {
-    const newNetwork = zkSyncNetworks.find(
-      (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === gateway?.toLowerCase()
-    );
-    return newNetwork ?? primaryNetwork;
-  };
-
+  const { primaryNetwork, zkSyncNetworks,getNetworkInfo } = useNetworks();
   const { selectedNetwork } = storeToRefs(useNetworkStore());
   let provider: Provider | undefined;
-  const request = (gateway: string) => {
-    const eraNetwork = getNetworkInfo(gateway) || selectedNetwork.value;
+  const request = (transaction: any) => {
+    const eraNetwork = getNetworkInfo(transaction) || selectedNetwork.value;
     if (!provider) {
       provider = new Provider(eraNetwork.rpcUrl);
     }
@@ -212,7 +205,7 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
   };
   const getWithdrawalStatus = async (transaction: TransactionInfo) => {
     if (!transaction.info.withdrawalFinalizationAvailable) {
-      const transactionDetails = await request(transaction.gateway).getTransactionDetails(transaction.transactionHash);
+      const transactionDetails = await request(transaction).getTransactionDetails(transaction.transactionHash);
       if (transactionDetails.status !== "verified") {
         return transaction;
       }
@@ -226,7 +219,7 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
     return transaction;
   };
   const getTransferStatus = async (transaction: TransactionInfo) => {
-    const transactionReceipt = await request(transaction.gateway).getTransactionReceipt(transaction.transactionHash);
+    const transactionReceipt = await request(transaction).getTransactionReceipt(transaction.transactionHash);
     if (!transactionReceipt) return transaction;
     transaction.info.completed = true;
     return transaction;
