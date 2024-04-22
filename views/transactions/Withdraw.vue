@@ -23,7 +23,10 @@
     </PageTitle>
 
     <div class="warnBox flex" v-if="!route.query.s || route.query.s !== 'okx'">
-      <div>Note: All LRT points will continue to be calculated after you request a withdrawal. They will appear in the next few days in dashboard due to the data synchronization process.</div>
+      <div>
+        Note: All LRT points will continue to be calculated after you request a withdrawal. They will appear in the next
+        few days in dashboard due to the data synchronization process.
+      </div>
     </div>
 
     <div v-if="showBridge">
@@ -181,11 +184,12 @@
             class="mb-block-padding-1/2 sm:mb-block-gap"
           >
             <p v-if="withdrawalManualFinalizationRequired">
-              You will be able to claim your withdrawal only after a {{ WITHDRAWAL_DELAY_DAYS }}-day withdrawal delay.
+              You will be able to claim your withdrawal only after a {{ displayEstimateWithdrawalDelayDays }}-day
+              withdrawal delay.
               <!-- <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">Learn more</a> -->
             </p>
             <p v-else>
-              You will receive funds only after a {{ WITHDRAWAL_DELAY_DAYS }}-day withdrawal delay.
+              You will receive funds only after a {{ displayEstimateWithdrawalDelayDays }}-day withdrawal delay.
               <!-- <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">Learn more</a> -->
             </p>
           </CommonAlert>
@@ -227,7 +231,7 @@
             class="mt-2"
             @try-again="isMergeTokenSelected ? estiamteForMergeToken : estimate"
           >
-           Fee estimation error: {{ feeError.message }}
+            Fee estimation error: {{ feeError.message }}
           </CommonErrorBlock>
           <div class="mt-4 flex items-center gap-4">
             <transition v-bind="TransitionOpacity()">
@@ -292,7 +296,7 @@
 
           <CommonHeightTransition
             v-if="isMergeTokenSelected && step === 'form'"
-            :opened="( !enoughAllowance && !continueButtonDisabled) || !!setAllowanceReceipt"
+            :opened="(!enoughAllowance && !continueButtonDisabled) || !!setAllowanceReceipt"
           >
             <CommonCardWithLineButtons class="mt-4">
               <DestinationItem
@@ -429,7 +433,7 @@
         </template>
       </form>
     </div>
-    <div class="flex flex-col gap-block-gap" v-else>
+    <div class="mt-6 flex flex-col gap-block-gap">
       <CommonCardWithLineButtons v-for="(item, index) in thirdChainMethods" :key="index" class="relative">
         <DestinationItem v-bind="item.props">
           <template #image v-if="item.icon">
@@ -484,14 +488,13 @@ import { useOnboardStore } from "@/store/onboard";
 import { usePreferencesStore } from "@/store/preferences";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncTokensStore } from "@/store/zksync/tokens";
-import { WITHDRAWAL_DELAY } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransfersHistoryStore } from "@/store/zksync/transfersHistory";
 import { useZkSyncWalletStore } from "@/store/zksync/wallet";
-import { ETH_TOKEN, isMergeToken, isSupportedMergeToken, MergeTokenContractUrl, WITHDRAWAL_DELAY_DAYS } from "@/utils/constants";
+import { ETH_TOKEN, isMergeToken, isSupportedMergeToken } from "@/utils/constants";
 import { ZKSYNC_WITHDRAWAL_DELAY } from "@/utils/doc-links";
 import { checksumAddress, decimalToBigNumber, formatRawTokenPrice, parseTokenAmount } from "@/utils/formatters";
-import { calculateFee } from "@/utils/helpers";
+import { calculateFee, getEstimateWithdrawalDelayDays } from "@/utils/helpers";
 import { silentRouterChange } from "@/utils/helpers";
 import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/transitions";
 import TransferSubmitted from "@/views/transactions/TransferSubmitted.vue";
@@ -499,16 +502,26 @@ import WithdrawalSubmitted from "@/views/transactions/WithdrawalSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 const showBridge = true;
 const chainList = [
-  // {
-  //   "name": "Symbiosis",
-  //   "description": "https://symbiosis.finance/",
-  //   "logo": "Symbiosys.svg",
-  //   "bannerImg": "Symbiosys.jpg",
-  //   "type": "Defi",
-  //   "url": "https://symbiosis.finance/",
-  //   "tiwwerUrl": "https://twitter.com/symbiosis_fi",
-  //   "discordUrl": "https://discord.com/invite/YHgDSJ42eG"
-  // },
+  {
+    name: "Meson Finance",
+    description: "https://meson.fi/",
+    logo: "Meson.svg",
+    bannerImg: "Meson.jpg",
+    type: "Infra",
+    url: "https://meson.fi/",
+    tiwwerUrl: "https://twitter.com/mesonfi",
+    discordUrl: "https://discord.com/invite/meson",
+  },
+  {
+    name: "Symbiosis",
+    description: "https://symbiosis.finance/",
+    logo: "Symbiosys.svg",
+    bannerImg: "Symbiosys.jpg",
+    type: "Defi",
+    url: "https://symbiosis.finance/",
+    tiwwerUrl: "https://twitter.com/symbiosis_fi",
+    discordUrl: "https://discord.com/invite/YHgDSJ42eG",
+  },
   {
     name: "Owlto Finance",
     description: "https://owlto.finance/",
@@ -575,6 +588,8 @@ const fromNetworkSelected = (networkKey?: string) => {
 
 const step = ref<"form" | "withdrawal-finalization-warning" | "confirm" | "submitted">("form");
 const destination = computed(() => (props.type === "transfer" ? destinations.value.nova : destinations.value.arbitrum));
+
+const displayEstimateWithdrawalDelayDays = getEstimateWithdrawalDelayDays(Date.now());
 
 const availableTokens = computed(() => {
   if (!tokens.value) return [];
@@ -1048,7 +1063,9 @@ const makeTransaction = async () => {
       info: {
         expectedCompleteTimestamp:
           transaction.value?.type === "withdrawal"
-            ? new Date(new Date().getTime() + WITHDRAWAL_DELAY).toISOString()
+            ? new Date(
+                new Date().getTime() + getEstimateWithdrawalDelayDays(Date.now()) * 24 * 60 * 60 * 1000
+              ).toISOString()
             : undefined,
         completed: false,
       },
