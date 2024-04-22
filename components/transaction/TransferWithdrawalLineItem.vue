@@ -94,15 +94,9 @@ const props = defineProps({
   },
 });
 
-const { primaryNetwork, zkSyncNetworks } = useNetworks();
-const getNetworkInfo = () => {
-  const newNetwork = zkSyncNetworks.find(
-    (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === props.transfer.gateway?.toLowerCase()
-  );
-  return newNetwork ?? primaryNetwork;
-};
+const { primaryNetwork, zkSyncNetworks,getNetworkInfo } = useNetworks();
 const { account } = storeToRefs(useOnboardStore());
-const eraNetwork = getNetworkInfo();
+const eraNetwork = getNetworkInfo(props.transfer);
 const label = computed(() => {
   const article = "Withdraw";
   if (props.transfer.to === account.value.address) {
@@ -125,11 +119,11 @@ const getl1NetworkName = () => {
     if (type === "withdrawal") {
       return {
         from: "",
-        to: getNetworkInfo().l1Network?.name,
+        to: getNetworkInfo(props.transfer).l1Network?.name,
       };
     } else if (type === "deposit") {
       return {
-        from: getNetworkInfo().l1Network?.name,
+        from: getNetworkInfo(props.transfer).l1Network?.name,
         to: "",
       };
     }
