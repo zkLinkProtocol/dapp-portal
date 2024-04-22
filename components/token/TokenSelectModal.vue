@@ -69,21 +69,22 @@
 
 <script lang="ts" setup>
 import { computed, ref } from "vue";
-import { ethers } from "ethers";
 
 import { Combobox } from "@headlessui/vue";
 import { MagnifyingGlassIcon } from "@heroicons/vue/24/outline";
+import { ethers } from "ethers";
+import { storeToRefs } from "pinia";
 
 import type { Token, TokenAmount } from "@/types";
+import type { Address } from "viem";
 import type { PropType } from "vue";
 
-import { groupBalancesByAmount } from "@/utils/mappers";
-import { Address } from "viem";
 import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
 import { useSearchtokenStore } from "@/store/searchToken";
 import { useZkSyncEthereumBalanceStore } from "@/store/zksync/ethereumBalance";
-import { ETH_ADDRESS, L2_ETH_TOKEN_ADDRESS, fetchErc20 } from "~/zksync-web3-nova/src/utils";
+import { groupBalancesByAmount } from "@/utils/mappers";
+import { ETH_ADDRESS, fetchErc20, L2_ETH_TOKEN_ADDRESS } from "~/zksync-web3-nova/src/utils";
 
 const props = defineProps({
   title: {
@@ -160,8 +161,25 @@ const filterTokens = (tokens: Token[]) => {
   return newTokens;
 };
 
-const displayedTokens = computed(() => filterTokens(props.tokens.filter((e) => selectedNetwork.value.isEthGasToken || (e.address !== ETH_ADDRESS && e.address.toLowerCase() !== L2_ETH_TOKEN_ADDRESS))));
-const displayedBalances = computed(() => filterTokens(props.balances.filter((e) => selectedNetwork.value.isEthGasToken || (e.address !== ETH_ADDRESS && e.address.toLowerCase() !== L2_ETH_TOKEN_ADDRESS))) as TokenAmount[]);
+const displayedTokens = computed(() =>
+  filterTokens(
+    props.tokens.filter(
+      (e) =>
+        selectedNetwork.value.isEthGasToken ||
+        (e.address !== ETH_ADDRESS && e.address.toLowerCase() !== L2_ETH_TOKEN_ADDRESS)
+    )
+  )
+);
+const displayedBalances = computed(
+  () =>
+    filterTokens(
+      props.balances.filter(
+        (e) =>
+          selectedNetwork.value.isEthGasToken ||
+          (e.address !== ETH_ADDRESS && e.address.toLowerCase() !== L2_ETH_TOKEN_ADDRESS)
+      )
+    ) as TokenAmount[]
+);
 const balanceGroups = groupBalancesByAmount(displayedBalances);
 const selectedTokenAddress = computed({
   get: () => props.tokenAddress,
@@ -172,7 +190,13 @@ const selectedToken = computed({
     if (!props.tokens) {
       return undefined;
     }
-    return props.tokens.filter((e)=> selectedNetwork.value.isEthGasToken || (e.address !== ETH_ADDRESS && e.address.toLowerCase() !== L2_ETH_TOKEN_ADDRESS)).find((e) => e.address === selectedTokenAddress.value);
+    return props.tokens
+      .filter(
+        (e) =>
+          selectedNetwork.value.isEthGasToken ||
+          (e.address !== ETH_ADDRESS && e.address.toLowerCase() !== L2_ETH_TOKEN_ADDRESS)
+      )
+      .find((e) => e.address === selectedTokenAddress.value);
   },
   set: (value) => {
     if (value) {

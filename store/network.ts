@@ -45,7 +45,12 @@ export const useNetworkStore = defineStore("network", () => {
   const identifyNetworkByQueryParam = () => {
     const windowLocation = window.location;
     const networkFromQueryParam = new URLSearchParams(windowLocation.search).get("network");
-    if (networkFromQueryParam && zkSyncNetworks.some((e) => e.key === networkFromQueryParam)) {
+    if (windowLocation.pathname === "/" && networkFromQueryParam === "blast") {
+      // hide blast for deposit
+      const url = new URL(windowLocation.href);
+      url.searchParams.set("network", zkSyncNetworks[0].key);
+      window.location.replace(url.toString());
+    } else if (networkFromQueryParam && zkSyncNetworks.some((e) => e.key === networkFromQueryParam)) {
       selectedNetworkKey.value = networkFromQueryParam;
       resetNetworkChangeWarning();
     }

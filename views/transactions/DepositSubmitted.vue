@@ -41,10 +41,11 @@
 <script lang="ts" setup>
 import { storeToRefs } from "pinia";
 
+import useNetworks from "@/composables/useNetworks";
+
 import type { TransactionInfo } from "@/store/zksync/transactionStatus";
 import type { PropType } from "vue";
 
-import { useNetworkStore } from "@/store/network";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 
 const { primaryNetwork, zkSyncNetworks } = useNetworks();

@@ -1,5 +1,6 @@
 import { injected, safe, walletConnect } from "@wagmi/connectors";
 import {
+  createConfig,
   getAccount,
   getConnections,
   getConnectors,
@@ -26,7 +27,7 @@ import { confirmedSupportedWallets, disabledWallets } from "@/data/wallets";
 import { useNetworkStore } from "@/store/network";
 
 const isMobile = () => window.innerWidth < 800; // simple way to detect mobile device
-
+const isBinanceWeb3App = () => window.ethereum?.isBinance;
 export const useOnboardStore = defineStore("onboard", () => {
   const { zkSyncNetworks } = useNetworks();
   const runtimeConfig = useRuntimeConfig();
@@ -83,12 +84,23 @@ export const useOnboardStore = defineStore("onboard", () => {
   };
   console.log("extendedChains", extendedChains);
   console.log("selectedNetwork", selectedNetwork.value);
-  const wagmiConfig = defaultWagmiConfig({
+  const wagmiConfig = createConfig({
     chains: extendedChains,
     projectId: env.walletConnectProjectID,
     metadata,
     connectors: [
-      injected(),
+      isBinanceWeb3App()
+        ? injected({
+            target() {
+              return {
+                id: "Binance Web3 Wallet",
+                name: "Binance Web3 Wallet",
+                provider: window.ethereum,
+                icon: "/img-binance-web3-wallet.png",
+              };
+            },
+          })
+        : injected(),
       safe({
         allowedDomains: [/app.safe.global$/],
         debug: true,
@@ -131,7 +143,7 @@ export const useOnboardStore = defineStore("onboard", () => {
     connectorName.value = connector?.name;
     let name = "";
     if (connections?.[0]?.connector.getProvider) {
-      const provider: any = await connections?.[0]?.connector.getProvider();
+      const provider: unknown = await connections?.[0]?.connector.getProvider();
       name = provider?.session?.peer?.metadata?.name;
     } else {
       name = connector?.name;
@@ -143,6 +155,10 @@ export const useOnboardStore = defineStore("onboard", () => {
     } else {
       walletName.value = name?.replace(/ Wallet$/, "").trim();
       console.log("name--------------->", name);
+    }
+
+    if (walletName.value?.includes("Binance")) {
+      walletName.value = "Binance Web3 Wallet";
     }
 
     if (walletName.value && connector) {
@@ -165,7 +181,7 @@ export const useOnboardStore = defineStore("onboard", () => {
 
   const BinanceWalletId = "8a0ee50d1f22f6651afcae7eb4253e52a3310b90af5daef78a8c4929a9bb99d4";
   const excludeWalletIds = ["bc949c5d968ae81310268bf9193f9c9fb7bb4e1283e1284af8f2bd4992535fd6"];
-  if (isMobile()) {
+  if (isMobile() && isBinanceWeb3App()) {
     excludeWalletIds.push(BinanceWalletId);
   }
   const featuredWalletIds = [
@@ -177,18 +193,13 @@ export const useOnboardStore = defineStore("onboard", () => {
     // "aba1f652e61fd536e8a7a5cd5e0319c9047c435ef8f7e907717361ff33bb3588",
     // "38f5d18bd8522c244bdd70cb4a68e0e718865155811c043f052fb9f1c51de662",//bitget
   ];
-  if (!isMobile()) {
+  if (!isBinanceWeb3App()) {
     featuredWalletIds.unshift(BinanceWalletId);
   }
 
   const web3modal = createWeb3Modal({
     wagmiConfig,
     projectId: env.walletConnectProjectID,
-    connectorImages: isMobile()
-      ? {
-          injected: "/img-browser-wallet.png",
-        }
-      : undefined,
     excludeWalletIds,
     featuredWalletIds,
     // termsConditionsUrl: "https://zksync.io/terms",
@@ -255,6 +266,7 @@ export const useOnboardStore = defineStore("onboard", () => {
   const {
     inProgress: switchingNetworkInProgress,
     error: switchingNetworkError,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     execute: switchNetwork,
   } = usePromise(
     async () => {
@@ -263,7 +275,7 @@ export const useOnboardStore = defineStore("onboard", () => {
     },
     { cache: false }
   );
-  const setCorrectNetwork = async (id: any) => {
+  const setCorrectNetwork = async (id: number) => {
     return await switchNetworkById(id).catch(() => undefined);
   };
 
@@ -316,7 +328,7 @@ export const useOnboardStore = defineStore("onboard", () => {
     switchNetworkById,
 
     getWallet,
-    getPublicClient: (chainId: any = "") => {
+    getPublicClient: (chainId?: number) => {
       if (!l1Network.value) throw new Error(`L1 network is not available on ${selectedNetwork.value.name}`);
       return getPublicClient(wagmiConfig, { chainId: chainId || l1Network.value?.id });
     },
