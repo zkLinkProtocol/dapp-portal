@@ -73,3 +73,4 @@ export function mapApiTransfer(transfer: Api.Response.Transfer) {
   };
 }
 export type Transfer = ReturnType<typeof mapApiTransfer>;
+export type Transaction = Api.Response.Transaction;

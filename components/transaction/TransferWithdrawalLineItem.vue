@@ -105,6 +105,9 @@ const getNetworkInfo = () => {
 const { account } = storeToRefs(useOnboardStore());
 const eraNetwork = getNetworkInfo();
 const label = computed(() => {
+  if(props.transfer.status === 'failed') {
+    return 'Failed Deposit'
+  }
   const article = 'Withdraw';
   if (props.transfer.to === account.value.address) {
     return article;
