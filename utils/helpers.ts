@@ -55,7 +55,7 @@ export async function retry<T>(func: () => Promise<T>, options: RetryOptions = {
   }
 }
 
-export const getEstimateWithdrawalDelayDays = (txTime: string) => {
+export const getEstimateWithdrawalDelayDays = (txTime: string | number) => {
   const transactionTime = new Date(txTime).getTime();
   if (transactionTime < LAST_BLAST_SYNCL2_TIME) {
     return 14;

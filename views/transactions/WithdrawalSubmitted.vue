@@ -159,8 +159,6 @@ import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
-import { LAST_BLAST_SYNCL2_TIME, WITHDRAWAL_DELAY_DAYS } from "@/utils/constants";
-
 import { getEstimateWithdrawalDelayDays } from "@/utils/helpers";
 
 const props = defineProps({
