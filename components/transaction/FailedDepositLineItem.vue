@@ -1,48 +1,27 @@
 <template>
-  <CommonButtonLine class="transaction-withdrawal-line-item">
+  <CommonButtonLine class="transaction-withdrawal-line-item" @click="isModalOpen = true">
     <div class="line-button-with-img-image">
-      <DestinationIconContainer>
-        <CommonSpinner v-if="inProgress" variant="dark" />
-        <MinusIcon v-else aria-hidden="true" />
+      <DestinationIconContainer class="p-0">
+        <img src="/img/icon-cross.svg" class="w-3 h-3" />
       </DestinationIconContainer>
     </div>
     <div class="withdrawal-line-body">
       <div class="withdrawal-line-top">
         <div class="line-button-with-img-body">
           <CommonButtonLineBodyInfo class="text-left">
-            <template #label>
-              {{ label }}
-            </template>
+            <template #label> Failed Deposit </template>
             <template #underline>
               <template v-if="chainsLabel">
-                <div v-if="transfer.type == 'deposit'">
+                <div>
                   From:
                   <!-- <img v-if="chainIconUrl" class="chain-icon left" :src="chainIconUrl" /> -->
-                  <span>{{ chainsLabel.from }}</span
+                  <span>{{ chainsLabel }}</span
                   >.
                 </div>
-                <div v-else-if="transfer.type == 'withdrawal'">
-                  To:
-                  <!-- <img v-if="chainIconUrl" class="chain-icon" :src="chainIconUrl" /> -->
-                  <span>{{ chainsLabel.to }}</span
-                  >.
-                </div>
-                <template v-else>
-                  <div v-if="chainsLabel.from !== chainsLabel.to" class="chain-label-wrap">
-                    <span>{{ chainsLabel.from }}</span>
-                    <ArrowRightIcon class="relative -top-px mx-1 inline h-4 w-4" aria-hidden="true" />
-                    <span>{{ chainsLabel.to }}</span
-                    >.
-                  </div>
-                  <span v-else>{{ chainsLabel.from }} .</span>
-                </template>
               </template>
               <span>{{ timeAgo }}</span>
             </template>
           </CommonButtonLineBodyInfo>
-          <div class="flex flex-wrap items-center gap-x-2 sm:hidden">
-            <TokenAmount v-if="token" :token="token" :amount="computeAmount" />
-          </div>
         </div>
         <div class="line-button-with-img-right">
           <CommonButtonLineBodyInfo ref="el" class="hidden text-right sm:block">
@@ -50,22 +29,41 @@
               <TokenAmount v-if="token" :token="token" :amount="computeAmount" />
             </template>
             <template #underline>
-              <TotalPrice v-if="token" :token="token" :amount="computeAmount" />
+              <div class="flex flex-col">
+                <span>Claim on source chain</span>
+                <CommonTimer format="human-readable" :future-date="expectedCompleteTimestamp" :only-days="true">
+                  <template #default="{ timer, isTimerFinished }">
+                    <span>{{ timer }} days left</span>
+                  </template>
+                </CommonTimer>
+              </div>
             </template>
           </CommonButtonLineBodyInfo>
         </div>
       </div>
-      <div class="withdrawal-line-separator"></div>
-      <div class="withdrawal-line-bottom">
-        <div>Withdrawal is available for claiming on the {{ eraNetwork.l1Network?.name }} network</div>
-        <CommonButton variant="primary" class="withdrawal-claim-button">Go to claim</CommonButton>
-      </div>
     </div>
   </CommonButtonLine>
+  <CommonModal v-model:opened="isModalOpen" title="Failed Deposit">
+    <div class="flex flex-col items-center text-left">
+      <p class="w-full text-left mb-8 mt-4">Your assets are SAFE!</p>
+
+      <p class="w-full text-left mb-8">
+        However, unfortunately, your deposit from Arbitrum failed to execute on Nova, resulting in your assets remaining
+        on the source chain.
+      </p>
+
+      <p class="w-full text-left mb-4">
+        After a 14-day period from the time of your deposit, your assets will be automatically returned to the deposit
+        address on the source chain.
+      </p>
+      <CommonButton type="submit" variant="primary" class="w-full" @click="isModalOpen = false"> Confirm </CommonButton>
+      <a class="mt-4">Contact for help</a>
+    </div>
+  </CommonModal>
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 
 import { ArrowRightIcon, MinusIcon } from "@heroicons/vue/24/outline";
 import { useTimeAgo } from "@vueuse/core";
@@ -73,26 +71,25 @@ import { BigNumber } from "ethers";
 import { storeToRefs } from "pinia";
 
 import TokenAmount from "@/components/transaction/lineItem/TokenAmount.vue";
-import TotalPrice from "@/components/transaction/lineItem/TotalPrice.vue";
 
 import useNetworks from "@/composables/useNetworks";
 
-import type { Transfer } from "@/utils/mappers";
+import type { NetworkLayer, Transaction } from "@/utils/mappers";
 import type { PropType } from "vue";
 
 import { useOnboardStore } from "@/store/onboard";
+import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { shortenAddress } from "@/utils/formatters";
+import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 
 const props = defineProps({
   transfer: {
-    type: Object as PropType<Transfer>,
+    type: Object as PropType<Transaction>,
     required: true,
   },
-  inProgress: {
-    type: Boolean,
-    default: false,
-  },
 });
+
+const isModalOpen = ref(false);
 
 const { primaryNetwork, zkSyncNetworks } = useNetworks();
 const getNetworkInfo = () => {
@@ -103,16 +100,6 @@ const getNetworkInfo = () => {
 };
 const { account } = storeToRefs(useOnboardStore());
 const eraNetwork = getNetworkInfo();
-const label = computed(() => {
-  if(props.transfer.status === 'failed') {
-    return 'Failed Deposit'
-  }
-  const article = 'Withdraw';
-  if (props.transfer.to === account.value.address) {
-    return article;
-  }
-  return `${article} to ${formatAddress(props.transfer.to)}`;
-});
 
 const formatAddress = (address: string) => {
   if (address === account.value.address) {
@@ -121,47 +108,29 @@ const formatAddress = (address: string) => {
   return shortenAddress(address);
 };
 
-const getl1NetworkName = () => {
-  const { type, gateway } = props.transfer;
-  // other chain
-  if (gateway) {
-    if (type === "withdrawal") {
-      return {
-        from: "",
-        to: getNetworkInfo().l1Network?.name,
-      };
-    } else if (type === "deposit") {
-      return {
-        from: getNetworkInfo().l1Network?.name,
-        to: "",
-      };
-    }
-  } else {
-    // primary chain
-    if (type === "transfer") {
-      return {
-        from: eraNetwork.name,
-        to: eraNetwork.name,
-      };
-    } else {
-      return {
-        from: primaryNetwork.l1Network?.name,
-        to: primaryNetwork.l1Network?.name,
-      };
-    }
-  }
-};
 const chainsLabel = computed(() => {
-  return getl1NetworkName();
+  const { networkKey } = props.transfer;
+  if (networkKey === "ethereum" && process.env.NODE_TYPE === "nexus-sepolia") {
+    // special handle for be
+    return "Sepolia";
+  } else {
+    const network = zkSyncNetworks.find((item) => item.key === networkKey);
+    return network?.l1Network?.name;
+  }
+});
+
+const expectedCompleteTimestamp = computed(() => {
+  console.log("transer: ", props.transfer);
+  return new Date(new Date(props.transfer.receivedAt).getTime() + 14 * 24 * 3600 * 1000).toISOString();
 });
 const computeAmount = computed(() => {
-  return BigNumber.from(props.transfer.amount || "0").toString();
+  return BigNumber.from(props.transfer.token.amount || "0").toString();
 });
 const token = computed(() => {
   return props.transfer.token;
 });
 
-const timeAgo = useTimeAgo(props.transfer.timestamp);
+const timeAgo = useTimeAgo(props.transfer.receivedAt);
 </script>
 
 <style lang="scss" scoped>
@@ -171,8 +140,10 @@ const timeAgo = useTimeAgo(props.transfer.timestamp);
   .line-button-with-img-image {
     @apply mt-[1.5px] aspect-square h-auto w-9 flex-none self-start;
   }
+
   .withdrawal-line-body {
     @apply w-full;
+
     .withdrawal-line-separator {
       @apply my-4 w-full border-t border-neutral-200 dark:border-neutral-800;
     }
@@ -183,10 +154,12 @@ const timeAgo = useTimeAgo(props.transfer.timestamp);
       .line-button-with-img-body {
         @apply w-full overflow-hidden;
       }
+
       .line-button-with-img-right {
         @apply w-max;
       }
     }
+
     .withdrawal-line-bottom {
       @apply flex flex-col items-center justify-between gap-4 xs:flex-row;
 

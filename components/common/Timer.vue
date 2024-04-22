@@ -70,6 +70,7 @@ const updateTimer = () => {
   diff.value = Math.max(targetTime - currentTime, 0);
   timer.value = formatTimeDiff(diff.value, props.onlyDays);
 
+
   if (diff.value === 0) {
     clearInterval(intervalId);
     return;
