@@ -135,6 +135,7 @@ import { storeToRefs } from "pinia";
 import { mainnet } from "viem/chains";
 
 import useInterval from "@/composables/useInterval";
+import useNetworks from "@/composables/useNetworks";
 import useSingleLoading from "@/composables/useSingleLoading";
 import useEcosystemBanner from "@/composables/zksync/deposit/useEcosystemBanner";
 
@@ -146,7 +147,6 @@ import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncWalletStore } from "@/store/zksync/wallet";
 import { parseTokenAmount, removeSmallAmount } from "@/utils/formatters";
 import { isOnlyZeroes } from "@/utils/helpers";
-import useNetworks from "@/composables/useNetworks";
 
 const onboardStore = useOnboardStore();
 const walletStore = useZkSyncWalletStore();

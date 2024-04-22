@@ -42,14 +42,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrowTopRightOnSquareIcon, Squares2X2Icon } from "@heroicons/vue/24/outline";
 import { storeToRefs } from "pinia";
 
 import { useDestinationsStore } from "@/store/destinations";
-import { useZkSyncProviderStore } from "@/store/zksync/provider";
 
 const { destinations } = storeToRefs(useDestinationsStore());
-const { eraNetwork } = storeToRefs(useZkSyncProviderStore());
 </script>
 
 <style lang="scss" scoped></style>

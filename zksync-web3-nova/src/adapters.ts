@@ -1,7 +1,30 @@
-import { BigNumber, BigNumberish, BytesLike, ethers, utils } from "ethers";
-import { IERC20MetadataFactory, IL1Bridge, IL1BridgeFactory, IL2BridgeFactory, IZkSyncFactory } from "../typechain";
-import { Provider } from "./provider";
+import { BigNumber, ethers, utils } from "ethers";
+import { Interface } from "ethers/lib/utils";
+
+import { l1EthDepositAbi } from "./abi";
 import {
+  BOOTLOADER_FORMAL_ADDRESS,
+  checkBaseCost,
+  DEFAULT_GAS_PER_PUBDATA_LIMIT,
+  estimateDefaultBridgeDepositL2Gas,
+  ETH_ADDRESS,
+  isETH,
+  L1_MESSENGER_ADDRESS,
+  layer1TxDefaults,
+  REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
+  scaleGasLimit,
+  undoL1ToL2Alias,
+  WMNT_CONTRACT,
+} from "./utils";
+import { zkSyncProvider } from "./zkSyncProvider"; //TODO the filename is not accurate
+import { IERC20MetadataFactory, IL1BridgeFactory, IL2BridgeFactory, IZkSyncFactory } from "../typechain";
+
+import { abi as primaryGetterAbi } from "../abi/GettersFacet.json";
+import WrappedMNTAbi from "../abi/WrappedMNT.json";
+import WethAbi from "../abi/weth.json";
+
+import type { Provider } from "./provider";
+import type {
   Address,
   BalancesMap,
   BlockTag,
@@ -11,26 +34,10 @@ import {
   TransactionRequest,
   TransactionResponse,
 } from "./types";
-import {
-  BOOTLOADER_FORMAL_ADDRESS,
-  checkBaseCost,
-  DEFAULT_GAS_PER_PUBDATA_LIMIT,
-  REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
-  ETH_ADDRESS,
-  isETH,
-  L1_MESSENGER_ADDRESS,
-  layer1TxDefaults,
-  undoL1ToL2Alias,
-  estimateDefaultBridgeDepositL2Gas,
-  scaleGasLimit,
-} from "./utils";
-import { Hash } from "~/types";
-import { Interface } from "ethers/lib/utils";
-import { abi as primaryGetterAbi } from "../abi/GettersFacet.json";
-import { l1EthDepositAbi } from "./abi";
-import { Fee, LineaProvider, zkSyncProvider } from "./zkSyncProvider"; //TODO the filename is not accurate
-
-type Constructor<T = {}> = new (...args: any[]) => T;
+import type { Fee } from "./zkSyncProvider";
+import type { BigNumberish, BytesLike } from "ethers";
+import type { Hash } from "~/types";
+type Constructor<T = unknown> = new (...args: unknown[]) => T;
 
 interface TxSender {
   sendTransaction(tx: ethers.providers.TransactionRequest): Promise<ethers.providers.TransactionResponse>;
@@ -75,7 +82,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     async getCanonicalTxHash(forwardHash: Hash): Promise<Hash | undefined> {
       const contractAddress = await this._providerL2().getMainContractAddress();
       const iface = new Interface(primaryGetterAbi);
-      let tx: TransactionRequest = {
+      const tx: TransactionRequest = {
         to: contractAddress,
         data: iface.encodeFunctionData("getCanonicalTxHash", [forwardHash]),
       };
@@ -156,6 +163,29 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       );
     }
 
+    async depositMNT(amount: BigNumberish, cb?: () => void) {
+      const wmntContract = new ethers.Contract(WMNT_CONTRACT, WrappedMNTAbi, this._signerL1());
+      const { hash } = await wmntContract.deposit({ value: amount });
+      if (cb) {
+        cb();
+      }
+      const res = await this._providerL1().waitForTransaction(hash);
+      console.log("approve mnt res: ", res);
+    }
+
+    async unwrapWETH(token: Address, amount: BigNumberish, cb?: () => void) {
+      const weths = await this._providerL2().getWETHContractAddress();
+      if (!weths.map((item) => item.toLowerCase().includes(token.toLowerCase()))) {
+        return;
+      }
+      const wethContract = new ethers.Contract(token, WethAbi, this._signerL1());
+      const { hash } = await wethContract.withdraw(amount);
+      if (cb) {
+        cb();
+      }
+      await this._providerL1().waitForTransaction(hash);
+    }
+
     async deposit(transaction: {
       token: Address;
       amount: BigNumberish;
@@ -170,6 +200,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       approveOverrides?: ethers.Overrides;
     }): Promise<PriorityOpResponse> {
       const depositTx = await this.getDepositTx(transaction);
+
       if (transaction.token == ETH_ADDRESS) {
         depositTx.overrides ??= {};
         console.log("depositTx.overrides", depositTx.overrides);
@@ -252,7 +283,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
     async getDepositEstimateGasForUseFee(l2GasLimit: BigNumber, baseCost: BigNumber): Promise<Fee> {
       const dummyAmount = 0; // must be 0, cause some secondary chain does not support deposit GAS Token, suck as Mantle
-      let baseGasLimit: BigNumber;
       const face = new Interface([l1EthDepositAbi]);
       const calldata = face.encodeFunctionData("requestL2Transaction", [
         await this.getAddress(),
@@ -284,7 +314,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       //   return fee;
       // }
 
-      baseGasLimit = await this._providerL1().estimateGas(estimateTx);
+      const baseGasLimit: BigNumber = await this._providerL1().estimateGas(estimateTx);
       return {
         gasLimit: scaleGasLimit(baseGasLimit),
         gasPerPubdataLimit: BigNumber.from(0),
@@ -304,7 +334,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       l2GasLimit?: BigNumberish;
       gasPerPubdataByte?: BigNumberish;
       overrides?: ethers.PayableOverrides;
-    }): Promise<any> {
+    }): Promise<unknown> {
       const bridgeContracts = await this.getL1BridgeContracts();
       if (transaction.bridgeAddress) {
         bridgeContracts.erc20.attach(transaction.bridgeAddress);
@@ -361,7 +391,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
           tx.gasPerPubdataByte,
           to,
         ];
-        debugger;
         overrides.value ??= baseCost.add(operatorTip);
         await checkBaseCost(baseCost, overrides.value);
 
@@ -506,7 +535,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       return fullCost;
     }
 
-    async _getWithdrawalLog(withdrawalHash: BytesLike, index: number = 0) {
+    async _getWithdrawalLog(withdrawalHash: BytesLike, index = 0) {
       const hash = ethers.utils.hexlify(withdrawalHash);
       const receipt = await this._providerL2().getTransactionReceipt(hash);
       const log = receipt.logs.filter(
@@ -544,10 +573,11 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       return BigNumber.from(l1Fee);
     }
 
-    async _getWithdrawalL2ToL1Log(withdrawalHash: BytesLike, index: number = 0) {
+    async _getWithdrawalL2ToL1Log(withdrawalHash: BytesLike, index = 0) {
       const hash = ethers.utils.hexlify(withdrawalHash);
       const receipt = await this._providerL2().getTransactionReceipt(hash);
       const messages = Array.from(receipt.l2ToL1Logs.entries()).filter(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         ([_, log]) => log.sender == L1_MESSENGER_ADDRESS
       );
       const [l2ToL1LogIndex, l2ToL1Log] = messages[index];
@@ -558,7 +588,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       };
     }
 
-    async finalizeWithdrawalParams(withdrawalHash: BytesLike, index: number = 0) {
+    async finalizeWithdrawalParams(withdrawalHash: BytesLike, index = 0) {
       const { log, l1BatchTxId } = await this._getWithdrawalLog(withdrawalHash, index);
       const { l2ToL1LogIndex } = await this._getWithdrawalL2ToL1Log(withdrawalHash, index);
       const sender = ethers.utils.hexDataSlice(log.topics[1], 12);
@@ -574,7 +604,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       };
     }
 
-    async finalizeWithdrawal(withdrawalHash: BytesLike, index: number = 0, overrides?: ethers.Overrides) {
+    async finalizeWithdrawal(withdrawalHash: BytesLike, index = 0, overrides?: ethers.Overrides) {
       const { l1BatchNumber, l2MessageIndex, l2TxNumberInBlock, message, sender, proof } =
         await this.finalizeWithdrawalParams(withdrawalHash, index);
 
@@ -604,7 +634,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       );
     }
 
-    async isWithdrawalFinalized(withdrawalHash: BytesLike, index: number = 0) {
+    async isWithdrawalFinalized(withdrawalHash: BytesLike, index = 0) {
       const { log } = await this._getWithdrawalLog(withdrawalHash, index);
       const { l2ToL1LogIndex } = await this._getWithdrawalL2ToL1Log(withdrawalHash, index);
       const sender = ethers.utils.hexDataSlice(log.topics[1], 12);
@@ -820,6 +850,7 @@ export function AdapterL2<TBase extends Constructor<TxSender>>(Base: TBase) {
     async withdraw(transaction: {
       token: Address;
       amount: BigNumberish;
+      isMergeToken?: boolean;
       to?: Address;
       bridgeAddress?: Address;
       overrides?: ethers.Overrides;

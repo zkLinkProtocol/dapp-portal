@@ -13,5 +13,5 @@ import { storeToRefs } from "pinia";
 import { useOnboardStore } from "@/store/onboard";
 
 const onboardStore = useOnboardStore();
-const { account,walletName } = storeToRefs(onboardStore);
+const { account, walletName } = storeToRefs(onboardStore);
 </script>

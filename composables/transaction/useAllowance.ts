@@ -6,7 +6,6 @@ import type { Hash } from "@/types";
 import type { BigNumberish } from "ethers";
 import type { PublicClient, WalletClient } from "viem";
 import type { Ref } from "vue";
-import { WriteContractParameters } from "@wagmi/core";
 
 export default (
   accountAddress: Ref<string | undefined>,
@@ -41,7 +40,12 @@ export default (
   );
 
   const requestAllowance = async () => {
-    if (accountAddress.value && tokenAddress.value && tokenAddress.value !== ETH_TOKEN.l1Address) {
+    if (
+      accountAddress.value &&
+      tokenAddress.value &&
+      tokenAddress.value !== ETH_TOKEN.l1Address &&
+      tokenAddress.value !== ETH_TOKEN.address
+    ) {
       await getAllowance();
     } else {
       reset();

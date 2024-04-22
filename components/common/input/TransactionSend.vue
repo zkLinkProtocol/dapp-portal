@@ -102,16 +102,17 @@ import { computed, ref, watch } from "vue";
 import { LockClosedIcon } from "@heroicons/vue/24/outline";
 import { BigNumber } from "ethers";
 
+import useNetworks from "@/composables/useNetworks";
+
 import type { Token, TokenAmount } from "@/types";
 import type { BigNumberish } from "ethers";
 import type { PropType } from "vue";
-import { useNetworkStore } from "@/store/network";
+
 import { decimalToBigNumber, formatTokenPrice, parseTokenAmount, removeSmallAmountPretty } from "@/utils/formatters";
 import { ETH_ADDRESS, L2_ETH_TOKEN_ADDRESS } from "~/zksync-web3-nova/src/utils";
-import useNetworks from "@/composables/useNetworks";
-const { zkSyncNetworks,isCustomNode,defaultNetwork } = useNetworks();
+const { zkSyncNetworks } = useNetworks();
 // const { selectedNetwork } = storeToRefs(useNetworkStore());
-const selectedNetwork = zkSyncNetworks.filter((i:any)=>i.key === "primary")[0];
+const selectedNetwork = zkSyncNetworks.filter((i) => i.key === "primary")[0];
 const props = defineProps({
   modelValue: {
     type: String,
@@ -161,7 +162,12 @@ const selectedTokenAddress = computed({
 });
 const selectedToken = computed(() => {
   const tokens = props.balances.length ? props.balances : props.tokens;
-  return tokens.filter((e)=> selectedNetwork.isEthGasToken || (e.address !== ETH_ADDRESS && e.address.toLowerCase() !== L2_ETH_TOKEN_ADDRESS)).find((e) => e.address === props.tokenAddress);
+  return tokens
+    .filter(
+      (e) =>
+        selectedNetwork.isEthGasToken || (e.address !== ETH_ADDRESS && e.address.toLowerCase() !== L2_ETH_TOKEN_ADDRESS)
+    )
+    .find((e) => e.address === props.tokenAddress);
 });
 const tokenBalance = computed(() => {
   if (!props.balances.length || !selectedToken.value) {

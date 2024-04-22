@@ -1,5 +1,6 @@
-import type { ZkSyncNetwork } from "@/data/networks";
 import useNetworks from "@/composables/useNetworks";
+
+import type { ZkSyncNetwork } from "@/data/networks";
 export type IconsList = {
   [key: string]: string;
 };

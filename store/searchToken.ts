@@ -1,7 +1,9 @@
-import type { TokenAmount } from "@/types";
 import { useStorage } from "@vueuse/core";
-import { useOnboardStore } from "@/store/onboard";
+
+import type { TokenAmount } from "@/types";
+
 import { useNetworkStore } from "@/store/network";
+import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncEthereumBalanceStore } from "@/store/zksync/ethereumBalance";
 
 type SearchToken = { networkKey: string } & TokenAmount;

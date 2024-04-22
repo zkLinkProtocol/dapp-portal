@@ -3,9 +3,9 @@ import { BigNumber } from "ethers";
 import useTimedCache from "@/composables/useTimedCache";
 
 import type { Token, TokenAmount } from "@/types";
+import type { Provider } from "@/zksync-web3-nova/src";
 import type { BigNumberish } from "ethers";
 import type { Ref } from "vue";
-import type { Provider } from "@/zksync-web3-nova/src";
 
 import { retry } from "@/utils/helpers";
 import { calculateFee } from "@/utils/helpers";
@@ -15,6 +15,7 @@ export type FeeEstimationParams = {
   from: string;
   to: string;
   tokenAddress: string;
+  isMergeToken?: boolean;
 };
 
 export default (
@@ -66,6 +67,7 @@ export default (
             to: params.to,
             token: params.tokenAddress === ETH_TOKEN.address ? ETH_TOKEN.l1Address! : params.tokenAddress,
             amount: "1",
+            isMergeToken: params.isMergeToken,
           });
         }),
       ]);

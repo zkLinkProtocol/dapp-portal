@@ -1,27 +1,29 @@
-import { utils, ethers, BigNumber, BigNumberish, BytesLike, Contract } from "ethers";
-import { SignatureLike } from "@ethersproject/bytes";
-import {
-  Address,
-  Eip712Meta,
-  PriorityQueueType,
-  PriorityOpTree,
-  DeploymentInfo,
-  PaymasterParams,
-  EthereumSignature,
-} from "./types";
-import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
-import { Provider } from "./provider";
-import { EIP712Signer } from "./signer";
-import { IERC20MetadataFactory } from "../typechain";
-import { AbiCoder } from "ethers/lib/utils";
-
 export * from "./paymaster-utils";
 
 export const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
-import { abi as IZkSync_abi } from "../abi/IZkSync.json";
-import { TokenAmount } from "~/types";
+import { BigNumber, Contract, ethers, utils } from "ethers";
+import { AbiCoder } from "ethers/lib/utils";
 import { erc20Abi } from "viem";
 
+import { EIP712Signer } from "./signer";
+import { PriorityOpTree, PriorityQueueType } from "./types";
+import { IERC20MetadataFactory } from "../typechain";
+
+import { abi as IZkSync_abi } from "../abi/IZkSync.json";
+
+import type { Provider } from "./provider";
+import type {
+  Address,
+  DeploymentInfo,
+  Eip712Meta,
+  EthereumSignature,
+  PaymasterParams,
+  TransactionRequest,
+} from "./types";
+import type { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
+import type { SignatureLike } from "@ethersproject/bytes";
+import type { BigNumberish, BytesLike } from "ethers";
+import type { TokenAmount } from "~/types";
 export const ZKSYNC_MAIN_ABI = new utils.Interface(IZkSync_abi);
 export const CONTRACT_DEPLOYER = new utils.Interface((await import("../abi/ContractDeployer.json")).abi);
 export const L1_MESSENGER = new utils.Interface((await import("../abi/IL1Messenger.json")).abi);
@@ -36,6 +38,11 @@ export const L1_MESSENGER_ADDRESS = "0x0000000000000000000000000000000000008008"
 export const L2_ETH_TOKEN_ADDRESS = "0x000000000000000000000000000000000000800a";
 
 export const L1_TO_L2_ALIAS_OFFSET = "0x1111000000000000000000000000000000001111";
+
+export const WMNT_CONTRACT =
+  process.env.NODE_TYPE === "nexus-goerli"
+    ? "0xEa12Be2389c2254bAaD383c6eD1fa1e15202b52A"
+    : "0x78c1b0C915c4FAA5FffA6CAbf0219DA63d7f4cb8";
 
 export const EIP1271_MAGIC_VALUE = "0x1626ba7e";
 
@@ -175,10 +182,10 @@ export function serialize(transaction: ethers.providers.TransactionRequest, sign
 
   const meta: Eip712Meta = transaction.customData;
 
-  let maxFeePerGas = transaction.maxFeePerGas || transaction.gasPrice || 0;
-  let maxPriorityFeePerGas = transaction.maxPriorityFeePerGas || maxFeePerGas;
+  const maxFeePerGas = transaction.maxFeePerGas || transaction.gasPrice || 0;
+  const maxPriorityFeePerGas = transaction.maxPriorityFeePerGas || maxFeePerGas;
 
-  const fields: any[] = [
+  const fields: unknown[] = [
     formatNumber(transaction.nonce || 0, "nonce"),
     formatNumber(maxPriorityFeePerGas, "maxPriorityFeePerGas"),
     formatNumber(maxFeePerGas, "maxFeePerGas"),
@@ -289,6 +296,7 @@ export function parseTransaction(payload: ethers.BytesLike): ethers.Transaction 
   }
 
   const raw = utils.RLP.decode(bytes.slice(1));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const transaction: any = {
     type: EIP712_TX_TYPE,
     nonce: handleNumber(raw[0]).toNumber(),
@@ -336,6 +344,7 @@ export function parseTransaction(payload: ethers.BytesLike): ethers.Transaction 
   return transaction;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getSignature(transaction: any, ethSignature?: EthereumSignature): Uint8Array {
   if (transaction?.customData?.customSignature && transaction.customData.customSignature.length) {
     return ethers.utils.arrayify(transaction.customData.customSignature);
@@ -352,7 +361,7 @@ function getSignature(transaction: any, ethSignature?: EthereumSignature): Uint8
   return new Uint8Array([...r, ...s, v]);
 }
 
-function eip712TxHash(transaction: any, ethSignature?: EthereumSignature) {
+function eip712TxHash(transaction: TransactionRequest, ethSignature?: EthereumSignature) {
   const signedDigest = EIP712Signer.getSignedDigest(transaction);
   const hashedSignature = ethers.utils.keccak256(getSignature(transaction, ethSignature));
 
@@ -374,7 +383,9 @@ export function getL2HashFromPriorityOp(
       if (priorityQueueLog && priorityQueueLog.args.txHash != null) {
         txHash = priorityQueueLog.args.txHash;
       }
-    } catch {}
+    } catch {
+      /* empty */
+    }
   }
   if (!txHash) {
     throw new Error("Failed to parse tx logs");
@@ -506,7 +517,7 @@ export async function isTypedDataSignatureCorrect(
   address: string,
   domain: TypedDataDomain,
   types: Record<string, Array<TypedDataField>>,
-  value: Record<string, any>,
+  value: Record<string, unknown>,
   signature: SignatureLike
 ): Promise<boolean> {
   const msgHash = ethers.utils._TypedDataEncoder.hash(domain, types, value);
@@ -557,7 +568,7 @@ export function scaleGasLimit(gasLimit: BigNumber): BigNumber {
 
 export async function fetchErc20(
   contractAddress: Address,
-  publicClient: any,
+  publicClient: ethers.providers.ExternalProvider,
   userAddress: Address | undefined
 ): Promise<TokenAmount | undefined> {
   const web3Provider = new ethers.providers.Web3Provider(publicClient, "any");
@@ -578,4 +589,8 @@ export async function fetchErc20(
     amount: balance.toString(),
     decimals: decimals,
   } as TokenAmount;
+}
+
+export function isSameAddress(a: Address, b: Address) {
+  return a && b && a.toLowerCase() === b.toLowerCase();
 }

@@ -8,5 +8,4 @@ type CustomBridgeToken = {
   symbol: string;
 };
 
-export const customBridgeTokens: CustomBridgeToken[] = [
-];
+export const customBridgeTokens: CustomBridgeToken[] = [];

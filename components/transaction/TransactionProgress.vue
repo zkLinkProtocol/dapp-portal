@@ -89,12 +89,18 @@
         </span>
       </div>
       <div v-if="expectedCompleteTimestamp && !completed">
-        <span class="text-neutral-400">Time: </span>
-        <CommonTimer format="human-readable" :future-date="expectedCompleteTimestamp">
+        <span class="text-neutral-400">Time{{ !isWithdraw ? "" : " left" }}: </span>
+        <CommonTimer format="human-readable" :future-date="expectedCompleteTimestamp" :only-days="isWithdraw">
           <template #default="{ timer, isTimerFinished }">
             <template v-if="isTimerFinished">Funds should arrive soon!</template>
             <template v-else>
-              <span class="tabular-nums">{{ timer }} left</span>
+              <span class="tabular-nums">{{ timer }} {{ isWithdraw ? "" : "left" }}</span>
+              <CommonButtonLabel as="span" class="showTip relative text-left" v-if="isWithdraw">
+                <img src="/img/Shape.svg" class="ml-1 inline-block h-3 w-3" alt="" />
+                <div class="tooltip">
+                  The estimated time remaining may differ from the actual time remaining.
+                </div>
+              </CommonButtonLabel>
             </template>
           </template>
         </CommonTimer>
@@ -162,6 +168,10 @@ const props = defineProps({
   animationState: {
     type: String as PropType<AnimationState>,
   },
+  isWithdraw: {
+    type: Boolean,
+    default: false,
+  }
 });
 
 const isSameAddress = computed(() => props.fromAddress === props.toAddress);
@@ -219,5 +229,25 @@ const isSameAddressDifferentDestination = computed(
       }
     }
   }
+}
+.showTip:hover {
+  .tooltip {
+    display: block;
+    z-index: 100;
+  }
+}
+.tooltip {
+  display: none;
+  position: absolute;
+  padding: 12px 20px 12px 24px;
+  bottom: 105%;
+  width: 30rem;
+  left: -15rem;
+  border-radius: 8px;
+  background: #1f2127;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 400;
+  transition: all .5s linear;
 }
 </style>

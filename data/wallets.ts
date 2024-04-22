@@ -3,7 +3,8 @@ type WalletEntry = { walletName: string; type: "injected" | "metaMask" | "wallet
 export const confirmedSupportedWallets: WalletEntry[] = [
   { walletName: "MetaMask", type: "metaMask" },
 
-  { walletName: "OKX", type: "injected" },
+  { walletName: "Injected", type: "injected" },
+  { walletName: "OKX", type: "injected" },  
   { walletName: "GateWallet", type: "injected" },
   { walletName: "MetaMask", type: "injected" },
   { walletName: "BitKeep", type: "injected" },
