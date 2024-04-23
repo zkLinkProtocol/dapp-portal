@@ -139,8 +139,8 @@ const getl1NetworkName = () => {
       };
     } else {
       return {
-        from: primaryNetwork.l1Network?.name,
-        to: primaryNetwork.l1Network?.name,
+        from: eraNetwork.l1Network?.name,
+        to: eraNetwork.l1Network?.name,
       };
     }
   }
