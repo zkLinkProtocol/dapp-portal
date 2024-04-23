@@ -24,7 +24,7 @@ export default (transactionInfo: ComputedRef<TransactionInfo>) => {
   const tokensStore = useZkSyncTokensStore();
   const { network } = storeToRefs(onboardStore);
   const { tokens } = storeToRefs(tokensStore);
-  const { primaryNetwork, zkSyncNetworks,getNetworkInfo } = useNetworks();
+  const { primaryNetwork, zkSyncNetworks, getNetworkInfo } = useNetworks();
 
   const { selectedNetwork } = storeToRefs(useNetworkStore());
   let provider: Provider | undefined;
@@ -122,7 +122,7 @@ export default (transactionInfo: ComputedRef<TransactionInfo>) => {
   } = usePromise(
     async () => {
       tokensStore.requestTokens();
-      const publicClient = onboardStore.getPublicClient();
+      const publicClient = onboardStore.getPublicClient(network.value.chainId);
       if (!publicClient) return;
       const transactionParams = await getTransactionParams();
       const [price, limit] = await Promise.all([
