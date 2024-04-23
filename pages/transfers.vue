@@ -135,8 +135,7 @@ type RecentBridgeOperation = Transfer & {
 const recentBridgeOperations = computed<RecentBridgeOperation[]>(() => {
   const recent = userTransactions.value.filter(
     (tx) =>
-      (tx.type === "withdrawal" &&
-        (!tx.info.completed || new Date(tx.timestamp).getTime() + WITHDRAWAL_DELAY * 2 > new Date().getTime())) ||
+      (tx.type === "withdrawal" && !tx.info.completed) ||
       (tx.type === "deposit" &&
         new Date(tx.timestamp).getTime() + getWaitTime(eraNetwork.value.l1Network?.id)[0] > new Date().getTime())
   );
