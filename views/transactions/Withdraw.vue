@@ -21,7 +21,24 @@
     >
       Confirm transaction
     </PageTitle>
-
+    <div class="tab">
+      <div class="box" :class="{ 'active': showBridge }" @click="showBridge =true">
+        <div class="name">
+          Use the official Bridge
+        </div>
+        <div class="time">
+          Up to 8 days, no additional fee
+        </div>
+      </div>
+      <div class="box" :class="{ 'active': !showBridge }" @click="showBridge =false">
+        <div class="name">
+          Use a third party bridge
+        </div>
+        <div class="time">
+          Usually takes under 20 mins
+        </div>
+      </div>
+    </div>
     <div class="warnBox flex" v-if="!route.query.s || route.query.s !== 'okx'">
       <div>
         Note: All LRT points will continue to be calculated after you request a withdrawal. They will appear in the next
@@ -432,7 +449,7 @@
         </template>
       </form>
     </div>
-    <div class="mt-6 flex flex-col gap-block-gap">
+    <div class="mt-6 flex flex-col gap-block-gap" v-else>
       <CommonCardWithLineButtons v-for="(item, index) in thirdChainMethods" :key="index" class="relative">
         <DestinationItem v-bind="item.props">
           <template #image v-if="item.icon">
@@ -506,7 +523,7 @@ import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/
 import TransferSubmitted from "@/views/transactions/TransferSubmitted.vue";
 import WithdrawalSubmitted from "@/views/transactions/WithdrawalSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
-const showBridge = true;
+const showBridge = ref(true);
 const chainList = [
   {
     name: "Meson Finance",
@@ -1162,6 +1179,42 @@ onBeforeUnmount(() => {
   }
   a {
     color: #0bc48f;
+  }
+}
+.tab{
+  width: 100%;
+  border-radius: 64px;
+  background: #262B33;
+  padding: 8px;
+  display: flex;
+  .box{
+    border-radius: 64px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 50%;
+    padding: 7px 0;
+    cursor: pointer;
+    .name{
+      color: #FFF;
+      font-family: Satoshi;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 700;
+      line-height: normal;
+    }
+    .time{
+      color: #9DA3AE;
+      text-align: center;
+      font-family: Satoshi;
+      font-size: 12px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+    }
+  }
+  .active{
+    background: #3D424D;
   }
 }
 </style>
