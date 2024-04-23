@@ -1187,6 +1187,7 @@ onBeforeUnmount(() => {
   background: #262B33;
   padding: 8px;
   display: flex;
+  margin-bottom: 16px;
   .box{
     border-radius: 64px;
     display: flex;
