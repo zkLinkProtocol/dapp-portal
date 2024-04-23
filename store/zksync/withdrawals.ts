@@ -191,7 +191,18 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
 
       const transactionFromStorage = transactionStatusStore.getTransaction(withdrawal.transactionHash);
       if (transactionFromStorage) {
-        if (!transactionFromStorage.info.completed) {
+        if (!transactionFromStorage.info.withdrawalFinalizationAvailable) {
+          const status = await checkWithdrawalFinalizeAvailable(transactionFromStorage);
+          if (status) {
+            transactionStatusStore.updateTransactionData(withdrawal.transactionHash, {
+              ...transactionFromStorage,
+              info: {
+                ...transactionFromStorage.info,
+                withdrawalFinalizationAvailable: true,
+              },
+            });
+          }
+        } else if (!transactionFromStorage.info.completed) {
           await setStatus(withdrawal);
           await sleep(200);
           if (withdrawal.status === "Finalized") {
@@ -282,6 +293,6 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
     updateWithdrawals,
     updateWithdrawalsIfPossible,
     checkWithdrawalFinalizeAvailable,
-    setStatus
+    setStatus,
   };
 });
