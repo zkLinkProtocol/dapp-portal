@@ -1,5 +1,5 @@
 <template>
-  <!-- <LoadersConnecting /> -->
+  <LoadersConnecting />
   <ModalConnectingWalletError />
   <!-- <ModalNetworkChangedWarning v-if="!isConnectingWallet" /> -->
   <ModalLegalNotice />

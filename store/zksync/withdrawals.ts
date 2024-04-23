@@ -30,7 +30,13 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
   const { destinations } = storeToRefs(useDestinationsStore());
   const eraWalletStore = useZkSyncWalletStore();
 
-  const TRANSACTIONS_FETCH_LIMIT = 50;
+  const TRANSACTIONS_FETCH_LIMIT = 100;
+
+  const DELAY_DAYS = process.env.NODE_TYPE === "nexus-sepolia" ? 1 : 7;
+
+  const isWithinDelayDays = (timestamp: number | string) => {
+    return Date.now() - new Date(timestamp).getTime() < DELAY_DAYS * 24 * 60 * 60 * 1000;
+  };
 
   function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -126,7 +132,7 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
         const totalBatchesExecuted = await getTotalBatchesExecuted(withdrawal);
         if (withdrawal.token.symbol === "ETH") {
           const status = await isEthWithdrawalFinalizedOnPrimary(withdrawal.transactionHash);
-          console.log("status: ", status);
+          console.log("status: ", status, withdrawal);
           claimable = status && totalBatchesExecuted >= l1BatchNumber;
         } else {
           claimable = totalBatchesExecuted >= l1BatchNumber;
@@ -187,8 +193,8 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
     );
     const withdrawals = transfers.items.filter((e) => e.type === "withdrawal" && e.token && e.amount);
     for (const withdrawal of withdrawals) {
+      if (isWithinDelayDays(withdrawal.timestamp)) continue;
       const { primaryNetwork, zkSyncNetworks, getNetworkInfo } = useNetworks();
-
       const transactionFromStorage = transactionStatusStore.getTransaction(withdrawal.transactionHash);
       if (transactionFromStorage) {
         if (!transactionFromStorage.info.withdrawalFinalizationAvailable) {
