@@ -67,7 +67,7 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
   const onboardStore = useOnboardStore();
   const { account } = storeToRefs(onboardStore);
   const eraWalletStore = useZkSyncWalletStore();
-  const { checkWithdrawalFinalizeAvailable } = useZkSyncWithdrawalsStore();
+  const zkSyncWithdrawalsStore = useZkSyncWithdrawalsStore();
   const storageSavedTransactions = useStorage<{ [networkKey: string]: TransactionInfo[] }>(
     "zksync-bridge-transactions",
     {}
@@ -208,21 +208,22 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
   };
   const getWithdrawalStatus = async (transaction: TransactionInfo) => {
     if (!transaction.info.withdrawalFinalizationAvailable) {
-      const transactionDetails = await request(transaction).getTransactionDetails(transaction.transactionHash);
-      if (transactionDetails.status !== "verified") {
+      const claimable = await zkSyncWithdrawalsStore.checkWithdrawalFinalizeAvailable(transaction);
+      if (!claimable) {
         return transaction;
       }
+      // const transactionDetails = await request(transaction).getTransactionDetails(transaction.transactionHash);
+      // if (transactionDetails.status !== "verified") {
+      //   return transaction;
+      // }
     }
-    if (!checkWithdrawalFinalizeAvailable) {
-      return transaction;
-    }
-    const isFinalized = await useZkSyncWalletStore()
-      .getL1VoidSigner(true)
-      ?.isWithdrawalFinalized(transaction.transactionHash)
-      .catch(() => false);
-    // transaction.info.withdrawalFinalizationAvailable = true;
-    const claimable = await checkWithdrawalFinalizeAvailable(transaction);
-    transaction.info.withdrawalFinalizationAvailable = claimable;
+
+    // const isFinalized = await useZkSyncWalletStore()
+    //   .getL1VoidSigner(true)
+    //   ?.isWithdrawalFinalized(transaction.transactionHash)
+    //   .catch(() => false);
+    const isFinalized = await zkSyncWithdrawalsStore.setStatus(transaction);
+    transaction.info.withdrawalFinalizationAvailable = true;
     transaction.info.completed = isFinalized;
     return transaction;
   };
