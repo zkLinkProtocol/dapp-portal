@@ -1185,6 +1185,7 @@ onBeforeUnmount(() => {
   background: #262B33;
   padding: 8px;
   display: flex;
+  margin-bottom: 16px;
   .box{
     border-radius: 64px;
     display: flex;
@@ -1195,7 +1196,6 @@ onBeforeUnmount(() => {
     cursor: pointer;
     .name{
       color: #FFF;
-      font-family: Satoshi;
       font-size: 16px;
       font-style: normal;
       font-weight: 700;
@@ -1204,7 +1204,6 @@ onBeforeUnmount(() => {
     .time{
       color: #9DA3AE;
       text-align: center;
-      font-family: Satoshi;
       font-size: 12px;
       font-style: normal;
       font-weight: 400;
