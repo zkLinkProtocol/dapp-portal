@@ -46,8 +46,8 @@
         <CommonCardWithLineButtons>
           <FailedDepositLineItem v-for="(item, index) in failedTransfers" :key="index" :transfer="item" as="a" />
         </CommonCardWithLineButtons>
-        <TypographyCategoryLabel v-if="!hasOnlyRecentBridgeOperations">Completed transfers</TypographyCategoryLabel>
       </template>
+      <TypographyCategoryLabel v-if="!hasOnlyRecentBridgeOperations">Completed transfers</TypographyCategoryLabel>
 
       <div v-if="loading">
         <CommonCardWithLineButtons>
@@ -59,7 +59,7 @@
           Loading transfers error: {{ recentTransfersRequestError.message }}
         </CommonErrorBlock>
       </CommonCardWithLineButtons>
-      <div v-else-if="displayedTransfers.length">
+      <div v-else-if="displayedTransfers.length" class="mt-6">
         <CommonCardWithLineButtons>
           <TransactionTransferLineItem v-for="(item, index) in displayedTransfers" :key="index" :transfer="item" />
         </CommonCardWithLineButtons>

@@ -119,6 +119,7 @@ export default (transactionInfo: ComputedRef<TransactionInfo>) => {
     inProgress: estimationInProgress,
     error: estimationError,
     execute: estimateFee,
+    reload: reloadEstimateFee,
   } = usePromise(
     async () => {
       tokensStore.requestTokens();
@@ -148,6 +149,16 @@ export default (transactionInfo: ComputedRef<TransactionInfo>) => {
       };
     },
     { cache: 1000 * 8 }
+  );
+
+  watch(
+    [network],
+    () => {
+      reloadEstimateFee();
+    },
+    {
+      immediate: true,
+    }
   );
 
   const commitTransaction = async () => {
