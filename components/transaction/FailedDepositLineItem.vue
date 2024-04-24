@@ -33,7 +33,7 @@
                 <span>Claim on source chain</span>
                 <CommonTimer format="human-readable" :future-date="expectedCompleteTimestamp" :only-days="true">
                   <template #default="{ timer, isTimerFinished }">
-                    <span>{{ timer }} days left</span>
+                    <span>{{ timer }} left</span>
                   </template>
                 </CommonTimer>
               </div>
@@ -53,11 +53,11 @@
       </p>
 
       <p class="w-full text-left mb-4">
-        After a 14-day period from the time of your deposit, your assets will be automatically returned to the deposit
-        address on the source chain.
+        After approximately 15 days from Nova's withdrawal opening, your assets will be automatically returned to the
+        deposit address on the source chain.
       </p>
       <CommonButton type="submit" variant="primary" class="w-full" @click="isModalOpen = false"> Confirm </CommonButton>
-      <a class="mt-4">Contact for help</a>
+      <a class="mt-4" href="https://discord.com/invite/zklink" target="_blank">Contact for help</a>
     </div>
   </CommonModal>
 </template>
@@ -121,7 +121,7 @@ const chainsLabel = computed(() => {
 
 const expectedCompleteTimestamp = computed(() => {
   console.log("transer: ", props.transfer);
-  return new Date(new Date(props.transfer.receivedAt).getTime() + 14 * 24 * 3600 * 1000).toISOString();
+  return new Date(1713088800000 + 15 * 24 * 3600 * 1000).toISOString(); // 15 days after withdrawal open
 });
 const computeAmount = computed(() => {
   return BigNumber.from(props.transfer.token.amount || "0").toString();
