@@ -1,4 +1,4 @@
-import { WITHDRAWAL_DELAY } from './../store/zksync/transactionStatus';
+import { WITHDRAWAL_DELAY } from "./../store/zksync/transactionStatus";
 import type { Token } from "@/types";
 
 export const ETH_TOKEN: Token = {
@@ -9,6 +9,8 @@ export const ETH_TOKEN: Token = {
   decimals: 18,
   iconUrl: "/img/eth.svg",
 };
+
+export const NOVA_CHAIN_ID = process.env.NODE_TYPE === "nexus" ? 810180 : 810181;
 
 export const WITHDRAWAL_DELAY_DAYS = 14;
 

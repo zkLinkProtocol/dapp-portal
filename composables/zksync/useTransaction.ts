@@ -11,6 +11,7 @@ import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncWalletStore } from "@/store/zksync/wallet";
 import { formatError } from "@/utils/formatters";
 import { sleep } from "@/utils/helpers";
+import { NOVA_CHAIN_ID } from "@/utils/constants";
 
 type TransactionParams = {
   type: "transfer" | "withdrawal";
@@ -33,7 +34,7 @@ export default (getSigner: () => Promise<Signer | undefined>, getProvider: () =>
   const transactionHash = ref<string | undefined>();
   const eraWalletStore = useZkSyncWalletStore();
   const onboardStore = useOnboardStore();
-  const publicClient = onboardStore.getPublicClient(onboardStore.network.chainId);
+  const publicClient = onboardStore.getPublicClient(NOVA_CHAIN_ID);
 
   const retrieveBridgeAddresses = useMemoize(() => getProvider().getDefaultBridgeAddresses());
   const { validateAddress } = useScreening();
