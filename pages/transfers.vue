@@ -46,8 +46,8 @@
         <CommonCardWithLineButtons>
           <FailedDepositLineItem v-for="(item, index) in failedTransfers" :key="index" :transfer="item" as="a" />
         </CommonCardWithLineButtons>
-        <TypographyCategoryLabel v-if="!hasOnlyRecentBridgeOperations">Completed transfers</TypographyCategoryLabel>
       </template>
+      <TypographyCategoryLabel v-if="!hasOnlyRecentBridgeOperations">Completed transfers</TypographyCategoryLabel>
 
       <div v-if="loading">
         <CommonCardWithLineButtons>
