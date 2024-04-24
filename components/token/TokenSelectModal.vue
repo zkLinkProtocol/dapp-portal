@@ -1,5 +1,14 @@
 <template>
-  <CommonModal v-model:opened="isModalOpened" class="token-select-modal" :title="title" @after-leave="search = ''">
+  <CommonModal v-model:opened="isModalOpened" class="token-select-modal" :class="{ 'token-modal': title === 'Choose chain and token' }" :title="title" @after-leave="search = ''">
+    <div v-if="title === 'Choose chain and token'" class="mb-4">
+      <div class="flex gap-2 flex-wrap">
+        <div v-for="(group, groupIndex) in arr" :key="groupIndex" class="chainBox cursor-pointer" :class="{'active': selectChain === group.key}"
+         @click="buttonClicked(zkSyncNetwork.find(item => item.key === group.key)!);">
+          <img :src="group.iconUrl" :alt="group.label"/>
+        </div>
+      </div>
+      <p v-if="!arr.length" class="mt-block-padding-1/2 text-center">No chains found</p>
+    </div>
     <Combobox v-model="selectedToken">
       <!-- TODO: Refactor this to use ComboboxInput as main component but look like CommonInputSearch -->
       <CommonInputSearch
@@ -46,7 +55,7 @@
                 size="sm"
                 variant="light"
                 :key="item.address"
-                @click="selectedToken = item"
+                @click="changeToken(item)"
               />
             </div>
           </div>
@@ -85,7 +94,28 @@ import { useSearchtokenStore } from "@/store/searchToken";
 import { useZkSyncEthereumBalanceStore } from "@/store/zksync/ethereumBalance";
 import { groupBalancesByAmount } from "@/utils/mappers";
 import { ETH_ADDRESS, fetchErc20, L2_ETH_TOKEN_ADDRESS } from "~/zksync-web3-nova/src/utils";
+import useNetworks from "@/composables/useNetworks";
+import type { ZkSyncNetwork } from "@/data/networks";
+import { useZkSyncWalletStore } from "@/store/zksync/wallet";
+import { useZkSyncProviderStore } from "@/store/zksync/provider";
+import { useRoute } from "#app";
+const route = useRoute();
+const providerStore = useZkSyncProviderStore();
+const { eraNetwork } = storeToRefs(providerStore);
+const { zkSyncNetworks } = useNetworks();
 
+const walletStore = useZkSyncWalletStore();
+const { balance, balanceInProgress, balanceError } = storeToRefs(walletStore);
+const zkSyncNetwork = zkSyncNetworks.filter((e) => !e.hidden)
+let arr : any[] = [];
+zkSyncNetwork.map((i)=> {
+  const obj = {
+    iconUrl: i.logoUrl,
+    key: i.key,
+    label: i.l1Network?.name,
+  };
+  arr.push(obj);
+});
 const props = defineProps({
   title: {
     type: String,
@@ -123,6 +153,7 @@ const { selectedNetwork } = storeToRefs(useNetworkStore());
 const zkSyncEthereumBalance = useZkSyncEthereumBalanceStore();
 
 const search = ref("");
+const selectChain = ref(selectedNetwork.value.key)
 const showLoading = ref(false);
 const hasBalances = computed(() => props.balances.length > 0);
 const onboardStore = useOnboardStore();
@@ -160,7 +191,48 @@ const filterTokens = (tokens: Token[]) => {
   }
   return newTokens;
 };
-
+const changeToken = (item:any) => {
+  console.log(item)
+  selectedToken.value = item
+  if (selectChain.value === selectedNetwork.value.key) {
+    return;
+  }
+  const url = new URL(route.fullPath, window.location.origin);
+  url.searchParams.set("network", selectChain.value);
+  url.searchParams.set("tokenAddress", item.address);
+  window.location.href = url.toString();
+}
+const isNetworkSelected = (network: ZkSyncNetwork) => selectChain.value === network.key;
+const chainList = ref<any[]>([]);
+const buttonClicked = (network: ZkSyncNetwork) => {
+  if (isNetworkSelected(network)) {
+    return;
+  }
+  selectChain.value = network.key;
+  const chainLists = balance.value.filter((e) => {
+    if (isSupportedMergeToken(e.address, network.key)) {
+      return true;
+    }
+    if (!e.l1Address) {
+      return false;
+    }
+    if (e.l1Address === ETH_ADDRESS) {
+      return true;
+    }
+    if (e.networkKey === eraNetwork.value.key) {
+      return true;
+    }
+    return false;
+  });
+  chainList.value = filterTokens(
+    chainLists.filter(
+      (e) =>
+        network.isEthGasToken ||
+        (e.address !== ETH_ADDRESS && e.address.toLowerCase() !== L2_ETH_TOKEN_ADDRESS)
+    )
+  ) as TokenAmount[]
+  balanceGroups = groupBalancesByAmount(chainList)
+};
 const displayedTokens = computed(() =>
   filterTokens(
     props.tokens.filter(
@@ -180,7 +252,7 @@ const displayedBalances = computed(
       )
     ) as TokenAmount[]
 );
-const balanceGroups = groupBalancesByAmount(displayedBalances);
+let balanceGroups = groupBalancesByAmount(displayedBalances);
 const selectedTokenAddress = computed({
   get: () => props.tokenAddress,
   set: (value) => emit("update:tokenAddress", value),
@@ -224,5 +296,30 @@ const closeModal = () => {
   .category:first-child .group-category-label {
     @apply pt-0;
   }
+}
+.token-modal {
+  .modal-card {
+    @apply block h-full grid-rows-[max-content_max-content_1fr];
+  }
+  .category:first-child .group-category-label {
+    @apply pt-0;
+  }
+}
+.chainBox{
+  display: flex;
+  width: 75.7px;
+  height: 64px;
+  padding: 12px 18px 12px 18px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  background: #3D424D;
+}
+.chainBox:hover{
+  border-radius: 8px;
+  background: rgba(23, 85, 244, 0.25);
+}
+.active{
+  border: 2px solid #1755F4;
 }
 </style>
