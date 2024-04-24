@@ -58,6 +58,30 @@ export declare namespace Api {
       gateway: string;
     };
 
+    type Transaction = {
+      hash: string;
+      to: string;
+      from: string;
+      data: string;
+      value: string;
+      isL1Originated: boolean;
+      fee: string;
+      nonce: number;
+      gasLimit: string;
+      gasPrice: string;
+      gasPerPubdata: string;
+      maxFeePerGas: string;
+      maxPriorityFeePerGas: string;
+      blockNumber: number;
+      l1BatchNumber: number;
+      blockHash: string;
+      type: number;
+      transactionIndex: number;
+      receivedAt: string;
+      networkKey: "ethereum";
+      token: TokenAmount;
+    };
+
     type TokenAddress = {
       balance: string;
       token: null | Token;

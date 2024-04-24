@@ -2,16 +2,20 @@ import {
   arbitrum,
   arbitrumSepolia,
   base,
+  baseSepolia,
+  blast,
+  blastSepolia,
   goerli,
   linea,
-  lineaTestnet,
+  lineaGoerli,
+  lineaSepolia,
   mainnet,
   manta,
   mantaTestnet,
   mantle,
   mantleTestnet,
   optimism,
-  scrollSepolia,
+  optimismSepolia,
   sepolia,
   zkSync,
   zkSyncSepoliaTestnet,
@@ -26,35 +30,30 @@ import type { Address } from "viem";
 
 import { PRIMARY_CHAIN_KEY } from "@/zksync-web3-nova/src/utils";
 
-export const blast = /*#__PURE__*/ defineChain({
-  id: 81457,
-  name: "Blast Mainnet",
-  network: "blast",
+export const mantaSepolia = /*#__PURE__*/ defineChain({
+  id: 3441006,
+  name: "Manta Pacific Sepolia Testnet",
+  network: "manta-sepolia",
   nativeCurrency: {
     decimals: 18,
     name: "ETH",
     symbol: "ETH",
   },
   rpcUrls: {
-    default: { http: ["https://rpc.blast.io"] },
-    public: { http: ["https://rpc.blast.io"] },
+    default: { http: ["https://pacific-rpc.sepolia-testnet.manta.network/http"] },
   },
   blockExplorers: {
-    etherscan: {
-      name: "Blast Explorer",
-      url: "https://blastscan.io/",
-    },
     default: {
-      name: "Blast Explorer",
-      url: "https://blastscan.io/",
+      name: "Manta Pacific Sepolia",
+      url: "https://pacific-explorer.sepolia-testnet.manta.network",
     },
   },
   contracts: {
     multicall3: {
-      address: "0xcA11bde05977b3631167028862bE2a173976CA11",
-      blockCreated: 212929,
+      address: "0x5Be4F807e0ae836Fc754dDEDDd72c0F4A28C8d43",
+      blockCreated: 468626,
     },
-  },
+  }
 });
 
 export const l1Networks = {
@@ -75,9 +74,33 @@ export const l1Networks = {
     ...linea,
     name: "Linea Mainnet",
   },
+  lineaGoerliTestnet: {
+    ...lineaGoerli,
+    name: "Linea Goerli Testnet",
+  },
+  lineaSepoliaTestnet: {
+    ...lineaSepolia,
+    name: "Linea Sepolia Testnet",
+  },
   mantle: {
     ...mantle,
     name: "Mantle Mainnet",
+  },
+  mantleGoerliTestnet: {
+    ...mantleTestnet,
+    name: "Mantle Goerli Testnet",
+  },
+  manta: {
+    ...manta,
+    name: "Manta Mainnet",
+  },
+  mantaGoerliTestnet: {
+    ...mantaTestnet,
+    name: "Manta Goerli Testnet",
+  },
+  mantaSepoliaTestnet: {
+    ...mantaSepolia,
+    name: "Manta Sepolia Testnet",
   },
   arbitrum: {
     ...arbitrum,
@@ -93,10 +116,6 @@ export const l1Networks = {
       },
     },
   },
-  scrollSepolia: {
-    ...scrollSepolia,
-    name: "Scroll Sepolia Testnet",
-  },
   zkSync: {
     ...zkSync,
     name: "zkSync Mainnet",
@@ -105,33 +124,29 @@ export const l1Networks = {
     ...zkSyncSepoliaTestnet,
     name: "zkSync Sepolia Testnet",
   },
-  lineaGoerliTestnet: {
-    ...lineaTestnet,
-    name: "Linea Goerli Testnet",
-  },
-  mantleGoerliTestnet: {
-    ...mantleTestnet,
-    name: "Mantle Goerli Testnet",
-  },
-  mantaGoerliTestnet: {
-    ...mantaTestnet,
-    name: "Manta Goerli Testnet",
-  },
-  manta: {
-    ...manta,
-    name: "Manta Mainnet",
-  },
   blast: {
     ...blast,
     name: "Blast Mainnet",
+  },
+  blastSepoliaTestnet: {
+    ...blastSepolia,
+    name: "Blast Sepolia Testnet",
   },
   optimism: {
     ...optimism,
     name: "Optimism Mainnet",
   },
+  optimismSepoliaTestnet: {
+    ...optimismSepolia,
+    name: "Optimism Sepolia Testnet",
+  },
   base: {
     ...base,
     name: "Base Mainnet",
+  },
+  baseSepoliaTestnet: {
+    ...baseSepolia,
+    name: "Base Sepolia Testnet",
   },
 } as const;
 export type L1Network = Chain;
@@ -384,62 +399,128 @@ export const nexusSepoliaNode: ZkSyncNetwork[] = [
     id: 810181,
     key: "sepolia",
     name: "zkLink Nova Testnet",
-    rpcUrl: "https://sepolia.rpc.zklink.network",
+    rpcUrl: "https://sepolia.rpc.zklink.io",
     logoUrl: "/img/ethereum.svg",
-    blockExplorerUrl: "https://sepolia.explorer.zklink.network",
-    blockExplorerApi: "https://sepolia.explorer-api.zklink.network",
-    withdrawalFinalizerApi: "https://sepolia.withdrawal-api.zklink.network",
-    mainContract: "0x53438eddeB3d3fD39c99150acA2575f73cE14198",
-    erc20BridgeL1: "0x9FF541E9de225157d245Ca46cFF6868e5c289C8F",
-    erc20BridgeL2: "0x3247575b4336C79956C5Df667A19C0AcBA9C62D6",
-    l1Gateway: "0xABE785340e1C1ed3228BC7ec460d2fEdD82260a0",
-    //TODO
+    blockExplorerUrl: "https://sepolia.explorer.zklink.io",
+    blockExplorerApi: "https://sepolia.explorer-api.zklink.io",
+    withdrawalFinalizerApi: "https://sepolia.withdrawal-api.zklink.io",
+    mainContract: "0x9719cD314BBf84B18aAEDEF56DF88E2267aA01e3",
+    erc20BridgeL1: "0x63e059BDEDeA829c22EfA31CbaDb9bea5E86c3Cd",
+    erc20BridgeL2: "0xcc43208B28B1eC25F000EfC0D2c2aF044715F888",
+    l1Gateway: "0xc6EbbD78E8f81626Bc62570f3C5949221F87b3Ee",
+    isEthGasToken: true,
     l1Network: l1Networks.sepolia,
   },
   {
     id: 810181,
     key: PRIMARY_CHAIN_KEY, //"primary"
     name: "zkLink Nova Testnet",
-    rpcUrl: "https://sepolia.rpc.zklink.network",
-    logoUrl: "/img/arbitrum-arb-logo.svg",
-    blockExplorerUrl: "https://sepolia.explorer.zklink.network",
-    blockExplorerApi: "https://sepolia.explorer-api.zklink.network",
-    withdrawalFinalizerApi: "https://sepolia.withdrawal-api.zklink.network",
-    mainContract: "0x788269f9353D7cbfE33c0889B7Dd1CAe833636E6",
-    erc20BridgeL1: "0x72de6d167ded1ee5fba17334bdcce686f3204d38",
-    erc20BridgeL2: "0x1895de0bea0eb8d8c7e6997c9be7649bb402d9e6",
-    //TODO
-    l1Network: l1Networks.arbitrumSepolia,
+    rpcUrl: "https://sepolia.rpc.zklink.io",
+    logoUrl: "/img/linea.svg",
+    blockExplorerUrl: "https://sepolia.explorer.zklink.io",
+    blockExplorerApi: "https://sepolia.explorer-api.zklink.io",
+    withdrawalFinalizerApi: "https://sepolia.withdrawal-api.zklink.io",
+    mainContract: "0x16393A77e1d5C2D285BDad9079afC5942f255407",
+    erc20BridgeL1: "0xea05Fad671D93aF9472D747866019991DF183F0f",
+    erc20BridgeL2: "0x6336D1DfE362a84933e526588A0fa20dd87736aE",
+    isEthGasToken: true,
+    l1Network: l1Networks.lineaSepoliaTestnet,
   },
   {
     id: 810181,
-    key: "zksyncsepolia",
+    key: "zksync",
     name: "zkLink Nova Testnet",
-    rpcUrl: "https://sepolia.rpc.zklink.network",
-    logoUrl: "/img/era.svg",
-    blockExplorerUrl: "https://sepolia.explorer.zklink.network",
-    blockExplorerApi: "http://localhost:3020",
-    withdrawalFinalizerApi: "https://sepolia.withdrawal-api.zklink.network",
-    mainContract: "0x916aa29B23DBC0f143e1cEaE0460C874FCEc0f58",
-    erc20BridgeL1: "0x",
-    erc20BridgeL2: "0x",
-    // TODO
+    rpcUrl: "https://sepolia.rpc.zklink.io",
+    logoUrl: "/img/zksync.svg",
+    blockExplorerUrl: "https://sepolia.explorer.zklink.io",
+    blockExplorerApi: "https://sepolia.explorer-api.zklink.io",
+    withdrawalFinalizerApi: "https://sepolia.withdrawal-api.zklink.io",
+    mainContract: "0x02627EFACfc2B000E77132fE9346C543eB980bAb",
+    erc20BridgeL1: "0xBf145DfdE964213246A4fcB8003621E8b0F11ffc",
+    erc20BridgeL2: "0xEbEAf62E4bCb4FdeC35100838c86c84B8134ADE0",
+    l1Gateway: "0x67ba43eD3860D155D16f82D12cA93A7B2e77bF2F",
+    isEthGasToken: true,
     l1Network: l1Networks.zkSyncSepoliaTestnet,
   },
   {
     id: 810181,
-    key: "scrollsepolia",
-    name: "zkLink Nova Testne",
-    rpcUrl: "https://sepolia.rpc.zklink.network",
-    logoUrl: "/img/sepolia.jpg",
-    blockExplorerUrl: "https://sepolia.explorer.zklink.network",
-    blockExplorerApi: "http://localhost:3020",
-    withdrawalFinalizerApi: "https://sepolia.withdrawal-api.zklink.network",
-    mainContract: "0x939016af6140141d89C4252b0c0013F4e5F1f4D7",
-    erc20BridgeL1: "0x",
-    erc20BridgeL2: "0x",
-    //TODO
-    l1Network: l1Networks.scrollSepolia,
+    key: "arbitrum",
+    name: "zkLink Nova Testnet",
+    rpcUrl: "https://sepolia.rpc.zklink.io",
+    logoUrl: "/img/arbitrum-arb-logo.svg",
+    blockExplorerUrl: "https://sepolia.explorer.zklink.io",
+    blockExplorerApi: "https://sepolia.explorer-api.zklink.io",
+    withdrawalFinalizerApi: "https://sepolia.withdrawal-api.zklink.io",
+    mainContract: "0xaE1875112Ae010A9fe755418B206AfB33Ee0b1fA",
+    erc20BridgeL1: "0xFC31fF38e24901052b813DcEBEF5A9A10EaF25Ec",
+    erc20BridgeL2: "0x7e1B152f25D2ff0771026067B5c8B5A1C8457478",
+    l1Gateway: "0xd75F08D0E513a072799C510d04D9AddC3a28Bd9A",
+    isEthGasToken: true,
+    l1Network: l1Networks.arbitrumSepolia,
+  },
+  {
+    id: 810181,
+    key: "optimism",
+    name: "zkLink Nova Testnet",
+    rpcUrl: "https://sepolia.rpc.zklink.io",
+    logoUrl: "/img/optimism.svg",
+    blockExplorerUrl: "https://sepolia.explorer.zklink.io",
+    blockExplorerApi: "https://sepolia.explorer-api.zklink.io",
+    withdrawalFinalizerApi: "https://sepolia.withdrawal-api.zklink.io",
+    mainContract: "0xbaC8EF345C684B0871dF390f44273160Ba3E6bc1",
+    erc20BridgeL1: "0x70194e2400eb89fA22E3bd0DaFa097CA09DAE76C",
+    erc20BridgeL2: "0x07476D10A8B3c614DC92a698cCeC34Aa9B844B92",
+    l1Gateway: "0x2f24331ddFB2D582079C200d1c233F168901a4e1",
+    isEthGasToken: true,
+    l1Network: l1Networks.optimismSepoliaTestnet,
+  },
+  {
+    id: 810181,
+    key: "base",
+    name: "zkLink Nova Testnet",
+    rpcUrl: "https://sepolia.rpc.zklink.io",
+    logoUrl: "/img/base.svg",
+    blockExplorerUrl: "https://sepolia.explorer.zklink.io",
+    blockExplorerApi: "https://sepolia.explorer-api.zklink.io",
+    withdrawalFinalizerApi: "https://sepolia.withdrawal-api.zklink.io",
+    mainContract: "0x8c4b80A5D5374Ff2Dc07310EF9Fdbc44e487b6C2",
+    erc20BridgeL1: "0xeA6232604C847d14638a30c1D261AF6C321AAB05",
+    erc20BridgeL2: "0x7c3c5C8528D55Af0C641846fF4756200DEFDC513",
+    l1Gateway: "0x4E2d5bAaF470028fE48a23bd5b680f4EC7A06f85",
+    isEthGasToken: true,
+    l1Network: l1Networks.baseSepoliaTestnet,
+  },
+  {
+    id: 810181,
+    key: "manta",
+    name: "zkLink Nova Testnet",
+    rpcUrl: "https://sepolia.rpc.zklink.io",
+    logoUrl: "/img/manta.jpg",
+    blockExplorerUrl: "https://sepolia.explorer.zklink.io",
+    blockExplorerApi: "https://sepolia.explorer-api.zklink.io",
+    withdrawalFinalizerApi: "https://sepolia.withdrawal-api.zklink.io",
+    mainContract: "0xEe5aFbd53D661968d13315f6960BBb103C2a1eCc",
+    erc20BridgeL1: "0x4C58CbF4e9594898e2cC66FdA3F435Cd3622Fe9f",
+    erc20BridgeL2: "0x1F282e46d75622C5B26921094b4ebF7D58D83CE2",
+    l1Gateway: "0xC8a31aA097c8D1dCF588C425415E4e5A0E250e67",
+    isEthGasToken: true,
+    l1Network: l1Networks.mantaSepoliaTestnet,
+  },
+  {
+    id: 810181,
+    key: "blast",
+    name: "zkLink Nova Testnet",
+    rpcUrl: "https://sepolia.rpc.zklink.io",
+    logoUrl: "/img/blast.svg",
+    blockExplorerUrl: "https://sepolia.explorer.zklink.io",
+    blockExplorerApi: "https://sepolia.explorer-api.zklink.io",
+    withdrawalFinalizerApi: "https://sepolia.withdrawal-api.zklink.io",
+    mainContract: "0x27CBbE82447a0C188eBD7Bc5fd706d140c7B0642",
+    erc20BridgeL1: "0xD74c6452Ec4c73E4E2050C6B3f4e675B96dFFC15",
+    erc20BridgeL2: "0x4E5622E4A41985C29028d92e1Cc2EdF02012c82E",
+    l1Gateway: "0x83d3f5Db3eea3dD7a30aAF71A32D244386d00C53",
+    isEthGasToken: true,
+    l1Network: l1Networks.blastSepoliaTestnet,
   },
 ];
 
@@ -498,10 +579,10 @@ export const zkSyncNetworks: ZkSyncNetwork[] = [
 export const getWaitTime = (id: number) => {
   const nodeType = process.env.NODE_TYPE;
   const responseTime = 2;
-  if (id === (nodeType === "nexus" ? mainnet.id : goerli.id)) {
+  if (id === (nodeType === "nexus" ? mainnet.id : sepolia.id)) {
     return [(12.8 + responseTime) * 60 * 1000 + responseTime, 12.8 + responseTime];
   }
-  if (id === (nodeType === "nexus" ? linea.id : lineaTestnet.id)) {
+  if (id === (nodeType === "nexus" ? linea.id : lineaSepolia.id)) {
     return [1 * 60 * 1000, 1];
   }
   if (id === (nodeType === "nexus" ? zkSync.id : zkSyncSepoliaTestnet.id)) {
@@ -513,10 +594,10 @@ export const getWaitTime = (id: number) => {
   if (id === (nodeType === "nexus" ? mantle.id : mantleTestnet.id)) {
     return [(1 + responseTime) * 60 * 1000, 1 + responseTime];
   }
-  if (id === (nodeType === "nexus" ? manta.id : mantaTestnet.id)) {
+  if (id === (nodeType === "nexus" ? manta.id : mantaSepolia.id)) {
     return [(1 + responseTime) * 60 * 1000, 1 + responseTime];
   }
-  if (id === blast.id) {
+  if (id === (nodeType === "nexus" ? blast.id : blastSepolia.id)) {
     return [(1 + responseTime) * 60 * 1000, 1 + responseTime];
   }
   return [(2 + responseTime) * 60 * 1000, 2 + responseTime];

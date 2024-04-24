@@ -650,7 +650,6 @@ const availableBalances = computed(() => {
   }
   return balance.value;
 });
-
 const routeTokenAddress = computed(() => {
   if (!route.query.token || Array.isArray(route.query.token) || !isAddress(route.query.token)) {
     return;

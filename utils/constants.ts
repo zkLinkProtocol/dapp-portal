@@ -1,3 +1,4 @@
+import { WITHDRAWAL_DELAY } from './../store/zksync/transactionStatus';
 import type { Token } from "@/types";
 
 export const ETH_TOKEN: Token = {

@@ -98,7 +98,10 @@ const { primaryNetwork, zkSyncNetworks,getNetworkInfo } = useNetworks();
 const { account } = storeToRefs(useOnboardStore());
 const eraNetwork = getNetworkInfo(props.transfer);
 const label = computed(() => {
-  const article = "Withdraw";
+  if(props.transfer.status === 'failed') {
+    return 'Failed Deposit'
+  }
+  const article = 'Withdraw';
   if (props.transfer.to === account.value.address) {
     return article;
   }

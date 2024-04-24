@@ -39,9 +39,15 @@
             }"
           />
         </CommonCardWithLineButtons>
-
-        <TypographyCategoryLabel v-if="!hasOnlyRecentBridgeOperations">Completed transfers</TypographyCategoryLabel>
       </template>
+      <template v-if="failedTransfers.length">
+        <TypographyCategoryLabel>Failed Deposit </TypographyCategoryLabel>
+
+        <CommonCardWithLineButtons>
+          <FailedDepositLineItem v-for="(item, index) in failedTransfers" :key="index" :transfer="item" as="a" />
+        </CommonCardWithLineButtons>
+      </template>
+      <TypographyCategoryLabel v-if="!hasOnlyRecentBridgeOperations">Completed transfers</TypographyCategoryLabel>
 
       <div v-if="loading">
         <CommonCardWithLineButtons>
@@ -96,14 +102,17 @@ import type { Transfer } from "@/utils/mappers";
 import { getWaitTime } from "@/data/networks";
 import { useDestinationsStore } from "@/store/destinations";
 import { useOnboardStore } from "@/store/onboard";
+import { useFailedDepositHistoryStore } from "@/store/zksync/failedDepositHistory";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
-import { WITHDRAWAL_DELAY } from "@/store/zksync/transactionStatus";
+import { getEstmatdDepositDelay, WITHDRAWAL_DELAY } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransfersHistoryStore } from "@/store/zksync/transfersHistory";
+import FailedDepositLineItem from "~/components/transaction/FailedDepositLineItem.vue";
 
 const onboardStore = useOnboardStore();
 const { eraNetwork } = storeToRefs(useZkSyncProviderStore());
 const transfersHistoryStore = useZkSyncTransfersHistoryStore();
+const failedDepositHistory = useFailedDepositHistoryStore();
 const { isConnected } = storeToRefs(onboardStore);
 const {
   transfers,
@@ -113,6 +122,9 @@ const {
   previousTransfersRequestInProgress,
   previousTransfersRequestError,
 } = storeToRefs(transfersHistoryStore);
+const { failedTransfers } = storeToRefs(failedDepositHistory);
+
+console.log("failedTransfers : ", failedTransfers.value);
 const { destinations } = storeToRefs(useDestinationsStore());
 const { userTransactions } = storeToRefs(useZkSyncTransactionStatusStore());
 type RecentBridgeOperation = Transfer & {
@@ -172,6 +184,7 @@ const { loading, reset: resetSingleLoading } = useSingleLoading(recentTransfersR
 const fetch = () => {
   if (!isConnected.value) return;
   transfersHistoryStore.requestRecentTransfers();
+  failedDepositHistory.requestFailedDepositTransfers();
 };
 fetch();
 
@@ -184,6 +197,7 @@ const unsubscribe = onboardStore.subscribeOnAccountChange((newAddress) => {
 const loadMoreEl = ref(null);
 const fetchMore = () => {
   transfersHistoryStore.requestPreviousTransfers();
+  failedDepositHistory.requestFailedDepositTransfers();
 };
 const { stop: stopLoadMoreObserver } = useIntersectionObserver(loadMoreEl, ([{ isIntersecting }]) => {
   if (isIntersecting) {
