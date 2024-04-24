@@ -4,7 +4,7 @@ WORKDIR /dapp-portal
 
 ADD . /dapp-portal
 
-RUN npm install && npm run generate:node:nexus-goerli
+RUN npm install && npm run generate:node:nexus-sepolia
 
 FROM 475911326710.dkr.ecr.ap-northeast-1.amazonaws.com/nginx:alpine3.18
 

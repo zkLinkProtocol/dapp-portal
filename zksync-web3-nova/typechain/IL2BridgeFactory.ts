@@ -54,6 +54,39 @@ const _abi = [
     inputs: [
       {
         internalType: "address",
+        name: "_l1Sender",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_l2Receiver",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_l1Token",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "_amount",
+        type: "uint256",
+      },
+      {
+        internalType: "bytes",
+        name: "_data",
+        type: "bytes",
+      },
+    ],
+    name: "finalizeDepositToMerge",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
         name: "_l1Bridge",
         type: "address",
       },

@@ -7,6 +7,7 @@
     "dev:node:memory": "cross-env NODE_TYPE=memory npm run dev",
     "dev:node:docker": "cross-env NODE_TYPE=dockerized npm run dev",
     "dev:node:nexus-goerli": "cross-env NODE_TYPE=nexus-goerli npm run dev",
+    "dev:node:nexus-sepolia": "cross-env NODE_TYPE=nexus-sepolia npm run dev",
     "dev:node:nexus": "cross-env NODE_TYPE=nexus npm run dev",
     "dev:node:hyperchain": "ts-node --transpile-only scripts/hyperchains/empty-check.ts && cross-env NODE_TYPE=hyperchain npm run dev",
     "generate": "nuxt generate && npm run generate-meta",
@@ -96,7 +97,7 @@
     "swiper": "^11.1.0",
     "ts-node": "^10.0.0",
     "typescript": "^4.3.5",
-    "viem": "^2.9.5",
+    "viem": "^2.9.16",
     "vite": "^3.0.0",
     "vue-tippy": "^6.0.0",
     "web3-avatar-vue": "^1.0.0"

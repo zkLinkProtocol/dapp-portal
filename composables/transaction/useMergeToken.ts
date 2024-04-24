@@ -13,7 +13,7 @@ export type SourceTokenInfo = {
   balance: bigint;
   depositLimit: bigint;
 };
-const NOVA_CHAIN_ID = nodeType === "nexus" ? 810180 : 810182;
+const NOVA_CHAIN_ID = nodeType === "nexus" ? 810180 : 810181;
 const MERGE_TOKEN_PORTAL_ADDRESSES =
   nodeType === "nexus" ? "0x83FD59FD58C6A5E6eA449e5400D02803875e1104" : "0x83FD59FD58C6A5E6eA449e5400D02803875e1104";
 export default (tokenL2Address: Ref<string | undefined>) => {
