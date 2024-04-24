@@ -33,7 +33,7 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
   const setStatus = async (obj: { transactionHash: ethers.utils.BytesLike; status: string; gateway: string }) => {
-    const { primaryNetwork, zkSyncNetworks,getNetworkInfo } = useNetworks();
+    const { primaryNetwork, zkSyncNetworks, getNetworkInfo } = useNetworks();
 
     const { selectedNetwork } = storeToRefs(useNetworkStore());
     let provider: Provider | undefined;
@@ -82,7 +82,7 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
     );
     const withdrawals = transfers.items.filter((e) => e.type === "withdrawal" && e.token && e.amount);
     for (const withdrawal of withdrawals) {
-      const { primaryNetwork, zkSyncNetworks,getNetworkInfo } = useNetworks();
+      const { primaryNetwork, zkSyncNetworks, getNetworkInfo } = useNetworks();
 
       const transactionFromStorage = transactionStatusStore.getTransaction(withdrawal.transactionHash);
       if (transactionFromStorage) {
@@ -156,7 +156,8 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
         },
         info: {
           expectedCompleteTimestamp: new Date(
-            new Date(withdrawalTransfer.timestamp).getTime() + WITHDRAWAL_DELAY
+            new Date(withdrawalTransfer.timestamp).getTime() +
+              getEstimateWithdrawalDelayDays(withdrawalTransfer.timestamp) * 24 * 3600 * 1000
           ).toISOString(),
           completed: withdrawal.status === "Finalized",
           withdrawalFinalizationAvailable: transactionDetails.status === "verified",
