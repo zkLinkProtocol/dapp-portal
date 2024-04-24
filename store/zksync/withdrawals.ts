@@ -1,4 +1,4 @@
-import { getPublicClient } from "@wagmi/core";
+import { getBalance, getPublicClient } from "@wagmi/core";
 import { ethers } from "ethers";
 import { $fetch } from "ofetch";
 
@@ -29,8 +29,11 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
   const { userTransactions } = storeToRefs(transactionStatusStore);
   const { destinations } = storeToRefs(useDestinationsStore());
   const eraWalletStore = useZkSyncWalletStore();
+  const wagmiConfig = onboardStore.wagmiConfig;
+  const { getNetworkInfo } = useNetworks();
+  const { selectedNetwork } = storeToRefs(useNetworkStore());
 
-  const TRANSACTIONS_FETCH_LIMIT = 100;
+  const TRANSACTIONS_FETCH_LIMIT = 100; // may miss claimable tx when user address has many txs;
 
   const DELAY_DAYS = process.env.NODE_TYPE === "nexus-sepolia" ? 1 : 7;
 
@@ -87,6 +90,21 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
     return res as bigint;
   };
 
+  const isETHBalanceEnoughForClaim = async (withdrawal: {
+    transactionHash: ethers.utils.BytesLike;
+    status: string;
+    gateway: string;
+    [key: string]: any;
+  }) => {
+    const eraNetwork = getNetworkInfo(withdrawal) || selectedNetwork.value;
+    const ethBalance = await getBalance(wagmiConfig as Config, {
+      address: eraNetwork.mainContract!,
+      chainId: eraNetwork.l1Network?.id,
+      token: undefined,
+    });
+    return !!ethBalance.value && ethBalance.value > Number(withdrawal.token.amount);
+  };
+
   const checkWithdrawalFinalizeAvailable = async (withdrawal: {
     transactionHash: ethers.utils.BytesLike;
     status: string;
@@ -133,7 +151,8 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
         if (withdrawal.token.symbol === "ETH") {
           const status = await isEthWithdrawalFinalizedOnPrimary(withdrawal.transactionHash);
           console.log("status: ", status, withdrawal);
-          claimable = status && totalBatchesExecuted >= l1BatchNumber;
+          const isEthBalanceEnough = await isETHBalanceEnoughForClaim(withdrawal);
+          claimable = status && totalBatchesExecuted >= l1BatchNumber && isEthBalanceEnough;
         } else {
           claimable = totalBatchesExecuted >= l1BatchNumber;
         }
