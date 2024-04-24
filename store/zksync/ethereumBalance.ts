@@ -1,9 +1,10 @@
 import { getBalance, getPublicClient } from "@wagmi/core";
+import { erc20Abi } from "viem";
 
 import type { Hash, TokenAmount } from "@/types";
 import type { Config } from "@wagmi/core";
 import type { Address } from "viem";
-import { erc20Abi } from "viem";
+
 import { l1Networks } from "@/data/networks";
 import { useEthereumBalanceStore } from "@/store/ethereumBalance";
 import { useNetworkStore } from "@/store/network";
@@ -17,7 +18,7 @@ export const useZkSyncEthereumBalanceStore = defineStore("zkSyncEthereumBalances
   const tokensStore = useZkSyncTokensStore();
   const { l1Network, selectedNetwork } = storeToRefs(useNetworkStore());
   const wagmiConfig = onboardStore.wagmiConfig;
-  const { account, network } = storeToRefs(onboardStore);
+  const { account } = storeToRefs(onboardStore);
   const { balance: ethereumBalance } = storeToRefs(ethereumBalancesStore);
   const { l1Tokens } = storeToRefs(tokensStore);
   const searchToken = useSearchtokenStore();
@@ -55,7 +56,13 @@ export const useZkSyncEthereumBalanceStore = defineStore("zkSyncEthereumBalances
     const filterL1tokens = Object.values(l1Tokens.value ?? []).filter(
       (e) => e.networkKey === selectedNetwork.value.key || e.address === ETH_TOKEN.l1Address
     );
-
+    if (selectedNetwork.value.key === "mantle") {
+      const nativeToken = filterL1tokens.find((e) => e.address === ETH_TOKEN.l1Address);
+      const wmntToken = filterL1tokens.find((e) => e.symbol === "WMNT");
+      nativeToken!.symbol = "MNT";
+      nativeToken!.price = wmntToken?.price ?? 0;
+      nativeToken!.iconUrl = "/img/mantle.svg";
+    }
     const publicClient = getPublicClient(wagmiConfig as Config, { chainId: l1Network.value?.id });
 
     const ethBalance = await getBalance(wagmiConfig as Config, {
@@ -107,7 +114,9 @@ export const useZkSyncEthereumBalanceStore = defineStore("zkSyncEthereumBalances
     oldBalance = balance.value ?? [];
     try {
       await requestBalance({ force: true });
-    } catch {}
+    } catch (e) {
+      console.log(e);
+    }
     isSaveToken = false;
   };
 

@@ -21,7 +21,7 @@
       <CommonButton
         v-if="
           connectorName !== 'WalletConnect' ||
-          (connectorName === 'WalletConnect' && (walletName?.includes('OKX') || walletName?.includes('MetaMask')))
+          (connectorName === 'WalletConnect' && (walletName?.includes('OKX') || walletName?.includes('MetaMask') || walletName?.includes('Binance')))
         "
         type="submit"
         :disabled="switchingNetworkInProgress"
@@ -31,11 +31,15 @@
       >
         Change wallet network to {{ eraNetwork.name }}
       </CommonButton>
-      <CommonButton v-else-if="walletName === 'Binance Web3'" disabled variant="primary" class="w-full">
-          The current version of your {{ walletName }} wallet may not support {{ eraNetwork.name }}
-      </CommonButton>
-      <CommonButton v-else disabled variant="primary" class="w-full">
+      <CommonButton v-else-if="connectorName === 'WalletConnect'" disabled variant="primary" class="w-full">
         Change network manually to {{ eraNetwork.name }} in your {{ walletName }} wallet
+      </CommonButton>
+      <template v-if="connectorName === 'WalletConnect'">
+        <CommonButtonUnderlineText :opened="!!walletName?.includes('Binance')">If you're using the Binance Web3 Wallet, please update it to the newest version.</CommonButtonUnderlineText>
+      </template>
+
+      <CommonButton v-else-if="walletName === 'Binance Web3'" disabled variant="primary" class="w-full">
+        The current version of your {{ walletName }} wallet may not support {{ eraNetwork.name }}
       </CommonButton>
     </div>
     <div v-else-if="buttonStep === 'continue'" class="transaction-footer-row">

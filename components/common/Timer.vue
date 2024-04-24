@@ -43,7 +43,7 @@ let intervalId: ReturnType<typeof setInterval> | undefined = undefined;
 
 const formatTimeDiff = (diff: number, onlyDays = false): string => {
   const day = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const hours = Math.floor(diff % (1000 * 60 * 60 * 24) / (1000 * 60 * 60));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
   const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
@@ -69,7 +69,6 @@ const updateTimer = () => {
   const targetTime = new Date(props.futureDate).getTime();
   diff.value = Math.max(targetTime - currentTime, 0);
   timer.value = formatTimeDiff(diff.value, props.onlyDays);
-
 
   if (diff.value === 0) {
     clearInterval(intervalId);

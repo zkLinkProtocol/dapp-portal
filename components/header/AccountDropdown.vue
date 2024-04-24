@@ -74,13 +74,7 @@ import { computed, ref, watch } from "vue";
 import { useTippy } from "vue-tippy";
 
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue";
-import {
-  ArrowTopRightOnSquareIcon,
-  DocumentDuplicateIcon,
-  ExclamationCircleIcon,
-  PowerIcon,
-  Squares2X2Icon,
-} from "@heroicons/vue/24/outline";
+import { ArrowTopRightOnSquareIcon, DocumentDuplicateIcon, PowerIcon, Squares2X2Icon } from "@heroicons/vue/24/outline";
 import { storeToRefs } from "pinia";
 
 import useCopy from "@/composables/useCopy";

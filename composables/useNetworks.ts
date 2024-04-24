@@ -3,7 +3,7 @@ import Hyperchains from "@/hyperchains/config.json";
 import type { ZkSyncNetwork } from "@/data/networks";
 import type { Token } from "@/types";
 
-import { zkSyncNetworks as defaultEraNetworks, nexusGoerliNode, nexusSepoliaNode, nexusNode } from "@/data/networks";
+import { zkSyncNetworks as defaultEraNetworks, nexusGoerliNode, nexusNode, nexusSepoliaNode } from "@/data/networks";
 import { PRIMARY_CHAIN_KEY } from "~/zksync-web3-nova/src/utils";
 
 export default () => {
@@ -40,6 +40,19 @@ export default () => {
     nexusNetworks[element.key] = element;
   }
   const isMainnet = runtimeConfig.public.nodeType === "nexus";
+  const getNetworkInfo = (transactionInfo:any) => {
+    if (transactionInfo.gateway) {
+      const newNetwork = zkSyncNetworks.find(
+        (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === transactionInfo.gateway?.toLowerCase()
+      );
+      return newNetwork ?? primaryNetwork;
+    } else {
+      let obj = zkSyncNetworks.find(
+        (item) => item.key && item.key.toLowerCase() === (transactionInfo.token?.networkKey || 'primary').toLowerCase()
+      )
+      return obj ?? primaryNetwork;
+    }
+  };
   return {
     isCustomNode,
     nexusNetworks,
@@ -47,5 +60,6 @@ export default () => {
     defaultNetwork,
     primaryNetwork,
     isMainnet,
+    getNetworkInfo,
   };
 };

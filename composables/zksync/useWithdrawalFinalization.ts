@@ -1,6 +1,7 @@
 import { useMemoize } from "@vueuse/core";
 import { BigNumber, type BigNumberish } from "ethers";
-import { Wallet } from "@/zksync-web3-nova/src";
+
+import useNetworks from "@/composables/useNetworks";
 
 import ZkSyncL1BridgeInterface from "@/zksync-web3-nova/abi/IL1Bridge.json";
 import ZkSyncContractInterface from "@/zksync-web3-nova/abi/IZkSync.json";
@@ -8,36 +9,27 @@ import ZkSyncContractInterface from "@/zksync-web3-nova/abi/IZkSync.json";
 import type { TransactionInfo } from "@/store/zksync/transactionStatus";
 import type { Hash } from "@/types";
 
+import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
-import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncTokensStore } from "@/store/zksync/tokens";
 import { formatError } from "@/utils/formatters";
-import useNetworks from "@/composables/useNetworks";
 import { Provider } from "@/zksync-web3-nova/src";
-import { useNetworkStore } from "@/store/network";
+import { Wallet } from "@/zksync-web3-nova/src";
 
 export default (transactionInfo: ComputedRef<TransactionInfo>) => {
   const status = ref<"not-started" | "processing" | "waiting-for-signature" | "sending" | "done">("not-started");
   const error = ref<Error | undefined>();
   const transactionHash = ref<Hash | undefined>();
   const onboardStore = useOnboardStore();
-  const providerStore = useZkSyncProviderStore();
   const tokensStore = useZkSyncTokensStore();
-  const { isCorrectNetworkSet, network } = storeToRefs(onboardStore);
+  const { network } = storeToRefs(onboardStore);
   const { tokens } = storeToRefs(tokensStore);
-  const { primaryNetwork, zkSyncNetworks } = useNetworks();
-
-  const getNetworkInfo = () => {
-    const newNetwork = zkSyncNetworks.find(
-      (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === transactionInfo.value.gateway?.toLowerCase()
-    );
-    return newNetwork ?? primaryNetwork;
-  };
+  const { primaryNetwork, zkSyncNetworks,getNetworkInfo } = useNetworks();
 
   const { selectedNetwork } = storeToRefs(useNetworkStore());
   let provider: Provider | undefined;
   const request = () => {
-    const eraNetwork = getNetworkInfo() || selectedNetwork.value;
+    const eraNetwork = getNetworkInfo(transactionInfo.value) || selectedNetwork.value;
     if (!provider) {
       provider = new Provider(eraNetwork.rpcUrl);
     }
@@ -48,6 +40,7 @@ export default (transactionInfo: ComputedRef<TransactionInfo>) => {
       erc20BridgeL1: eraNetwork.erc20BridgeL1,
       erc20BridgeL2: eraNetwork.erc20BridgeL2,
       l1Gateway: eraNetwork.l1Gateway,
+      wethContract: eraNetwork.wethContract,
     });
     provider.setIsEthGasToken(eraNetwork.isEthGasToken ?? true);
     return provider;
@@ -163,10 +156,10 @@ export default (transactionInfo: ComputedRef<TransactionInfo>) => {
       error.value = undefined;
 
       status.value = "processing";
-      if (!(network.value.chain?.id === getNetworkInfo().l1Network?.id)) {
-        await onboardStore.setCorrectNetwork(getNetworkInfo().l1Network?.id);
+      if (!(network.value.chain?.id === getNetworkInfo(transactionInfo.value).l1Network?.id)) {
+        await onboardStore.setCorrectNetwork(getNetworkInfo(transactionInfo.value).l1Network?.id);
       }
-      const wallet = await onboardStore.getWallet(getNetworkInfo().l1Network?.id);
+      const wallet = await onboardStore.getWallet(getNetworkInfo(transactionInfo.value).l1Network?.id);
       const { transactionParams, gasLimit, gasPrice } = (await estimateFee())!;
       status.value = "waiting-for-signature";
       transactionHash.value = await wallet.writeContract({

@@ -11,8 +11,7 @@
         </template>
         <template v-else>
           Your funds will be available on <span class="font-medium">{{ transaction.to.destination.label }}</span> after
-          the {{WITHDRAWAL_DELAY_DAYS}}-day delay.
-          During this time, the transaction will be processed
+          the {{ displayEstimateWithdrawTime }}-day delay. During this time, the transaction will be processed
           {{
             withdrawalManualFinalizationRequired
               ? "and become available for claiming."
@@ -45,13 +44,16 @@
       :from-explorer-link="blockExplorerUrl"
       :from-transaction-hash="transaction.transactionHash"
       :to-transaction-hash="finalizeTransactionHash || transaction.info.toTransactionHash"
-      :to-explorer-link="finalizeTransactionHash || transaction.info.toTransactionHash ? l1BlockExplorerUrls : undefined"
+      :to-explorer-link="
+        finalizeTransactionHash || transaction.info.toTransactionHash ? l1BlockExplorerUrls : undefined
+      "
       :token="transaction.token"
       :completed="transaction.info.completed"
       :animation-state="withdrawalFinalizationAvailable ? 'stopped-in-the-end' : undefined"
       :expected-complete-timestamp="
         withdrawalFinalizationAvailable ? undefined : transaction.info.expectedCompleteTimestamp
       "
+      :is-withdraw="true"
     >
       <template #to-button v-if="withdrawalFinalizationAvailable">
         <template v-if="!(network.chain?.id === getNetworkInfo().l1Network?.id)">
@@ -157,7 +159,8 @@ import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
-import { WITHDRAWAL_DELAY_DAYS } from '@/utils/constants'
+import { getEstimateWithdrawalDelayDays } from "@/utils/helpers";
+
 const props = defineProps({
   transaction: {
     type: Object as PropType<TransactionInfo>,
@@ -176,20 +179,32 @@ const props = defineProps({
 // });
 const { primaryNetwork, zkSyncNetworks } = useNetworks();
 
-const { selectedNetwork, l1Network, l1BlockExplorerUrl } = storeToRefs(useNetworkStore());
+const { l1Network, l1BlockExplorerUrl } = storeToRefs(useNetworkStore());
 const getNetworkInfo = () => {
-  const newNetwork = zkSyncNetworks.find(
-    (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === props.transaction?.gateway?.toLowerCase()
-  );
-  const obj = { l1Network: { id: l1Network.value?.id, blockExplorers: { default: { url: l1BlockExplorerUrl } } } };
-  return props.transaction ? newNetwork ?? primaryNetwork : obj;
+  if (props.transaction?.gateway) {
+    const newNetwork = zkSyncNetworks.find(
+      (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === props.transaction?.gateway?.toLowerCase()
+    );
+    const obj = { l1Network: { id: l1Network.value?.id, blockExplorers: { default: { url: l1BlockExplorerUrl } } } };
+    return props.transaction ? newNetwork ?? primaryNetwork : obj;
+  } else {
+    let objs = zkSyncNetworks.find(
+      (item) => item.key && item.key.toLowerCase() === (props.transaction?.token?.networkKey || "primary").toLowerCase()
+    );
+    const obj = { l1Network: { id: l1Network.value?.id, blockExplorers: { default: { url: l1BlockExplorerUrl } } } };
+    return props.transaction ? objs ?? primaryNetwork : obj;
+  }
 };
 const l1BlockExplorerUrls = getNetworkInfo().l1Network?.blockExplorers?.default.url;
 const onboardStore = useOnboardStore();
-const network = onboardStore.network;
+// const network = onboardStore.network;
 const transactionStatusStore = useZkSyncTransactionStatusStore();
 const { eraNetwork, blockExplorerUrl } = storeToRefs(useZkSyncProviderStore());
-const { connectorName, isCorrectNetworkSet } = storeToRefs(onboardStore);
+const { connectorName } = storeToRefs(onboardStore);
+
+const network = computed(() => {
+  return onboardStore.network;
+});
 
 const withdrawalManualFinalizationRequired = computed(() => {
   return (
@@ -199,6 +214,10 @@ const withdrawalManualFinalizationRequired = computed(() => {
 });
 const withdrawalFinalizationAvailable = computed(() => {
   return withdrawalManualFinalizationRequired.value && props.transaction.info.withdrawalFinalizationAvailable;
+});
+
+const displayEstimateWithdrawTime = computed(() => {
+  return getEstimateWithdrawalDelayDays(props.transaction.timestamp);
 });
 
 const {

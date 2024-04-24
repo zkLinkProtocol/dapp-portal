@@ -1,5 +1,5 @@
 import { getPublicClient } from "@wagmi/core";
-import { BigNumber, BigNumberish, BytesLike, Contract, ethers, utils } from "ethers";
+import { ethers } from "ethers";
 import { $fetch } from "ofetch";
 
 import useNetworks from "@/composables/useNetworks";
@@ -8,13 +8,11 @@ import type { ZkSyncNetwork } from "@/data/networks";
 import type { Api } from "@/types";
 import type { Config } from "@wagmi/core";
 
-import { nexusGoerliNode } from "@/data/networks";
 import { useDestinationsStore } from "@/store/destinations";
 import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncTransactionStatusStore, WITHDRAWAL_DELAY } from "@/store/zksync/transactionStatus";
-import { useZkSyncWalletStore } from "@/store/zksync/wallet";
 import { Provider } from "@/zksync-web3-nova/src";
 import { Wallet } from "@/zksync-web3-nova/src";
 
@@ -34,20 +32,13 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
   function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
-  const setStatus = async (obj: { transactionHash: any; status: string; gateway: string }) => {
-    const { primaryNetwork, zkSyncNetworks } = useNetworks();
-
-    const getNetworkInfo = () => {
-      const newNetwork = zkSyncNetworks.find(
-        (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === obj.gateway?.toLowerCase()
-      );
-      return newNetwork ?? primaryNetwork;
-    };
+  const setStatus = async (obj: { transactionHash: ethers.utils.BytesLike; status: string; gateway: string }) => {
+    const { primaryNetwork, zkSyncNetworks, getNetworkInfo } = useNetworks();
 
     const { selectedNetwork } = storeToRefs(useNetworkStore());
     let provider: Provider | undefined;
     const request = () => {
-      const eraNetwork = getNetworkInfo() || selectedNetwork.value;
+      const eraNetwork = getNetworkInfo(obj) || selectedNetwork.value;
       if (!provider) {
         provider = new Provider(eraNetwork.rpcUrl);
       }
@@ -56,13 +47,16 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
         erc20BridgeL1: eraNetwork.erc20BridgeL1,
         erc20BridgeL2: eraNetwork.erc20BridgeL2,
         l1Gateway: eraNetwork.l1Gateway,
+        wethContract: eraNetwork.wethContract,
       });
       provider.setIsEthGasToken(eraNetwork.isEthGasToken ?? true);
       return provider;
     };
 
     const web3Provider = new ethers.providers.Web3Provider(
-      getPublicClient(onboardStore.wagmiConfig as Config, { chainId: getNetworkInfo().l1Network?.id }) as any,
+      getPublicClient(onboardStore.wagmiConfig as Config, {
+        chainId: getNetworkInfo(obj).l1Network?.id,
+      }) as ethers.providers.ExternalProvider,
       "any"
     );
     const wallet = new Wallet(
@@ -80,6 +74,7 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
     if (!eraNetwork.value.blockExplorerApi)
       throw new Error(`Block Explorer API is not available on ${eraNetwork.value.name}`);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const transfers: { items: any[] } = await $fetch(
       `${eraNetwork.value.blockExplorerApi}/address/${
         account.value.address
@@ -87,16 +82,30 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
     );
     const withdrawals = transfers.items.filter((e) => e.type === "withdrawal" && e.token && e.amount);
     for (const withdrawal of withdrawals) {
-      const { primaryNetwork, zkSyncNetworks } = useNetworks();
+      const { primaryNetwork, zkSyncNetworks, getNetworkInfo } = useNetworks();
 
-      const getNetworkInfo = () => {
-        const newNetwork = zkSyncNetworks.find(
-          (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === withdrawal.gateway?.toLowerCase()
-        );
-        return newNetwork ?? primaryNetwork;
-      };
       const transactionFromStorage = transactionStatusStore.getTransaction(withdrawal.transactionHash);
       if (transactionFromStorage) {
+        // check if tx.to.destination is matching with tx.token.networkKey for erc20
+        if (
+          transactionFromStorage.to.destination.key !== transactionFromStorage.token.networkKey &&
+          transactionFromStorage.token.symbol !== "ETH"
+        ) {
+          const { selectedNetwork } = storeToRefs(useNetworkStore());
+          const eraNetworks = getNetworkInfo(withdrawal) || selectedNetwork.value;
+          const obj = {
+            iconUrl: eraNetworks.logoUrl!,
+            key: "nova",
+            label: eraNetworks?.l1Network?.name ?? "",
+          };
+          transactionStatusStore.updateTransactionData(withdrawal.transactionHash, {
+            ...transactionFromStorage,
+            to: {
+              ...transactionFromStorage.to,
+              destination: obj,
+            },
+          });
+        }
         if (!transactionFromStorage.info.completed) {
           await setStatus(withdrawal);
           await sleep(200);
@@ -126,7 +135,7 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
       let eraNetworks: ZkSyncNetwork;
       let obj = {};
       const request = () => {
-        eraNetworks = getNetworkInfo() || selectedNetwork.value;
+        eraNetworks = getNetworkInfo(withdrawal) || selectedNetwork.value;
         obj = {
           iconUrl: eraNetworks.logoUrl,
           key: "nova",
@@ -141,11 +150,11 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
           erc20BridgeL1: eraNetworks.erc20BridgeL1,
           erc20BridgeL2: eraNetworks.erc20BridgeL2,
           l1Gateway: eraNetworks.l1Gateway,
+          wethContract: eraNetworks.wethContract,
         });
         provider.setIsEthGasToken(eraNetworks.isEthGasToken ?? true);
         return provider;
       };
-
       if (!withdrawalTransfer) continue;
       if (new Date(withdrawalTransfer.timestamp).getTime() < Date.now() - FETCH_TIME_LIMIT) break;
       const transactionDetails = await retry(() => request().getTransactionDetails(withdrawal.transactionHash));
@@ -167,7 +176,8 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
         },
         info: {
           expectedCompleteTimestamp: new Date(
-            new Date(withdrawalTransfer.timestamp).getTime() + WITHDRAWAL_DELAY
+            new Date(withdrawalTransfer.timestamp).getTime() +
+              getEstimateWithdrawalDelayDays(withdrawalTransfer.timestamp) * 24 * 3600 * 1000
           ).toISOString(),
           completed: withdrawal.status === "Finalized",
           withdrawalFinalizationAvailable: transactionDetails.status === "verified",

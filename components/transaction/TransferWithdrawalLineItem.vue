@@ -74,15 +74,14 @@ import { storeToRefs } from "pinia";
 
 import TokenAmount from "@/components/transaction/lineItem/TokenAmount.vue";
 import TotalPrice from "@/components/transaction/lineItem/TotalPrice.vue";
-import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 
-import type { NetworkLayer, Transfer } from "@/utils/mappers";
+import useNetworks from "@/composables/useNetworks";
+
+import type { Transfer } from "@/utils/mappers";
 import type { PropType } from "vue";
 
 import { useOnboardStore } from "@/store/onboard";
-import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { shortenAddress } from "@/utils/formatters";
-import useNetworks from "@/composables/useNetworks";
 
 const props = defineProps({
   transfer: {
@@ -95,15 +94,9 @@ const props = defineProps({
   },
 });
 
-const { primaryNetwork, zkSyncNetworks } = useNetworks();
-const getNetworkInfo = () => {
-  const newNetwork = zkSyncNetworks.find(
-    (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === props.transfer.gateway?.toLowerCase()
-  );
-  return newNetwork ?? primaryNetwork;
-};
+const { primaryNetwork, zkSyncNetworks,getNetworkInfo } = useNetworks();
 const { account } = storeToRefs(useOnboardStore());
-const eraNetwork = getNetworkInfo();
+const eraNetwork = getNetworkInfo(props.transfer);
 const label = computed(() => {
   if(props.transfer.status === 'failed') {
     return 'Failed Deposit'
@@ -121,10 +114,7 @@ const formatAddress = (address: string) => {
   }
   return shortenAddress(address);
 };
-const chainIconUrl = computed(() => {
-  // return props.transfer.token?.chainIconUrl;
-  return getNetworkInfo()?.logoUrl;
-});
+
 const getl1NetworkName = () => {
   const { type, gateway } = props.transfer;
   // other chain
@@ -132,11 +122,11 @@ const getl1NetworkName = () => {
     if (type === "withdrawal") {
       return {
         from: "",
-        to: getNetworkInfo().l1Network?.name,
+        to: getNetworkInfo(props.transfer).l1Network?.name,
       };
     } else if (type === "deposit") {
       return {
-        from: getNetworkInfo().l1Network?.name,
+        from: getNetworkInfo(props.transfer).l1Network?.name,
         to: "",
       };
     }

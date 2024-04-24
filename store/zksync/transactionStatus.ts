@@ -1,6 +1,10 @@
 import { useStorage } from "@vueuse/core";
+import { type BigNumberish, type BytesLike, ethers } from "ethers";
 import { decodeEventLog } from "viem";
 
+import useNetworks from "@/composables/useNetworks";
+
+import { abi as secondaryAbi } from "@/views/transactions/ZkLink.json";
 import ZkSyncContractInterface from "@/zksync-web3-nova/abi/IZkSync.json";
 
 import type { FeeEstimationParams } from "@/composables/zksync/useFee";
@@ -8,16 +12,11 @@ import type { TransactionDestination } from "@/store/destinations";
 import type { TokenAmount } from "@/types";
 import type { Hash } from "@/types";
 
-import { useOnboardStore } from "@/store/onboard";
-import { useZkSyncProviderStore } from "@/store/zksync/provider";
-import { useZkSyncWalletStore } from "@/store/zksync/wallet";
-import { abi as secondaryAbi } from "@/views/transactions/ZkLink.json";
-import { ethers, type BigNumberish, type BytesLike } from "ethers";
-import { PRIMARY_CHAIN_KEY } from "~/zksync-web3-nova/src/utils";
-import { nexusGoerliNode } from "@/data/networks";
-import useNetworks from "@/composables/useNetworks";
-import { Provider } from "@/zksync-web3-nova/src";
 import { useNetworkStore } from "@/store/network";
+import { useOnboardStore } from "@/store/onboard";
+import { useZkSyncWalletStore } from "@/store/zksync/wallet";
+import { Provider } from "@/zksync-web3-nova/src";
+import { PRIMARY_CHAIN_KEY } from "~/zksync-web3-nova/src/utils";
 
 export type TransactionInfo = {
   type: FeeEstimationParams["type"] | "deposit";
@@ -45,7 +44,7 @@ export const getEstmatdDepositDelay = (networkKey: string): number => {
     return ESTIMATED_DEPOSIT_DELAY_SECONDARY;
   }
 };
-export const WITHDRAWAL_DELAY = 14 * 24 * 60 * 60 * 1000; // 7 * 24 hours
+export const WITHDRAWAL_DELAY = 7 * 24 * 60 * 60 * 1000; // 7 * 24 hours
 export type Address = Hash;
 export type ForwardL2Request = {
   gateway: Address;
@@ -63,9 +62,7 @@ export type ForwardL2Request = {
 
 export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionStatus", () => {
   const onboardStore = useOnboardStore();
-  const providerStore = useZkSyncProviderStore();
   const { account } = storeToRefs(onboardStore);
-  const { eraNetwork } = storeToRefs(providerStore);
   const eraWalletStore = useZkSyncWalletStore();
 
   const storageSavedTransactions = useStorage<{ [networkKey: string]: TransactionInfo[] }>(
@@ -137,8 +134,8 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
       throw new Error("No L2 transaction hash found");
     }
 
-    let abicoder = new ethers.utils.AbiCoder();
-    let encodedata = abicoder.encode(
+    const abicoder = new ethers.utils.AbiCoder();
+    const encodedata = abicoder.encode(
       ["(bytes32,address,bool,address,uint256,address,uint256,bytes32,uint256,uint256,bytes32,address)"],
       [
         [
@@ -159,6 +156,7 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
     );
     const forwardHash = ethers.utils.keccak256(encodedata) as Hash;
     console.log(forwardHash);
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       const canonicalTxHash = await eraWalletStore.getPrimaryL1VoidSigner().getCanonicalTxHash(forwardHash);
       if (canonicalTxHash) return canonicalTxHash;
@@ -179,24 +177,17 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
       transactionHash = await getDepositL2TransactionHash(transaction.transactionHash);
     }
 
-    const transactionReceipt = await request(transaction.gateway).getTransactionReceipt(transactionHash);
+    const transactionReceipt = await request(transaction).getTransactionReceipt(transactionHash);
     if (!transactionReceipt) return transaction;
     transaction.info.toTransactionHash = transactionHash;
     transaction.info.completed = true;
     return transaction;
   };
-  const { primaryNetwork, zkSyncNetworks } = useNetworks();
-  const getNetworkInfo = (gateway: any) => {
-    const newNetwork = zkSyncNetworks.find(
-      (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === gateway?.toLowerCase()
-    );
-    return newNetwork ?? primaryNetwork;
-  };
-
+  const { primaryNetwork, zkSyncNetworks,getNetworkInfo } = useNetworks();
   const { selectedNetwork } = storeToRefs(useNetworkStore());
   let provider: Provider | undefined;
-  const request = (gateway: any) => {
-    const eraNetwork = getNetworkInfo(gateway) || selectedNetwork.value;
+  const request = (transaction: any) => {
+    const eraNetwork = getNetworkInfo(transaction) || selectedNetwork.value;
     if (!provider) {
       provider = new Provider(eraNetwork.rpcUrl);
     }
@@ -207,13 +198,14 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
       erc20BridgeL1: eraNetwork.erc20BridgeL1,
       erc20BridgeL2: eraNetwork.erc20BridgeL2,
       l1Gateway: eraNetwork.l1Gateway,
+      wethContract: eraNetwork.wethContract,
     });
     provider.setIsEthGasToken(eraNetwork.isEthGasToken ?? true);
     return provider;
   };
   const getWithdrawalStatus = async (transaction: TransactionInfo) => {
     if (!transaction.info.withdrawalFinalizationAvailable) {
-      const transactionDetails = await request(transaction.gateway).getTransactionDetails(transaction.transactionHash);
+      const transactionDetails = await request(transaction).getTransactionDetails(transaction.transactionHash);
       if (transactionDetails.status !== "verified") {
         return transaction;
       }
@@ -227,7 +219,7 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
     return transaction;
   };
   const getTransferStatus = async (transaction: TransactionInfo) => {
-    const transactionReceipt = await request(transaction.gateway).getTransactionReceipt(transaction.transactionHash);
+    const transactionReceipt = await request(transaction).getTransactionReceipt(transaction.transactionHash);
     if (!transactionReceipt) return transaction;
     transaction.info.completed = true;
     return transaction;

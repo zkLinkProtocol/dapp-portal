@@ -113,6 +113,7 @@
 
 <script lang="ts" setup>
 import { ref } from "vue";
+import { computed } from "vue";
 
 import {
   ArrowsRightLeftIcon,
@@ -124,13 +125,14 @@ import {
 } from "@heroicons/vue/24/outline";
 import { storeToRefs } from "pinia";
 
+import Banner from "./Banner.vue";
+
 import useColorMode from "@/composables/useColorMode";
+import useNetworks from "@/composables/useNetworks";
 
 import { useRoute } from "#imports";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncWithdrawalsStore } from "@/store/zksync/withdrawals";
-import useNetworks from "@/composables/useNetworks";
-import Banner from "./Banner.vue";
 const { defaultNetwork, isMainnet } = useNetworks();
 
 const route = useRoute();

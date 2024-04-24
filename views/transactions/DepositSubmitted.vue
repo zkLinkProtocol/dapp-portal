@@ -41,13 +41,14 @@
 <script lang="ts" setup>
 import { storeToRefs } from "pinia";
 
+import useNetworks from "@/composables/useNetworks";
+
 import type { TransactionInfo } from "@/store/zksync/transactionStatus";
 import type { PropType } from "vue";
 
-import { useNetworkStore } from "@/store/network";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 
-const { primaryNetwork, zkSyncNetworks } = useNetworks();
+const { primaryNetwork, zkSyncNetworks,getNetworkInfo } = useNetworks();
 let prop = defineProps({
   transaction: {
     type: Object as PropType<TransactionInfo>,
@@ -59,12 +60,6 @@ let prop = defineProps({
   },
 });
 
-const getNetworkInfo = () => {
-  const newNetwork = zkSyncNetworks.find(
-    (item) => item.l1Gateway && item.l1Gateway.toLowerCase() === prop.transaction.gateway?.toLowerCase()
-  );
-  return newNetwork ?? primaryNetwork;
-};
-const l1BlockExplorerUrl = getNetworkInfo()?.l1Network?.blockExplorers?.default.url;
+const l1BlockExplorerUrl = getNetworkInfo(prop.transaction)?.l1Network?.blockExplorers?.default.url;
 const { eraNetwork, blockExplorerUrl } = storeToRefs(useZkSyncProviderStore());
 </script>
