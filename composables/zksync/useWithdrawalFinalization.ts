@@ -122,8 +122,9 @@ export default (transactionInfo: ComputedRef<TransactionInfo>) => {
     reload: reloadEstimateFee,
   } = usePromise(
     async () => {
+      const eraNetwork = getNetworkInfo(transactionInfo.value) || selectedNetwork.value;
       tokensStore.requestTokens();
-      const publicClient = onboardStore.getPublicClient(network.value.chainId);
+      const publicClient = onboardStore.getPublicClient(eraNetwork.l1Network?.id);
       if (!publicClient) return;
       const transactionParams = await getTransactionParams();
       const [price, limit] = await Promise.all([
@@ -149,16 +150,6 @@ export default (transactionInfo: ComputedRef<TransactionInfo>) => {
       };
     },
     { cache: 1000 * 8 }
-  );
-
-  watch(
-    [network],
-    () => {
-      reloadEstimateFee();
-    },
-    {
-      immediate: true,
-    }
   );
 
   const commitTransaction = async () => {
