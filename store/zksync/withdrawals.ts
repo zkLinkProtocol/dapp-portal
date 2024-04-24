@@ -35,7 +35,7 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
 
   const TRANSACTIONS_FETCH_LIMIT = 100; // may miss claimable tx when user address has many txs;
 
-  const DELAY_DAYS = process.env.NODE_TYPE === "nexus-sepolia" ? 1 : 7;
+  const DELAY_DAYS = process.env.NODE_TYPE === "nexus-sepolia" ? 0.5 : 7;
 
   const isWithinDelayDays = (timestamp: number | string) => {
     return Date.now() - new Date(timestamp).getTime() < DELAY_DAYS * 24 * 60 * 60 * 1000;

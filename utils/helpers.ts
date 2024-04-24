@@ -54,3 +54,7 @@ export async function retry<T>(func: () => Promise<T>, options: RetryOptions = {
     }
   }
 }
+
+export async function sleep(time: number) {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
