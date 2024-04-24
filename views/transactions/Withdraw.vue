@@ -1209,6 +1209,17 @@ onBeforeUnmount(() => {
       font-weight: 400;
       line-height: normal;
     }
+    @media screen and (max-width: 600px) {
+      .name{
+        font-size: 12px;
+      }
+      .time{
+        font-size: 10px;
+      }
+    }
+  }
+  .box:focus{
+    background: transparent;
   }
   .active{
     background: #3D424D;
