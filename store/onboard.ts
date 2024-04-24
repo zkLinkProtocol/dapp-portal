@@ -209,7 +209,6 @@ export const useOnboardStore = defineStore("onboard", () => {
     // termsConditionsUrl: "https://zksync.io/terms",
     // privacyPolicyUrl: "https://zksync.io/privacy",
     themeMode: selectedColorMode.value,
-    enableAnalytics: false
   });
 
   watchAccount(wagmiConfig, {
