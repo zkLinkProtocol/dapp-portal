@@ -37,7 +37,10 @@
         </CommonButton>
         <!--//TODO not only Binance Web3-->
         <CommonButton
-          v-else-if="walletName?.includes('Binance') && l1Network.name.includes('Mantle')"
+          v-else-if="
+            (walletName?.includes('Binance') && l1Network.name.includes('Mantle')) ||
+            (isBinanceWeb3App && ['Mantle Mainnet', 'Linea Mainnet', 'Base Mainnet'].includes(l1Network.name))
+          "
           disabled
           variant="primary"
           class="w-full"
@@ -63,7 +66,9 @@
           </slot>
         </CommonButton>
         <template v-if="connectorName === 'WalletConnect'">
-          <CommonButtonUnderlineText :opened="!!walletName?.includes('Binance')">If you're using the Binance Web3 Wallet, please update it to the newest version.</CommonButtonUnderlineText>
+          <CommonButtonUnderlineText :opened="!!walletName?.includes('Binance')"
+            >If you're using the Binance Web3 Wallet, please update it to the newest version.</CommonButtonUnderlineText
+          >
         </template>
       </template>
       <template v-else>
@@ -94,6 +99,9 @@ import { l1Networks } from "@/data/networks";
 import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
 import { TransitionAlertScaleInOutTransition } from "@/utils/transitions";
+
+const isBinanceWeb3App = window.ethereum?.isBinance;
+
 const props = defineProps({
   transaction: {
     type: Object as PropType<TransactionInfo>,
@@ -126,8 +134,8 @@ const getNetworkInfo = () => {
     return props.transaction ? newNetwork ?? primaryNetwork : obj;
   } else {
     let obj = zkSyncNetworks.find(
-      (item) => item.key && item.key.toLowerCase() === (props.transaction?.token?.networkKey || 'primary').toLowerCase()
-    )
+      (item) => item.key && item.key.toLowerCase() === (props.transaction?.token?.networkKey || "primary").toLowerCase()
+    );
     const objs = { l1Network: { id: l1Network.value?.id } };
     return props.transaction ? obj ?? primaryNetwork : objs;
   }
