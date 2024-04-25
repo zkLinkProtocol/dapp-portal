@@ -579,7 +579,7 @@ const amountInputTokenAddress = computed({
 const tokenBalance = computed<BigNumberish | undefined>(() => {
   return balance.value?.find((e) => e.address === selectedToken.value?.address)?.amount;
 });
-const { result: mergeTokenInfo } = useMergeToken(computed(() => selectedToken.value?.l2Address));
+const { result: mergeTokenInfo, reloadMergeTokenInfo } = useMergeToken(computed(() => selectedToken.value?.l2Address));
 
 const {
   result: allowance,
@@ -853,6 +853,7 @@ const makeTransaction = async () => {
     step.value = "submitted";
     previousTransactionAddress.value = transaction.value!.to.address;
     recentlyBridged.value = true;
+    reloadMergeTokenInfo();
   }
 
   if (tx) {
@@ -964,7 +965,7 @@ onMounted(() => {
   if (selectedNetworkKey.value === "blast") {
     selectedNetworkKey.value = zkSyncNetworks[0].key;
   }
-})
+});
 </script>
 
 <style lang="scss" scoped>

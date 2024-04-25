@@ -23,6 +23,7 @@ export default (tokenL2Address: Ref<string | undefined>) => {
     inProgress,
     error,
     execute: getMergeTokenInfo,
+    reload: reloadMergeTokenInfo,
     reset,
   } = usePromise(
     async () => {
@@ -59,5 +60,6 @@ export default (tokenL2Address: Ref<string | undefined>) => {
     inProgress: computed(() => inProgress.value),
     error: computed(() => error.value),
     requestMergeTokenInfo,
+    reloadMergeTokenInfo
   };
 };
