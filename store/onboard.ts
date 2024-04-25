@@ -311,7 +311,13 @@ export const useOnboardStore = defineStore("onboard", () => {
     isConnected: computed(() => !!account.value.address),
     network: computed(() => network.value),
     isConnectingWallet: computed(() => {
-      console.log("account.value", account.value.isConnecting, account.value.isReconnecting);
+      console.log(
+        "account.value",
+        account.value.address,
+        account.value.open,
+        account.value.isConnecting,
+        account.value.isReconnecting
+      );
       return account.value.isReconnecting || account.value.isConnecting;
     }),
     connectingWalletError,
