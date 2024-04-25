@@ -75,7 +75,11 @@ export default (getSigner: () => Promise<Signer | undefined>, getProvider: () =>
 
       transactionHash.value = tx.hash;
       await sleep(1500);
-      await publicClient?.getTransactionReceipt({ hash: tx.hash as `0x${string}` });
+      try {
+        await publicClient?.getTransactionReceipt({ hash: tx.hash as `0x${string}` });
+      } catch (e) {
+        error.value = formatError(e as Error);
+      }
       status.value = "done";
 
       return tx;

@@ -49,6 +49,12 @@ export const MERGE_TOKENS =
           targetNetworkKeys: ["arbitrum", "base"],
           decimals: 6,
         },
+        {
+          symbol: "USDC",
+          address: "0x61759317e2D6Ce05d79F35423b98B27efC15CE34",
+          targetNetworkKeys: ["arbitrum", "base"],
+          decimals: 6,
+        },
       ];
 
 export const isMergeToken = (address: string) => {

@@ -48,6 +48,9 @@ export const getEstmatdDepositDelay = (networkKey: string): number => {
   }
 };
 export const WITHDRAWAL_DELAY = 14 * 24 * 60 * 60 * 1000; // 7 * 24 hours
+
+export const WITHDRAWAL_CHECK_DELAY_DAYS = process.env.NODE_TYPE === "nexus-sepolia" ? 0.5 : 7;
+
 export type Address = Hash;
 export type ForwardL2Request = {
   gateway: Address;
