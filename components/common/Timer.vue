@@ -49,7 +49,7 @@ const formatTimeDiff = (diff: number, onlyDays = false): string => {
 
   if (props.format === "human-readable") {
     if (onlyDays) {
-      return `~ ${day} day${day !== 1 ? "s" : ""}`
+      return `~ ${day + 1} day${day + 1 !== 1 ? "s" : ""}`;
     }
     let formattedString = "";
     if (hours > 0) formattedString += `${day} day ${hours} hour${hours > 1 ? "s" : ""} `;
@@ -69,7 +69,6 @@ const updateTimer = () => {
   const targetTime = new Date(props.futureDate).getTime();
   diff.value = Math.max(targetTime - currentTime, 0);
   timer.value = formatTimeDiff(diff.value, props.onlyDays);
-
 
   if (diff.value === 0) {
     clearInterval(intervalId);
