@@ -13,7 +13,11 @@ import { useDestinationsStore } from "@/store/destinations";
 import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
-import { useZkSyncTransactionStatusStore, WITHDRAWAL_DELAY } from "@/store/zksync/transactionStatus";
+import {
+  useZkSyncTransactionStatusStore,
+  WITHDRAWAL_DELAY,
+  WITHDRAWAL_CHECK_DELAY_DAYS,
+} from "@/store/zksync/transactionStatus";
 import { useZkSyncWalletStore } from "@/store/zksync/wallet";
 import { Provider } from "@/zksync-web3-nova/src";
 import { Wallet } from "@/zksync-web3-nova/src";
@@ -35,10 +39,8 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
 
   const TRANSACTIONS_FETCH_LIMIT = 100; // may miss claimable tx when user address has many txs;
 
-  const DELAY_DAYS = process.env.NODE_TYPE === "nexus-sepolia" ? 0.5 : 7;
-
   const isWithinDelayDays = (timestamp: number | string) => {
-    return Date.now() - new Date(timestamp).getTime() < DELAY_DAYS * 24 * 60 * 60 * 1000;
+    return Date.now() - new Date(timestamp).getTime() < WITHDRAWAL_CHECK_DELAY_DAYS * 24 * 60 * 60 * 1000;
   };
 
   function sleep(ms: number) {
@@ -302,7 +304,7 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
   };
   const { reset: resetAutoUpdate, stop: stopAutoUpdate } = useInterval(() => {
     updateWithdrawals();
-  }, 60_000);
+  }, 5 * 60_000);
 
   onboardStore.subscribeOnAccountChange((account) => {
     if (account) {
