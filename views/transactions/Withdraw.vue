@@ -21,7 +21,24 @@
     >
       Confirm transaction
     </PageTitle>
-
+    <div class="tab">
+      <div class="box" :class="{ 'active': showBridge }" @click="showBridge =true">
+        <div class="name">
+          Use the official Bridge
+        </div>
+        <div class="time">
+          Up to 8 days, no additional fee
+        </div>
+      </div>
+      <div class="box" :class="{ 'active': !showBridge }" @click="showBridge =false">
+        <div class="name">
+          Use a third party bridge
+        </div>
+        <div class="time">
+          Usually takes under 20 mins
+        </div>
+      </div>
+    </div>
     <div class="warnBox flex" v-if="!route.query.s || route.query.s !== 'okx'">
       <div>
         Note: All LRT points will continue to be calculated after you request a withdrawal. They will appear in the next
@@ -184,11 +201,12 @@
             class="mb-block-padding-1/2 sm:mb-block-gap"
           >
             <p v-if="withdrawalManualFinalizationRequired">
-              You will be able to claim your withdrawal only after a {{ WITHDRAWAL_DELAY_DAYS }}-day withdrawal delay.
+              You will be able to claim your withdrawal only after a {{ displayEstimateWithdrawalDelayDays }}-day
+              withdrawal delay.
               <!-- <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">Learn more</a> -->
             </p>
             <p v-else>
-              You will receive funds only after a {{ WITHDRAWAL_DELAY_DAYS }}-day withdrawal delay.
+              You will receive funds only after a {{ displayEstimateWithdrawalDelayDays }}-day withdrawal delay.
               <!-- <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">Learn more</a> -->
             </p>
           </CommonAlert>
@@ -432,7 +450,7 @@
         </template>
       </form>
     </div>
-    <div class="mt-6 flex flex-col gap-block-gap">
+    <div class="mt-6 flex flex-col gap-block-gap" v-else>
       <CommonCardWithLineButtons v-for="(item, index) in thirdChainMethods" :key="index" class="relative">
         <DestinationItem v-bind="item.props">
           <template #image v-if="item.icon">
@@ -487,26 +505,19 @@ import { useOnboardStore } from "@/store/onboard";
 import { usePreferencesStore } from "@/store/preferences";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncTokensStore } from "@/store/zksync/tokens";
-import { WITHDRAWAL_DELAY } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransactionStatusStore } from "@/store/zksync/transactionStatus";
 import { useZkSyncTransfersHistoryStore } from "@/store/zksync/transfersHistory";
 import { useZkSyncWalletStore } from "@/store/zksync/wallet";
-import {
-  ETH_TOKEN,
-  isMergeToken,
-  isSupportedMergeToken,
-  MergeTokenContractUrl,
-  WITHDRAWAL_DELAY_DAYS,
-} from "@/utils/constants";
+import { ETH_TOKEN, isMergeToken, isSupportedMergeToken } from "@/utils/constants";
 import { ZKSYNC_WITHDRAWAL_DELAY } from "@/utils/doc-links";
 import { checksumAddress, decimalToBigNumber, formatRawTokenPrice, parseTokenAmount } from "@/utils/formatters";
-import { calculateFee } from "@/utils/helpers";
+import { calculateFee, getEstimateWithdrawalDelayDays } from "@/utils/helpers";
 import { silentRouterChange } from "@/utils/helpers";
 import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/transitions";
 import TransferSubmitted from "@/views/transactions/TransferSubmitted.vue";
 import WithdrawalSubmitted from "@/views/transactions/WithdrawalSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
-const showBridge = true;
+const showBridge = ref(true);
 const chainList = [
   {
     name: "Meson Finance",
@@ -594,6 +605,8 @@ const fromNetworkSelected = (networkKey?: string) => {
 
 const step = ref<"form" | "withdrawal-finalization-warning" | "confirm" | "submitted">("form");
 const destination = computed(() => (props.type === "transfer" ? destinations.value.nova : destinations.value.arbitrum));
+
+const displayEstimateWithdrawalDelayDays = getEstimateWithdrawalDelayDays(Date.now());
 
 const availableTokens = computed(() => {
   if (!tokens.value) return [];
@@ -1071,7 +1084,9 @@ const makeTransaction = async () => {
       info: {
         expectedCompleteTimestamp:
           transaction.value?.type === "withdrawal"
-            ? new Date(new Date().getTime() + WITHDRAWAL_DELAY).toISOString()
+            ? new Date(
+                new Date().getTime() + getEstimateWithdrawalDelayDays(Date.now()) * 24 * 60 * 60 * 1000
+              ).toISOString()
             : undefined,
         completed: false,
       },
@@ -1166,6 +1181,52 @@ onBeforeUnmount(() => {
   }
   a {
     color: #0bc48f;
+  }
+}
+.tab{
+  width: 100%;
+  border-radius: 64px;
+  background: #262B33;
+  padding: 8px;
+  display: flex;
+  margin-bottom: 16px;
+  .box{
+    border-radius: 64px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 50%;
+    padding: 7px 0;
+    cursor: pointer;
+    .name{
+      color: #FFF;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 700;
+      line-height: normal;
+    }
+    .time{
+      color: #9DA3AE;
+      text-align: center;
+      font-size: 12px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+    }
+    @media screen and (max-width: 600px) {
+      .name{
+        font-size: 12px;
+      }
+      .time{
+        font-size: 10px;
+      }
+    }
+  }
+  .box:focus{
+    background: transparent;
+  }
+  .active{
+    background: #3D424D;
   }
 }
 </style>
