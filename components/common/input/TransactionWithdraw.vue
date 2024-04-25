@@ -6,6 +6,7 @@
       :loading="loading"
       :tokens="tokens"
       :balances="balances"
+      :title="from==='withdraw'? 'Choose chain and token':''"
     >
       <template #body-bottom v-if="$slots['token-dropdown-bottom']">
         <slot name="token-dropdown-bottom" />
@@ -154,6 +155,10 @@ const props = defineProps({
   label: {
     type: String,
     default: "Amount",
+  },
+  from: {
+    type: String,
+    default: "",
   },
   tokens: {
     type: Array as PropType<Token[]>,
