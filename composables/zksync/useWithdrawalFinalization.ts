@@ -24,7 +24,7 @@ export default (transactionInfo: ComputedRef<TransactionInfo>) => {
   const tokensStore = useZkSyncTokensStore();
   const { network } = storeToRefs(onboardStore);
   const { tokens } = storeToRefs(tokensStore);
-  const { primaryNetwork, zkSyncNetworks,getNetworkInfo } = useNetworks();
+  const { primaryNetwork, zkSyncNetworks, getNetworkInfo } = useNetworks();
 
   const { selectedNetwork } = storeToRefs(useNetworkStore());
   let provider: Provider | undefined;
@@ -119,10 +119,12 @@ export default (transactionInfo: ComputedRef<TransactionInfo>) => {
     inProgress: estimationInProgress,
     error: estimationError,
     execute: estimateFee,
+    reload: reloadEstimateFee,
   } = usePromise(
     async () => {
+      const eraNetwork = getNetworkInfo(transactionInfo.value) || selectedNetwork.value;
       tokensStore.requestTokens();
-      const publicClient = onboardStore.getPublicClient();
+      const publicClient = onboardStore.getPublicClient(eraNetwork.l1Network?.id);
       if (!publicClient) return;
       const transactionParams = await getTransactionParams();
       const [price, limit] = await Promise.all([

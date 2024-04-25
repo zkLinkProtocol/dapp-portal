@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMemoize } from "@vueuse/core";
 import { type BigNumberish } from "ethers";
 
@@ -6,8 +7,11 @@ import useScreening from "@/composables/useScreening";
 import type { TokenAmount } from "@/types";
 import type { Provider, Signer } from "@/zksync-web3-nova/src";
 
+import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncWalletStore } from "@/store/zksync/wallet";
 import { formatError } from "@/utils/formatters";
+import { sleep } from "@/utils/helpers";
+import { NOVA_CHAIN_ID } from "@/utils/constants";
 
 type TransactionParams = {
   type: "transfer" | "withdrawal";
@@ -29,6 +33,8 @@ export default (getSigner: () => Promise<Signer | undefined>, getProvider: () =>
   const error = ref<Error | undefined>();
   const transactionHash = ref<string | undefined>();
   const eraWalletStore = useZkSyncWalletStore();
+  const onboardStore = useOnboardStore();
+  const publicClient = onboardStore.getPublicClient(NOVA_CHAIN_ID);
 
   const retrieveBridgeAddresses = useMemoize(() => getProvider().getDefaultBridgeAddresses());
   const { validateAddress } = useScreening();
@@ -68,6 +74,12 @@ export default (getSigner: () => Promise<Signer | undefined>, getProvider: () =>
       });
 
       transactionHash.value = tx.hash;
+      await sleep(1500);
+      try {
+        await publicClient?.getTransactionReceipt({ hash: tx.hash as `0x${string}` });
+      } catch (e) {
+        error.value = formatError(e as Error);
+      }
       status.value = "done";
 
       return tx;

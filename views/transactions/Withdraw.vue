@@ -802,7 +802,11 @@ const mergeTokenL2Address = computed(() => {
   return undefined;
 });
 
-const { result: mergeTokenInfo, inProgress: mergeTokenInfoInProgress } = useMergeToken(mergeTokenL2Address);
+const {
+  result: mergeTokenInfo,
+  reloadMergeTokenInfo,
+  inProgress: mergeTokenInfoInProgress,
+} = useMergeToken(mergeTokenL2Address);
 
 const mergeTokenWithdrawalLimitExceeds = computed(() => {
   try {
@@ -1062,6 +1066,7 @@ const makeTransaction = async () => {
   if (transactionStatus.value === "done") {
     step.value = "submitted";
     previousTransactionAddress.value = transaction.value!.to.address;
+    reloadMergeTokenInfo();
   }
 
   if (tx) {

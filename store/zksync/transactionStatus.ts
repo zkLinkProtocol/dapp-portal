@@ -9,6 +9,9 @@ import ZkSyncContractInterface from "@/zksync-web3-nova/abi/IZkSync.json";
 
 import type { FeeEstimationParams } from "@/composables/zksync/useFee";
 import type { TransactionDestination } from "@/store/destinations";
+
+import { useZkSyncWithdrawalsStore } from "@/store/zksync/withdrawals";
+
 import type { TokenAmount } from "@/types";
 import type { Hash } from "@/types";
 
@@ -44,6 +47,9 @@ export const getEstmatdDepositDelay = (networkKey: string): number => {
     return ESTIMATED_DEPOSIT_DELAY_SECONDARY;
   }
 };
+
+export const WITHDRAWAL_CHECK_DELAY_DAYS = process.env.NODE_TYPE === "nexus-sepolia" ? 0.5 : 7;
+
 export const WITHDRAWAL_DELAY = 7 * 24 * 60 * 60 * 1000; // 7 * 24 hours
 export type Address = Hash;
 export type ForwardL2Request = {
@@ -64,7 +70,7 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
   const onboardStore = useOnboardStore();
   const { account } = storeToRefs(onboardStore);
   const eraWalletStore = useZkSyncWalletStore();
-
+  const zkSyncWithdrawalsStore = useZkSyncWithdrawalsStore();
   const storageSavedTransactions = useStorage<{ [networkKey: string]: TransactionInfo[] }>(
     "zksync-bridge-transactions",
     {}
@@ -183,7 +189,7 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
     transaction.info.completed = true;
     return transaction;
   };
-  const { primaryNetwork, zkSyncNetworks,getNetworkInfo } = useNetworks();
+  const { primaryNetwork, zkSyncNetworks, getNetworkInfo } = useNetworks();
   const { selectedNetwork } = storeToRefs(useNetworkStore());
   let provider: Provider | undefined;
   const request = (transaction: any) => {
@@ -205,15 +211,21 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
   };
   const getWithdrawalStatus = async (transaction: TransactionInfo) => {
     if (!transaction.info.withdrawalFinalizationAvailable) {
-      const transactionDetails = await request(transaction).getTransactionDetails(transaction.transactionHash);
-      if (transactionDetails.status !== "verified") {
+      const claimable = await zkSyncWithdrawalsStore.checkWithdrawalFinalizeAvailable(transaction);
+      if (!claimable) {
         return transaction;
       }
+      // const transactionDetails = await request(transaction).getTransactionDetails(transaction.transactionHash);
+      // if (transactionDetails.status !== "verified") {
+      //   return transaction;
+      // }
     }
-    const isFinalized = await useZkSyncWalletStore()
-      .getL1VoidSigner(true)
-      ?.isWithdrawalFinalized(transaction.transactionHash)
-      .catch(() => false);
+
+    // const isFinalized = await useZkSyncWalletStore()
+    //   .getL1VoidSigner(true)
+    //   ?.isWithdrawalFinalized(transaction.transactionHash)
+    //   .catch(() => false);
+    const isFinalized = await zkSyncWithdrawalsStore.setStatus(transaction);
     transaction.info.withdrawalFinalizationAvailable = true;
     transaction.info.completed = isFinalized;
     return transaction;
