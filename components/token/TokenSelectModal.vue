@@ -21,7 +21,7 @@
           <MagnifyingGlassIcon aria-hidden="true" />
         </template>
       </CommonInputSearch>
-      <div class="-mx-block-padding-1/2 h-[18rem] overflow-auto px-block-padding-1/2">
+      <div class="-mx-block-padding-1/2 md:h-[18rem] h-[15rem] overflow-auto px-block-padding-1/2">
         <template v-if="loading">
           <div class="-mx-block-padding-1/2">
             <TokenBalanceLoader v-for="index in 2" variant="light" :key="index" />
