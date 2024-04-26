@@ -142,7 +142,7 @@ export const useOnboardStore = defineStore("onboard", () => {
     wagmiConnector.value = connector;
     connectorName.value = connector?.name;
     let name = "";
-    if (connections?.[0]?.connector.getProvider) {
+    if (connections?.[0]?.connector?.getProvider && typeof connections?.[0]?.connector?.getProvider === "function") {
       const provider: unknown = await connections?.[0]?.connector.getProvider();
       name = provider?.session?.peer?.metadata?.name;
     } else {
