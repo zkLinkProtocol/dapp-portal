@@ -78,30 +78,48 @@ export const useFailedDepositHistoryStore = defineStore("failedDepositHistory", 
       const mappedTransfers = response.items;
 
       const l2Provider = await providerStore.requestProvider();
-      const tokens = mappedTransfers.map((tx) => {
-        const l2BridgeAddress = tx.to;
-        const l2Bridge = IL2BridgeFactory.connect(l2BridgeAddress, l2Provider);
-        let calldata;
-        try {
-          calldata = l2Bridge.interface.decodeFunctionData("finalizeDepositToMerge", tx.data); // we know only these two cases for failed deposit
-        } catch (e) {
-          calldata = l2Bridge.interface.decodeFunctionData("finalizeDeposit", tx.data);
-        }
-
-        console.log("calldata: ", calldata);
-        const amount = calldata._amount as BigNumberish;
-        const token = calldata._l1Token as Address;
-        return {
-          amount,
-          token,
-          networkKey: tx.networkKey,
-        };
-      });
+      const tokens = mappedTransfers
+        .map((tx) => {
+          const l2BridgeAddress = tx.to;
+          const l2Bridge = IL2BridgeFactory.connect(l2BridgeAddress, l2Provider);
+          let calldata;
+          try {
+            calldata = l2Bridge.interface.decodeFunctionData("finalizeDepositToMerge", tx.data); // we know only these two cases for failed deposit
+          } catch (e) {
+            //do nothing
+          }
+          if (!calldata) {
+            try {
+              calldata = l2Bridge.interface.decodeFunctionData("finalizeDeposit", tx.data);
+            } catch (e) {
+              //do nothing
+            }
+          }
+          if (!calldata) {
+            return;
+          }
+          console.log("calldata: ", calldata);
+          const amount = calldata._amount as BigNumberish;
+          const token = calldata._l1Token as Address;
+          return {
+            hash: tx.hash,
+            amount,
+            token,
+            networkKey: tx.networkKey,
+          };
+        })
+        .filter((item) => !!item);
       const tokenDatas = await Promise.all(tokens.map((item) => formatErc20(item.token, item.amount, item.networkKey)));
-      mappedTransfers.forEach((transfer, index) => {
-        transfer.token = tokenDatas[index];
-      });
-      transfers.value = [...mappedTransfers];
+      const result = [];
+      for (let i = 0; i < tokens.length; i++) {
+        const token = tokens[i];
+        const transfer = mappedTransfers.find((item) => item.hash === token!.hash);
+        if (transfer) {
+          transfer.token = tokenDatas[i];
+          result.push(transfer);
+        }
+      }
+      transfers.value = [...result];
     },
     { cache: 30000 }
   );
