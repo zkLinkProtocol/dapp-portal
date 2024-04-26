@@ -16,12 +16,12 @@
 </template>
 
 <script lang="ts" setup>
-import { onBeforeMount } from "vue";
-onBeforeMount(() => {
-  if (window.innerWidth < 500) {
-    window.eruda.init();
-  }
-});
+// import { onBeforeMount } from "vue";
+// onBeforeMount(() => {
+//   if (window.innerWidth < 500) {
+//     window.eruda.init();
+//   }
+// });
 </script>
 
 <style lang="scss" scoped>
