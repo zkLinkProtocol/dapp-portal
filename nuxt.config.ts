@@ -45,6 +45,9 @@ export default defineNuxtConfig({
           src: "https://cdn.rudderlabs.com/v1.1/rudder-analytics.min.js",
           defer: true,
         },
+        // {
+        //   src: '//cdn.jsdelivr.net/npm/eruda'
+        // }
       ],
     },
   },

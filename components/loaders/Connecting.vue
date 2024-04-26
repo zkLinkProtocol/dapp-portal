@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 
 import { storeToRefs } from "pinia";
 

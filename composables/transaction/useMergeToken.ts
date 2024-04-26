@@ -15,7 +15,7 @@ export type SourceTokenInfo = {
 };
 const NOVA_CHAIN_ID = nodeType === "nexus" ? 810180 : 810181;
 const MERGE_TOKEN_PORTAL_ADDRESSES =
-  nodeType === "nexus" ? "0x83FD59FD58C6A5E6eA449e5400D02803875e1104" : "0x83FD59FD58C6A5E6eA449e5400D02803875e1104";
+  nodeType === "nexus" ? "0x83FD59FD58C6A5E6eA449e5400D02803875e1104" : "0x400993142059ddF34636c58Bb066aAD2d21ec273";
 export default (tokenL2Address: Ref<string | undefined>) => {
   const onboardStore = useOnboardStore();
   const {
@@ -23,6 +23,7 @@ export default (tokenL2Address: Ref<string | undefined>) => {
     inProgress,
     error,
     execute: getMergeTokenInfo,
+    reload: reloadMergeTokenInfo,
     reset,
   } = usePromise(
     async () => {
@@ -59,5 +60,6 @@ export default (tokenL2Address: Ref<string | undefined>) => {
     inProgress: computed(() => inProgress.value),
     error: computed(() => error.value),
     requestMergeTokenInfo,
+    reloadMergeTokenInfo
   };
 };

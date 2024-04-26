@@ -1,12 +1,19 @@
+import useNetworks from "@/composables/useNetworks";
 import usePaginatedRequest from "@/composables/zksync/usePaginatedRequest";
 
 import type { Api } from "@/types";
 import type { Transfer } from "@/utils/mappers";
 
+import { useDestinationsStore } from "@/store/destinations";
 import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
-import { mapApiTransfer } from "@/utils/mappers";
+import {
+  useZkSyncTransactionStatusStore,
+  WITHDRAWAL_CHECK_DELAY_DAYS,
+  WITHDRAWAL_DELAY,
+} from "@/store/zksync/transactionStatus";
 import { useZkSyncWithdrawalsStore } from "@/store/zksync/withdrawals";
+import { mapApiTransfer } from "@/utils/mappers";
 
 const TRANSACTIONS_FETCH_LIMIT = 50;
 
@@ -14,6 +21,10 @@ export const useZkSyncTransfersHistoryStore = defineStore("zkSyncTransfersHistor
   const onboardStore = useOnboardStore();
   const { eraNetwork } = storeToRefs(useZkSyncProviderStore());
   const { account } = storeToRefs(onboardStore);
+  const transactionStatusStore = useZkSyncTransactionStatusStore();
+  const { userTransactions } = storeToRefs(transactionStatusStore);
+  const { destinations } = storeToRefs(useDestinationsStore());
+  const { getNetworkInfo } = useNetworks();
 
   const filterOutDuplicateTransfers = (transfers: Transfer[]) => {
     /*
@@ -81,6 +92,42 @@ export const useZkSyncTransfersHistoryStore = defineStore("zkSyncTransfersHistor
       const mappedTransfers = response.items.map(mapApiTransfer);
       useZkSyncWithdrawalsStore().updateWithdrawals();
       transfers.value = filterOutDuplicateTransfers(mappedTransfers);
+      //TODO put withdrawals into local storage
+      for (const withdrawal of transfers.value.filter((e) => e.type === "withdrawal")) {
+        if (!userTransactions.value.find((e) => e.transactionHash === withdrawal.transactionHash)) {
+          const eraNetworks = getNetworkInfo(withdrawal);
+          const obj = {
+            iconUrl: eraNetworks.logoUrl,
+            key: "nova",
+            label: eraNetworks?.l1Network?.name,
+          };
+          transactionStatusStore.saveTransaction({
+            type: "withdrawal",
+            transactionHash: withdrawal.transactionHash!,
+            timestamp: withdrawal.timestamp,
+            token: {
+              ...withdrawal.token!,
+              amount: withdrawal.amount!,
+            },
+            from: {
+              address: withdrawal.from,
+              destination: destinations.value.nova,
+            },
+            to: {
+              address: withdrawal.to,
+              destination: obj,
+            },
+            info: {
+              expectedCompleteTimestamp: new Date(
+                new Date(withdrawal.timestamp).getTime() + WITHDRAWAL_DELAY
+              ).toISOString(),
+              completed: false, // will check internally
+              withdrawalFinalizationAvailable: false, // will check internally
+            },
+            gateway: withdrawal.gateway,
+          });
+        }
+      }
     },
     { cache: 30000 }
   );

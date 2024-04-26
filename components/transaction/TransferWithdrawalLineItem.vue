@@ -94,14 +94,14 @@ const props = defineProps({
   },
 });
 
-const { primaryNetwork, zkSyncNetworks,getNetworkInfo } = useNetworks();
+const { primaryNetwork, zkSyncNetworks, getNetworkInfo } = useNetworks();
 const { account } = storeToRefs(useOnboardStore());
 const eraNetwork = getNetworkInfo(props.transfer);
 const label = computed(() => {
-  if(props.transfer.status === 'failed') {
-    return 'Failed Deposit'
+  if (props.transfer.status === "failed") {
+    return "Failed Deposit";
   }
-  const article = 'Withdraw';
+  const article = "Withdraw";
   if (props.transfer.to === account.value.address) {
     return article;
   }
@@ -139,8 +139,8 @@ const getl1NetworkName = () => {
       };
     } else {
       return {
-        from: primaryNetwork.l1Network?.name,
-        to: primaryNetwork.l1Network?.name,
+        from: eraNetwork.l1Network?.name,
+        to: eraNetwork.l1Network?.name,
       };
     }
   }

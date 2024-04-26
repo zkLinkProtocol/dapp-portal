@@ -63,7 +63,9 @@
           </slot>
         </CommonButton>
         <template v-if="connectorName === 'WalletConnect'">
-          <CommonButtonUnderlineText :opened="!!walletName?.includes('Binance')">If you're using the Binance Web3 Wallet, please update it to the newest version.</CommonButtonUnderlineText>
+          <CommonButtonUnderlineText :opened="!!walletName?.includes('Binance')"
+            >If you're using the Binance Web3 Wallet, please update it to the newest version.</CommonButtonUnderlineText
+          >
         </template>
       </template>
       <template v-else>
@@ -126,8 +128,8 @@ const getNetworkInfo = () => {
     return props.transaction ? newNetwork ?? primaryNetwork : obj;
   } else {
     let obj = zkSyncNetworks.find(
-      (item) => item.key && item.key.toLowerCase() === (props.transaction?.token?.networkKey || 'primary').toLowerCase()
-    )
+      (item) => item.key && item.key.toLowerCase() === (props.transaction?.token?.networkKey || "primary").toLowerCase()
+    );
     const objs = { l1Network: { id: l1Network.value?.id } };
     return props.transaction ? obj ?? primaryNetwork : objs;
   }
@@ -146,7 +148,7 @@ const isGateWalletUnsupportedChain = computed(() => {
 const buttonStep = computed(() => {
   console.log("buttonStep getNetworkInfo().l1Network?.id", getNetworkInfo().l1Network?.id);
   console.log("buttonStep network.value.chain?.id", network.value.chain?.id);
-  if (!account.value.address || isConnectingWallet.value) {
+  if (!account.value.address) {
     return "connect";
   } else if (!(network.value.chain?.id === getNetworkInfo().l1Network?.id)) {
     return "network";

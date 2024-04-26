@@ -655,7 +655,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
       return await l1Bridge.isWithdrawalFinalized(log.l1BatchNumber, proof!.id);
     }
-
+    
     async claimFailedDeposit(depositHash: BytesLike, overrides?: ethers.Overrides) {
       const receipt = await this._providerL2().getTransactionReceipt(ethers.utils.hexlify(depositHash));
       const successL2ToL1LogIndex = receipt.l2ToL1Logs.findIndex(
