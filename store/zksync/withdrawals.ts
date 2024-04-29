@@ -106,12 +106,7 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
     return !!ethBalance.value && ethBalance.value > Number(withdrawal.token.amount);
   };
 
-  const checkWithdrawalFinalizeAvailable = async (withdrawal: {
-    transactionHash: ethers.utils.BytesLike;
-    status: string;
-    gateway: string;
-    [key: string]: any;
-  }) => {
+  const checkWithdrawalFinalizeAvailable = async (withdrawal: TransactionInfo) => {
     const { primaryNetwork, zkSyncNetworks, getNetworkInfo } = useNetworks();
     const { selectedNetwork } = storeToRefs(useNetworkStore());
     let provider: Provider | undefined;
@@ -249,7 +244,21 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
               },
             });
           }
-        } else if (!transactionFromStorage.info.completed) {
+        } else {
+          // recheck claimable status
+          const status = await checkWithdrawalFinalizeAvailable(transactionFromStorage);
+          if (!status) {
+            transactionStatusStore.updateTransactionData(withdrawal.transactionHash, {
+              ...transactionFromStorage,
+              info: {
+                ...transactionFromStorage.info,
+                withdrawalFinalizationAvailable: false,
+              },
+            });
+          }
+        }
+
+        if (!transactionFromStorage.info.completed) {
           await setStatus(withdrawal);
           await sleep(200);
           if (withdrawal.status === "Finalized") {
