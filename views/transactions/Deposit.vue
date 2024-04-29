@@ -71,6 +71,7 @@
           v-model:error="amountError"
           v-model:token-address="amountInputTokenAddress"
           label="From"
+          :from="'deposit'"
           :tokens="availableTokens"
           :balances="availableBalances"
           :max-amount="maxAmount"
