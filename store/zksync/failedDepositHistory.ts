@@ -41,25 +41,39 @@ export const useFailedDepositHistoryStore = defineStore("failedDepositHistory", 
     const network = zkSyncNetworks.find((item) => item.key === networkKey);
     if (!network) throw new Error("Invalid networ key: " + networkKey);
     const publicClient = onboardStore.getPublicClient(network.l1Network?.id);
-    const [symbol, decimals] = await Promise.all([
-      publicClient?.readContract({
-        abi: erc20Abi,
-        address: token,
-        functionName: "symbol",
-        args: [],
-      }),
-      publicClient?.readContract({
-        abi: erc20Abi,
-        address: token,
-        functionName: "decimals",
-        args: [],
-      }),
-    ]);
+    let _symbol = "",
+      _decimals = 18;
+    try {
+      const [symbol, decimals] = await Promise.all([
+        publicClient?.readContract({
+          abi: erc20Abi,
+          address: token,
+          functionName: "symbol",
+          args: [],
+        }),
+        publicClient?.readContract({
+          abi: erc20Abi,
+          address: token,
+          functionName: "decimals",
+          args: [],
+        }),
+      ]);
+      _symbol = symbol ?? "";
+      _decimals = decimals ?? 18;
+    } catch (e) {
+      console.log(e);
+      if (token === "0xBBeB516fb02a01611cBBE0453Fe3c580D7281011") {
+        // special case for WBTC
+        _symbol = "WBTC";
+        _decimals = 8;
+      }
+    }
+
     return {
       address: token,
-      symbol: symbol!,
+      symbol: _symbol!,
       amount,
-      decimals: decimals!,
+      decimals: _decimals!,
       l2Address: "",
     };
   };
@@ -105,7 +119,7 @@ export const useFailedDepositHistoryStore = defineStore("failedDepositHistory", 
             hash: tx.hash,
             amount,
             token,
-            networkKey: tx.networkKey,
+            networkKey: tx.networkKey || "primary",
           };
         })
         .filter((item) => !!item);
