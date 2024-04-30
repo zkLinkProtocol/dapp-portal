@@ -47,7 +47,13 @@
           <FailedDepositLineItem v-for="(item, index) in failedTransfers" :key="index" :transfer="item" as="a" />
         </CommonCardWithLineButtons>
       </template>
-      <TypographyCategoryLabel v-if="!hasOnlyRecentBridgeOperations">Completed transfers</TypographyCategoryLabel>
+      <div class="flex items-center justify-between" v-if="!hasOnlyRecentBridgeOperations">
+        <TypographyCategoryLabel>Completed transfers</TypographyCategoryLabel>
+        <div class="flex items-center filter-checkbox">
+          <label for="show-deposits-withdrawals-only" class="mr-2">Show Deposits & Withdrawas only</label>
+          <input type="checkbox" id="show-deposits-withdrawals-only" v-model="showDepositsWithdrawalsOnly" />
+        </div>
+      </div>
 
       <div v-if="loading">
         <CommonCardWithLineButtons>
@@ -59,7 +65,7 @@
           Loading transfers error: {{ recentTransfersRequestError.message }}
         </CommonErrorBlock>
       </CommonCardWithLineButtons>
-      <div v-else-if="displayedTransfers.length" class="mt-6">
+      <div v-else-if="displayedTransfers.length">
         <CommonCardWithLineButtons>
           <TransactionTransferLineItem v-for="(item, index) in displayedTransfers" :key="index" :transfer="item" />
         </CommonCardWithLineButtons>
@@ -124,6 +130,8 @@ const {
 } = storeToRefs(transfersHistoryStore);
 const { failedTransfers } = storeToRefs(failedDepositHistory);
 
+const showDepositsWithdrawalsOnly = ref(true);
+
 console.log("failedTransfers : ", failedTransfers.value);
 const { destinations } = storeToRefs(useDestinationsStore());
 const { userTransactions } = storeToRefs(useZkSyncTransactionStatusStore());
@@ -171,9 +179,11 @@ const actionNotRequiredBridgeTransactions = computed(() => {
   return recentBridgeOperations.value.filter((e) => !actionRequiredHashes.includes(e.transactionHash));
 });
 const displayedTransfers = computed(() => {
-  return transfers.value.filter(
-    (transfer) => !recentBridgeOperations.value.find((tx) => tx.transactionHash === transfer.transactionHash)
-  );
+  return transfers.value
+    .filter((transfer) => !recentBridgeOperations.value.find((tx) => tx.transactionHash === transfer.transactionHash))
+    .filter((item) =>
+      showDepositsWithdrawalsOnly.value ? item.type === "deposit" || item.type === "withdrawal" : true
+    );
 });
 const hasOnlyRecentBridgeOperations = computed(() => {
   return !displayedTransfers.value.length && recentBridgeOperations.value.length && !recentTransfersRequestError.value;
@@ -210,4 +220,12 @@ onBeforeUnmount(() => {
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.filter-checkbox {
+  color: #9ca2ae;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px; /* 125% */
+}
+</style>
