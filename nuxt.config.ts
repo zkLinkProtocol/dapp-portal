@@ -52,7 +52,10 @@ export default defineNuxtConfig({
     },
   },
   plugins: [],
-  modules: ["@kevinmarrec/nuxt-pwa", "@pinia/nuxt"],
+  modules: ["@kevinmarrec/nuxt-pwa", "@pinia/nuxt", "nuxt-gtag"],
+  gtag: {
+    id: "G-VJL36Q8SJ4",
+  },
   ssr: false,
   pwa: {
     meta: {
