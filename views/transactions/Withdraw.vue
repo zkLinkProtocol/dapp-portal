@@ -74,6 +74,7 @@
             v-model:error="amountError"
             v-model:token-address="amountInputTokenAddress"
             :label="type === 'withdrawal' ? 'From' : undefined"
+            :from="'withdraw'"
             :tokens="availableTokens"
             :balances="availableBalances"
             :max-amount="maxAmount"
@@ -578,7 +579,6 @@ const props = defineProps({
 const { selectedNetwork } = storeToRefs(useNetworkStore());
 const route = useRoute();
 const router = useRouter();
-
 const onboardStore = useOnboardStore();
 const walletStore = useZkSyncWalletStore();
 const tokensStore = useZkSyncTokensStore();
@@ -666,7 +666,7 @@ const tokenWithHighestBalancePrice = computed(() => {
 });
 const defaultToken = computed(() => availableTokens.value?.[0] ?? undefined);
 const selectedTokenAddress = ref<string | undefined>(
-  routeTokenAddress.value ?? tokenWithHighestBalancePrice.value?.address ?? defaultToken.value?.address
+  route.query.tokenAddress ?? routeTokenAddress.value ?? tokenWithHighestBalancePrice.value?.address ?? defaultToken.value?.address
 );
 const selectedToken = computed<Token | undefined>(() => {
   if (!tokens.value) {
