@@ -1,5 +1,14 @@
 <template>
-  <CommonButtonLine class="transaction-withdrawal-line-item" @click="isModalOpen = true">
+  <CommonButtonLine
+    class="transaction-withdrawal-line-item"
+    @click="
+      () => {
+        if (!clainedTxHash) {
+          isModalOpen = true;
+        }
+      }
+    "
+  >
     <div class="line-button-with-img-image">
       <DestinationIconContainer class="p-0">
         <img src="/img/icon-cross.svg" class="w-3 h-3" />
@@ -30,12 +39,10 @@
             </template>
             <template #underline>
               <div class="flex flex-col">
-                <span>Claim on source chain</span>
-                <CommonTimer format="human-readable" :future-date="expectedCompleteTimestamp" :only-days="true">
-                  <template #default="{ timer, isTimerFinished }">
-                    <span>{{ timer }} days left</span>
-                  </template>
-                </CommonTimer>
+                <span>Transaction hash of asset return</span>
+                <a :href="clainedTxHash?.explorerUrl" target="_blank" class="claimed-hash">{{
+                  clainedTxHash?.txHash
+                }}</a>
               </div>
             </template>
           </CommonButtonLineBodyInfo>
@@ -53,11 +60,11 @@
       </p>
 
       <p class="w-full text-left mb-4">
-        After a 14-day period from the time of your deposit, your assets will be automatically returned to the deposit
-        address on the source chain.
+        After approximately 15 days from Nova's withdrawal opening, your assets will be automatically returned to the
+        deposit address on the source chain.
       </p>
       <CommonButton type="submit" variant="primary" class="w-full" @click="isModalOpen = false"> Confirm </CommonButton>
-      <a class="mt-4">Contact for help</a>
+      <a class="mt-4" href="https://discord.com/invite/zklink" target="_blank">Contact for help</a>
     </div>
   </CommonModal>
 </template>
@@ -81,6 +88,7 @@ import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { shortenAddress } from "@/utils/formatters";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
+import { failedDepositClaimedTxhashes } from "@/data/failedClaimedTxhashes";
 
 const props = defineProps({
   transfer: {
@@ -120,14 +128,30 @@ const chainsLabel = computed(() => {
 });
 
 const expectedCompleteTimestamp = computed(() => {
+  xw;
   console.log("transer: ", props.transfer);
-  return new Date(new Date(props.transfer.receivedAt).getTime() + 14 * 24 * 3600 * 1000).toISOString();
+  return new Date(1713088800000 + 15 * 24 * 3600 * 1000).toISOString(); // 15 days after withdrawal open
 });
 const computeAmount = computed(() => {
   return BigNumber.from(props.transfer.token.amount || "0").toString();
 });
 const token = computed(() => {
   return props.transfer.token;
+});
+
+const clainedTxHash = computed(() => {
+  for (const [key, value] of Object.entries(failedDepositClaimedTxhashes)) {
+    const item = value[props.transfer.hash];
+    if (item) {
+      const network = zkSyncNetworks.find((item) => item.key === key);
+      return {
+        explorerUrl: `${network?.l1Network?.blockExplorers?.default.url}/tx/${item}`,
+        txHash: item.substring(0, 6) + "..." + item.substring(item.length - 4),
+      };
+    }
+    continue;
+  }
+  return null;
 });
 
 const timeAgo = useTimeAgo(props.transfer.receivedAt);
@@ -167,6 +191,16 @@ const timeAgo = useTimeAgo(props.transfer.receivedAt);
         @apply w-full whitespace-nowrap xs:w-auto;
       }
     }
+  }
+  .claimed-hash {
+    color: #1755f4;
+    text-align: right;
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    text-decoration-line: underline;
   }
 }
 </style>

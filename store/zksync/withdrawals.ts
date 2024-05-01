@@ -48,17 +48,16 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
   }
 
   /**
-   * 对于提到从链的提现：
-* 条件1：查linea上zklink合约的isEthWithdrawalFinalized：
+   * for withdrawal to secondary chain：
+* condition 1: call zklink contract's isEthWithdrawalFinalized on Linea
 
   * _l2BatchNumber
   * _l2MessageIndex
 
   getTransactionReceipt（novaTxHash)
 
-* 条件2：查从链的zklink合约的totalBatchesExecuted，查出来的值必须要>=nova上的提现hash去查所在batch高度
-
-  对于eth 提现需要满足 条件1和条件2， 对于erc20， 只需要满足条件2
+* condition 2：call zklink contract's totalBatchesExecuted on secondary chain, result >= l1batchnumber of the withdrawal transaction hash
+  for eth need both condition 1 and 2;， for erc20, only need condition2
    * @param transactionHash 
    * @returns 
    */
@@ -107,12 +106,7 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
     return !!ethBalance.value && ethBalance.value > Number(withdrawal.token.amount);
   };
 
-  const checkWithdrawalFinalizeAvailable = async (withdrawal: {
-    transactionHash: ethers.utils.BytesLike;
-    status: string;
-    gateway: string;
-    [key: string]: any;
-  }) => {
+  const checkWithdrawalFinalizeAvailable = async (withdrawal: TransactionInfo) => {
     const { primaryNetwork, zkSyncNetworks, getNetworkInfo } = useNetworks();
     const { selectedNetwork } = storeToRefs(useNetworkStore());
     let provider: Provider | undefined;
@@ -250,7 +244,21 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
               },
             });
           }
-        } else if (!transactionFromStorage.info.completed) {
+        } else {
+          // recheck claimable status
+          const status = await checkWithdrawalFinalizeAvailable(transactionFromStorage);
+          if (!status) {
+            transactionStatusStore.updateTransactionData(withdrawal.transactionHash, {
+              ...transactionFromStorage,
+              info: {
+                ...transactionFromStorage.info,
+                withdrawalFinalizationAvailable: false,
+              },
+            });
+          }
+        }
+
+        if (!transactionFromStorage.info.completed) {
           await setStatus(withdrawal);
           await sleep(200);
           if (withdrawal.status === "Finalized") {

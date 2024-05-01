@@ -84,29 +84,33 @@ export const useOnboardStore = defineStore("onboard", () => {
   };
   console.log("extendedChains", extendedChains);
   console.log("selectedNetwork", selectedNetwork.value);
+  const connectors = [
+    injected(),
+    safe({
+      allowedDomains: [/app.safe.global$/],
+      debug: true,
+    }),
+    walletConnect({ projectId: env.walletConnectProjectID, showQrModal: false, metadata }),
+  ];
+  if (isBinanceWeb3App()) {
+    connectors.unshift(
+      injected({
+        target() {
+          return {
+            id: "Binance Web3 Wallet",
+            name: "Binance Web3 Wallet",
+            provider: window.ethereum,
+            icon: "/img-binance-web3-wallet.png",
+          };
+        },
+      })
+    );
+  }
   const wagmiConfig = createConfig({
     chains: extendedChains,
     projectId: env.walletConnectProjectID,
     metadata,
-    connectors: [
-      isBinanceWeb3App()
-        ? injected({
-            target() {
-              return {
-                id: "Binance Web3 Wallet",
-                name: "Binance Web3 Wallet",
-                provider: window.ethereum,
-                icon: "/img-binance-web3-wallet.png",
-              };
-            },
-          })
-        : injected(),
-      safe({
-        allowedDomains: [/app.safe.global$/],
-        debug: true,
-      }),
-      walletConnect({ projectId: env.walletConnectProjectID, showQrModal: false, metadata }),
-    ],
+    connectors: connectors,
     client: ({ chain }) => {
       return createClient({ chain, transport: http() });
     },
@@ -142,7 +146,7 @@ export const useOnboardStore = defineStore("onboard", () => {
     wagmiConnector.value = connector;
     connectorName.value = connector?.name;
     let name = "";
-    if (connections?.[0]?.connector.getProvider) {
+    if (connections?.[0]?.connector?.getProvider && typeof connections?.[0]?.connector?.getProvider === "function") {
       const provider: unknown = await connections?.[0]?.connector.getProvider();
       name = provider?.session?.peer?.metadata?.name;
     } else {
