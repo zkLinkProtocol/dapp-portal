@@ -194,6 +194,7 @@ const fetch = () => {
   if (!isConnected.value) return;
   transfersHistoryStore.requestRecentTransfers();
   failedDepositHistory.requestFailedDepositTransfers();
+  transfersHistoryStore.requestWithdrawals();
 };
 fetch();
 
