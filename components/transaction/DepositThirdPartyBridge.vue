@@ -39,15 +39,17 @@ import { ref } from "vue";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/vue/24/outline";
 import { $fetch } from "ofetch";
 
-import { useOnboardStore } from "@/store/onboard";
-
-const onboardStore = useOnboardStore();
-
 const handleLink = (link: string) => {
   window.open(link, "_blank");
 };
 
 const ThirdPartyBridges = [
+  {
+    name: "Meson Finance",
+    logo: "/img/Meson.svg",
+    bannerImg: "Meson.jpg",
+    url: "https://meson.fi/zklink",
+  },
   {
     name: "Owlto Finance",
     logo: "/img/owlto.svg",
@@ -60,29 +62,20 @@ const ThirdPartyBridges = [
     bannerImg: "Symbiosys.jpg",
     url: "https://app.symbiosis.finance/swap?chainIn=Ethereum&chainOut=ZkLink&tokenIn=ETH&tokenOut=ETH",
   },
-  {
-    name: "Meson Finance",
-    logo: "/img/Meson.svg",
-    bannerImg: "Meson.jpg",
-    url: "https://meson.fi/zklink",
-  },
 ];
 const bridgePoints = ref(ThirdPartyBridges.map((item) => ({ ...item, points: 0 })));
-const API_URL = "https://app-api.zklink.io/lrt-points/nova/points/project";
+const API_URL = "https://app-api.zklink.io/lrt-points/cache/bridge/latest/points";
 const fetchBridgePoints = async () => {
-  if (!onboardStore.account) return;
-
   const points = (await Promise.all([
-    $fetch(API_URL, { params: { address: onboardStore.account.address, project: "owlet" } }),
-    $fetch(API_URL, { params: { address: onboardStore.account.address, project: "symbiosis" } }),
-    $fetch(API_URL, { params: { address: onboardStore.account.address, project: "meson" } }),
+    $fetch(API_URL, { params: { name: "meson" } }),
+    $fetch(API_URL, { params: { name: "owlet" } }),
+    $fetch(API_URL, { params: { name: "symbiosis" } }),
   ])) as any[];
   console.log(points, "points");
   const _bridgePoints = bridgePoints.value;
   for (let i = 0; i < points.length; i++) {
     const { data } = points[i];
-    const novaPoints = data.reduce((prev, item) => prev + Number(item.points), 0);
-    _bridgePoints[i].points = novaPoints.toFixed(2);
+    _bridgePoints[i].points = data;
   }
   bridgePoints.value = _bridgePoints;
 };
@@ -102,17 +95,17 @@ fetchBridgePoints();
     margin-bottom: 1rem;
   }
   .deposit-thrid-bridge-item:hover {
-    background: #032e3f;
+    background: #343a44;
   }
   .deposit-thrid-bridge-item {
     cursor: pointer;
     border-radius: 16px;
-    background: #011c26;
+    background: #262b33;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 1rem 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 24px;
     .left {
       display: flex;
       align-items: center;
@@ -145,7 +138,7 @@ fetchBridgePoints();
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      font-size: 14px;
+      font-size: 16px;
     }
   }
 }
