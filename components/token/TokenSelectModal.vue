@@ -21,7 +21,7 @@
           <MagnifyingGlassIcon aria-hidden="true" />
         </template>
       </CommonInputSearch>
-      <div class="-mx-block-padding-1/2 md:h-[18rem] h-[15rem] overflow-auto px-block-padding-1/2">
+      <div class="-mx-block-padding-1/2 overflow-auto px-block-padding-1/2">
         <template v-if="loading">
           <div class="-mx-block-padding-1/2">
             <TokenBalanceLoader v-for="index in 2" variant="light" :key="index" />
@@ -105,9 +105,9 @@ const { zkSyncNetworks } = useNetworks();
 
 const walletStore = useZkSyncWalletStore();
 const { balance, balanceInProgress, balanceError } = storeToRefs(walletStore);
-const zkSyncNetwork = zkSyncNetworks.filter((e) => !e.hidden)
-let arr : any[] = [];
-zkSyncNetwork.map((i)=> {
+const zkSyncNetwork = zkSyncNetworks.filter((e) => !e.hidden);
+let arr: any[] = [];
+zkSyncNetwork.map((i) => {
   const obj = {
     iconUrl: i.logoUrl,
     key: i.key,
@@ -156,15 +156,13 @@ const searchList = ref<any[]>([]);
 watch(
   () => search.value,
   (value) => {
-    if (chainList.value.length >0) {
-      searchList.value = filterTokens(
-        chainList.value
-      ) as TokenAmount[]
-      balanceGroups = groupBalancesByAmount(searchList)
+    if (chainList.value.length > 0) {
+      searchList.value = filterTokens(chainList.value) as TokenAmount[];
+      balanceGroups = groupBalancesByAmount(searchList);
     }
-  },
+  }
 );
-const selectChain = ref(selectedNetwork.value.key)
+const selectChain = ref(selectedNetwork.value.key);
 const showLoading = ref(false);
 const hasBalances = computed(() => props.balances.length > 0);
 const onboardStore = useOnboardStore();
@@ -202,9 +200,9 @@ const filterTokens = (tokens: Token[]) => {
   }
   return newTokens;
 };
-const changeToken = (item:any) => {
-  console.log(item)
-  selectedToken.value = item
+const changeToken = (item: any) => {
+  console.log(item);
+  selectedToken.value = item;
   if (selectChain.value === selectedNetwork.value.key) {
     return;
   }
@@ -212,7 +210,7 @@ const changeToken = (item:any) => {
   url.searchParams.set("network", selectChain.value);
   url.searchParams.set("tokenAddress", item.address);
   window.location.href = url.toString();
-}
+};
 const isNetworkSelected = (network: ZkSyncNetwork) => selectChain.value === network.key;
 const chainLists = ref<any[]>([]);
 const chainList = ref<any[]>([]);
@@ -238,12 +236,10 @@ const buttonClicked = async (network: ZkSyncNetwork) => {
   });
   chainList.value = filterTokens(
     chainLists.value.filter(
-      (e) =>
-        network.isEthGasToken ||
-        (e.address !== ETH_ADDRESS && e.address.toLowerCase() !== L2_ETH_TOKEN_ADDRESS)
+      (e) => network.isEthGasToken || (e.address !== ETH_ADDRESS && e.address.toLowerCase() !== L2_ETH_TOKEN_ADDRESS)
     )
-  ) as TokenAmount[]
-  balanceGroups = groupBalancesByAmount(chainList)
+  ) as TokenAmount[];
+  balanceGroups = groupBalancesByAmount(chainList);
 };
 const displayedTokens = computed(() =>
   filterTokens(
@@ -312,12 +308,14 @@ const closeModal = () => {
 .token-modal {
   .modal-card {
     @apply block h-full grid-rows-[max-content_max-content_1fr];
+    display: flex;
+    flex-direction: column;
   }
   .category:first-child .group-category-label {
     @apply pt-0;
   }
 }
-.chainBox{
+.chainBox {
   display: flex;
   width: 75.7px;
   height: 64px;
@@ -325,19 +323,19 @@ const closeModal = () => {
   justify-content: center;
   align-items: center;
   border-radius: 8px;
-  background: #3D424D;
-  img{
+  background: #3d424d;
+  img {
     border-radius: 50%;
     width: 40px;
   }
 }
-.chainBox:hover{
+.chainBox:hover {
   border-radius: 8px;
   background: rgba(23, 85, 244, 0.25);
 }
-.active{
+.active {
   border-radius: 8px;
   background: rgba(23, 85, 244, 0.25);
-  border: 2px solid #1755F4;
+  border: 2px solid #1755f4;
 }
 </style>
