@@ -204,7 +204,7 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
     const transfers: { items: any[] } = await $fetch(
       `${eraNetwork.value.blockExplorerApi}/address/${
         account.value.address
-      }/transfers?limit=${TRANSACTIONS_FETCH_LIMIT.toString()}`
+      }/withdrawalTransfers?limit=${TRANSACTIONS_FETCH_LIMIT.toString()}`
     );
     const withdrawals = transfers.items.filter((e) => e.type === "withdrawal" && e.token && e.amount);
     for (const withdrawal of withdrawals) {
