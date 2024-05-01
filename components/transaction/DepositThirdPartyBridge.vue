@@ -13,7 +13,7 @@
           <p class="name">{{ item.name }}</p>
           <p class="desc">
             <span>Bridge more than 0.1 ETH/ 500USDT /500 USDC to Nova to earn Nova Points.</span>
-            <CommonButtonLabel as="span" class="showTip relative text-left">
+            <CommonButtonLabel as="span" class="showTip relative hidden text-left md:block">
               <img src="/img/Shape.svg" class="ml-1 inline-block h-3 w-3" alt="" />
               <div class="tooltip">
                 You can earn Nova Points for each transaction of bridging to Nova over 0.1 ETH/ 500USDT /500 USDC
@@ -27,7 +27,7 @@
         </div>
       </div>
       <div class="right">
-        <span>{{ item.points }} Nova Points</span>
+        <span class="text-sm">{{ item.points }} Nova Points</span>
         <ArrowTopRightOnSquareIcon class="line-button-with-img-icon" />
       </div>
     </div>
@@ -132,13 +132,13 @@ fetchBridgePoints();
         font-weight: 400;
         line-height: normal;
         letter-spacing: -0.5px;
+        margin-right: 20px;
       }
     }
     .right {
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      font-size: 16px;
     }
   }
 }
