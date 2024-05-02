@@ -86,7 +86,6 @@ fetchBridgePoints();
 .deposit-thrid-bridge {
   margin-top: 1rem;
   .title {
-    color: #fff;
     font-size: 20px;
     font-style: normal;
     font-weight: 400;
@@ -139,6 +138,7 @@ fetchBridgePoints();
       display: flex;
       align-items: center;
       justify-content: flex-end;
+      color: #fff;
     }
   }
 }
