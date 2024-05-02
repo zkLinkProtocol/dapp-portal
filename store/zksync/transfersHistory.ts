@@ -124,9 +124,9 @@ export const useZkSyncTransfersHistoryStore = defineStore("zkSyncTransfersHistor
       }
       const response = await loadNextWithdrawals();
       const mappedTransfers = response.items.map(mapApiTransfer);
-      transfers.value = filterOutDuplicateTransfers(mappedTransfers);
+      withdrawals.value = filterOutDuplicateTransfers(mappedTransfers);
       //TODO put withdrawals into local storage
-      for (const withdrawal of transfers.value.filter((e) => e.type === "withdrawal")) {
+      for (const withdrawal of withdrawals.value.filter((e) => e.type === "withdrawal")) {
         if (!userTransactions.value.find((e) => e.transactionHash === withdrawal.transactionHash)) {
           const eraNetworks = getNetworkInfo(withdrawal);
           const obj = {
