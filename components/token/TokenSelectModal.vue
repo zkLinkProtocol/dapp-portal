@@ -1,10 +1,21 @@
 <template>
-  <CommonModal v-model:opened="isModalOpened" class="token-select-modal" :class="{ 'token-modal': title === 'Choose chain and token' }" :title="title" @after-leave="search = ''">
+  <CommonModal
+    v-model:opened="isModalOpened"
+    class="token-select-modal"
+    :class="{ 'token-modal': title === 'Choose chain and token' }"
+    :title="title"
+    @after-leave="search = ''"
+  >
     <div v-if="title === 'Choose chain and token'" class="mb-4">
       <div class="flex gap-2 flex-wrap">
-        <div v-for="(group, groupIndex) in arr" :key="groupIndex" class="chainBox cursor-pointer" :class="{'active': selectChain === group.key}"
-         @click="buttonClicked(zkSyncNetwork.find(item => item.key === group.key)!);">
-          <img :src="group.iconUrl" :alt="group.label"/>
+        <div
+          v-for="(group, groupIndex) in arr"
+          :key="groupIndex"
+          class="chainBox cursor-pointer"
+          :class="{ active: selectChain === group.key }"
+          @click="buttonClicked(zkSyncNetwork.find(item => item.key === group.key)!);"
+        >
+          <img :src="group.iconUrl" :alt="group.label" />
         </div>
       </div>
       <p v-if="!arr.length" class="mt-block-padding-1/2 text-center">No chains found</p>
