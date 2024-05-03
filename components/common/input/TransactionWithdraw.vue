@@ -6,7 +6,7 @@
       :loading="loading"
       :tokens="tokens"
       :balances="balances"
-      :title="from==='withdraw'? 'Choose chain and token':''"
+      :title="from === 'withdraw' ? 'Choose chain and token' : 'Choose token'"
     >
       <template #body-bottom v-if="$slots['token-dropdown-bottom']">
         <slot name="token-dropdown-bottom" />
