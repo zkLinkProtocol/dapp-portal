@@ -225,6 +225,11 @@ const changeToken = (item: any) => {
 const isNetworkSelected = (network: ZkSyncNetwork) => selectChain.value === network.key;
 const chainLists = ref<any[]>([]);
 const chainList = ref<any[]>([]);
+
+const isWithdraw = computed(() => {
+  return props.title === "Choose chain and token";
+});
+
 const buttonClicked = async (network: ZkSyncNetwork) => {
   if (isNetworkSelected(network)) {
     return;
@@ -237,7 +242,9 @@ const buttonClicked = async (network: ZkSyncNetwork) => {
     if (!e.l1Address) {
       return false;
     }
-    if (e.l1Address === ETH_ADDRESS) {
+    if (isWithdraw.value && network.key === "mantle") {
+      return false;
+    } else if (e.l1Address === ETH_ADDRESS) {
       return true;
     }
     if (e.networkKey === network.key) {
@@ -261,6 +268,7 @@ const displayedTokens = computed(() =>
     )
   )
 );
+
 const displayedBalances = computed(
   () =>
     filterTokens(
