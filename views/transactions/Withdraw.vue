@@ -22,21 +22,13 @@
       Confirm transaction
     </PageTitle>
     <div class="tab">
-      <div class="box" :class="{ 'active': showBridge }" @click="showBridge =true">
-        <div class="name">
-          Use the official Bridge
-        </div>
-        <div class="time">
-          Up to 8 days, no additional fee
-        </div>
+      <div class="box" :class="{ active: showBridge }" @click="showBridge = true">
+        <div class="name">Use the official Bridge</div>
+        <div class="time">Up to 8 days, no additional fee</div>
       </div>
-      <div class="box" :class="{ 'active': !showBridge }" @click="showBridge =false">
-        <div class="name">
-          Use a third party bridge
-        </div>
-        <div class="time">
-          Usually takes under 20 mins
-        </div>
+      <div class="box" :class="{ active: !showBridge }" @click="showBridge = false">
+        <div class="name">Use a third party bridge</div>
+        <div class="time">Usually takes under 20 mins</div>
       </div>
     </div>
     <div class="warnBox flex" v-if="!route.query.s || route.query.s !== 'okx'">
@@ -618,7 +610,9 @@ const availableTokens = computed(() => {
       if (!e.l1Address) {
         return false;
       }
-      if (e.l1Address === ETH_ADDRESS) {
+      if (selectedNetwork.value.key === "mantle" && e.l1Address === ETH_ADDRESS) {
+        return false;
+      } else if (e.l1Address === ETH_ADDRESS) {
         return true;
       }
       if (e.networkKey === eraNetwork.value.key) {
@@ -639,7 +633,9 @@ const availableBalances = computed(() => {
       if (!e.l1Address) {
         return false;
       }
-      if (e.l1Address === ETH_ADDRESS) {
+      if (selectedNetwork.value.key === "mantle" && e.l1Address === ETH_ADDRESS) {
+        return false;
+      } else if (e.l1Address === ETH_ADDRESS) {
         return true;
       }
       if (e.networkKey === eraNetwork.value.key) {
@@ -666,7 +662,10 @@ const tokenWithHighestBalancePrice = computed(() => {
 });
 const defaultToken = computed(() => availableTokens.value?.[0] ?? undefined);
 const selectedTokenAddress = ref<string | undefined>(
-  route.query.tokenAddress ?? routeTokenAddress.value ?? tokenWithHighestBalancePrice.value?.address ?? defaultToken.value?.address
+  route.query.tokenAddress ??
+    routeTokenAddress.value ??
+    tokenWithHighestBalancePrice.value?.address ??
+    defaultToken.value?.address
 );
 const selectedToken = computed<Token | undefined>(() => {
   if (!tokens.value) {
@@ -1183,14 +1182,14 @@ onBeforeUnmount(() => {
     color: #0bc48f;
   }
 }
-.tab{
+.tab {
   width: 100%;
   border-radius: 64px;
-  background: #262B33;
+  background: #262b33;
   padding: 8px;
   display: flex;
   margin-bottom: 16px;
-  .box{
+  .box {
     border-radius: 64px;
     display: flex;
     flex-direction: column;
@@ -1198,15 +1197,15 @@ onBeforeUnmount(() => {
     width: 50%;
     padding: 7px 0;
     cursor: pointer;
-    .name{
-      color: #FFF;
+    .name {
+      color: #fff;
       font-size: 16px;
       font-style: normal;
       font-weight: 700;
       line-height: normal;
     }
-    .time{
-      color: #9DA3AE;
+    .time {
+      color: #9da3ae;
       text-align: center;
       font-size: 12px;
       font-style: normal;
@@ -1214,19 +1213,19 @@ onBeforeUnmount(() => {
       line-height: normal;
     }
     @media screen and (max-width: 600px) {
-      .name{
+      .name {
         font-size: 12px;
       }
-      .time{
+      .time {
         font-size: 10px;
       }
     }
   }
-  .box:focus{
+  .box:focus {
     background: transparent;
   }
-  .active{
-    background: #3D424D;
+  .active {
+    background: #3d424d;
   }
 }
 </style>
