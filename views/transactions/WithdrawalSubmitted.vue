@@ -31,7 +31,7 @@
         <CommonAlert v-else variant="warning" :icon="ExclamationTriangleIcon" class="mb-4">
           <p>
             You will have to claim your withdrawal once it's processed. Claiming will require paying the fee on the
-            {{ eraNetwork.l1Network?.name }} network.
+            destination network.
           </p>
         </CommonAlert>
       </template>
