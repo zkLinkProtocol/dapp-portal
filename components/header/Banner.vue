@@ -31,6 +31,12 @@
           <img src="/img/portal-banner-mobile.png" className="mobileImg" />
         </a>
       </swiper-slide>
+      <swiper-slide>
+        <a href="https://www.binance.com/en/activity/mission/zklink-nova-airdrop" target="\_blank">
+          <img src="/img/banner-binance-zkl@2x.png" className="bannerImg" />
+          <img src="/img/banner-binance-zkl-mobile.png" className="mobileImg" />
+        </a>
+      </swiper-slide>
     </swiper>
   </div>
 </template>
