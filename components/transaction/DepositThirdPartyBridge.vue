@@ -48,7 +48,7 @@ const ThirdPartyBridges = [
     name: "Free (Official Bridge of Merlin Chain)",
     logo: "/img/Free.svg",
     url: "https://free.tech/zklink",
-    desc: "Bridge M-BTC & solvBTC to earn Nova Points",
+    desc: "Bridge M-BTC and solvBTC from Merlin to earn 1.5x Nova Points",
     noTooltip: true,
     noPoints: true,
   },
