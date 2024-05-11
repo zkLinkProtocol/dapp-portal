@@ -53,6 +53,11 @@ const ThirdPartyBridges = [
     noPoints: true,
   },
   {
+    name: "Orbiter Finance",
+    logo: "/img/orbiter.svg",
+    url: "https://www.orbiter.finance/?source=Ethereum&dest=zkLink%20Nova&token=ETH",
+  },
+  {
     name: "Meson Finance",
     logo: "/img/Meson.svg",
     url: "https://meson.fi/zklink",
@@ -72,6 +77,7 @@ const bridgePoints = ref(ThirdPartyBridges.map((item) => ({ ...item, points: 0 }
 const API_URL = "https://app-api.zklink.io/lrt-points/cache/bridge/latest/points";
 const fetchBridgePoints = async () => {
   const points = (await Promise.all([
+    $fetch(API_URL, { params: { name: "orbiter" } }),
     $fetch(API_URL, { params: { name: "meson" } }),
     $fetch(API_URL, { params: { name: "owlet" } }),
     $fetch(API_URL, { params: { name: "symbiosis" } }),
