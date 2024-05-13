@@ -87,7 +87,7 @@ export const useOnboardStore = defineStore("onboard", () => {
   const connectors = [
     injected(),
     safe({
-      allowedDomains: [/app.safe.global$/],
+      allowedDomains: [/safe.zklink.io$/, /app.safe.global$/],
       debug: true,
     }),
     walletConnect({ projectId: env.walletConnectProjectID, showQrModal: false, metadata }),
