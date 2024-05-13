@@ -12,8 +12,8 @@
         <div>
           <p class="name">{{ item.name }}</p>
           <p class="desc">
-            <span>Bridge more than 0.1 ETH/ 500USDT /500 USDC to Nova to earn Nova Points.</span>
-            <CommonButtonLabel as="span" class="showTip relative hidden text-left md:block">
+            <span>{{ item.desc || "Bridge more than 0.1 ETH/ 500USDT /500 USDC to Nova to earn Nova Points." }} </span>
+            <CommonButtonLabel as="span" class="showTip relative hidden text-left md:block" v-if="!item.noTooltip">
               <img src="/img/Shape.svg" class="ml-1 inline-block h-3 w-3" alt="" />
               <div class="tooltip">
                 You can earn Nova Points for each transaction of bridging to Nova over 0.1 ETH/ 500USDT /500 USDC
@@ -27,7 +27,7 @@
         </div>
       </div>
       <div class="right">
-        <span class="text-sm">{{ item.points }} Nova Points</span>
+        <span class="text-sm" v-if="!item.noPoints">{{ item.points }} Nova Points</span>
         <ArrowTopRightOnSquareIcon class="line-button-with-img-icon" />
       </div>
     </div>
@@ -45,21 +45,31 @@ const handleLink = (link: string) => {
 
 const ThirdPartyBridges = [
   {
+    name: "Free (Official Bridge of Merlin Chain)",
+    logo: "/img/Free.svg",
+    url: "https://free.tech/zklink",
+    desc: "Bridge M-BTC and solvBTC from Merlin to earn 1.5x Nova Points",
+    noTooltip: true,
+    noPoints: true,
+  },
+  {
+    name: "Orbiter Finance",
+    logo: "/img/orbiter.svg",
+    url: "https://www.orbiter.finance/?source=Ethereum&dest=zkLink%20Nova&token=ETH",
+  },
+  {
     name: "Meson Finance",
     logo: "/img/Meson.svg",
-    bannerImg: "Meson.jpg",
     url: "https://meson.fi/zklink",
   },
   {
     name: "Owlto Finance",
     logo: "/img/owlto.svg",
-    bannerImg: "owlto.jpeg",
     url: "https://owlto.finance/?to=zkLinkNova",
   },
   {
     name: "Symbiosis",
     logo: "/img/Symbiosys.svg",
-    bannerImg: "Symbiosys.jpg",
     url: "https://app.symbiosis.finance/swap?chainIn=Ethereum&chainOut=ZkLink&tokenIn=ETH&tokenOut=ETH",
   },
 ];
@@ -67,6 +77,7 @@ const bridgePoints = ref(ThirdPartyBridges.map((item) => ({ ...item, points: 0 }
 const API_URL = "https://app-api.zklink.io/lrt-points/cache/bridge/latest/points";
 const fetchBridgePoints = async () => {
   const points = (await Promise.all([
+    $fetch(API_URL, { params: { name: "orbiter" } }),
     $fetch(API_URL, { params: { name: "meson" } }),
     $fetch(API_URL, { params: { name: "owlet" } }),
     $fetch(API_URL, { params: { name: "symbiosis" } }),

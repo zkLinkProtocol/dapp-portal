@@ -53,7 +53,7 @@ export const MAX_BYTECODE_LEN_BYTES = ((1 << 16) - 1) * 32;
 
 // Currently, for some reason the SDK may return slightly smaller value than required for the L1->L2
 // transaction. We will use a coefficient to ensure that the transaction will be accepted.
-export const L1_FEE_ESTIMATION_COEF_NUMERATOR = BigNumber.from(12);
+export const L1_FEE_ESTIMATION_COEF_NUMERATOR = BigNumber.from(20);
 export const L1_FEE_ESTIMATION_COEF_DENOMINATOR = BigNumber.from(10);
 
 // This gas limit will be used for displaying the error messages when the users do not have enough fee.
