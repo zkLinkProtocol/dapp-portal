@@ -32,7 +32,7 @@
       </div>
     </div>
 
-    <PageTitle v-if="step === 'form'">Deposit</PageTitle>
+    <PageTitle v-if="step === 'form'">{{ pageTitle }}</PageTitle>
     <PageTitle
       v-else-if="step === 'confirm'"
       :back-function="
@@ -520,6 +520,12 @@ const fromNetworkSelected = (networkKey?: string) => {
     router.replace({ name: "withdraw", query: route.query });
   }
 };
+
+const pageTitle = computed(() => {
+  const titleParam = route.query.title;
+  return props.isIntegrate ? titleParam : "Deposit";
+});
+
 const step = ref<"form" | "confirm" | "submitted">("form");
 const isMerge = ref<true | false>(true);
 const destination = computed(() => destinations.value.nova);
