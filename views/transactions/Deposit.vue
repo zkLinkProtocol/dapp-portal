@@ -79,13 +79,15 @@
           :loading="tokensRequestInProgress || balanceInProgress"
           :merge-limit-exceeds="mergeLimitExceeds"
           class="mb-block-padding-1/2 sm:mb-block-gap"
+          :is-integrate="props.isIntegrate"
         >
           <template #dropdown>
             <CommonButtonDropdown
               :toggled="fromNetworkModalOpened"
               size="xs"
               variant="light"
-              @click="fromNetworkModalOpened = true"
+              @click="fromNetworkModalOpened = props.isIntegrate ? false : true"
+              :no-chevron="props.isIntegrate"
             >
               <template #left-icon>
                 <img :src="selectedNetwork.logoUrl" class="h-full w-full rounded-full" />
