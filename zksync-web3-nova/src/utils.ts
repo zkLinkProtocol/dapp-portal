@@ -579,7 +579,8 @@ export async function fetchErc20(
     symbol = await erc20Contract.symbol();
     decimals = await erc20Contract.decimals();
     balance = await erc20Contract.balanceOf(userAddress);
-  } catch {
+  } catch (e) {
+    console.log(e);
     return undefined;
   }
   return {
