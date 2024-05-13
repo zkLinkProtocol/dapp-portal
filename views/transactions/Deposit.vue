@@ -425,6 +425,7 @@
             </template>
           </template>
         </EthereumTransactionFooter>
+        <DepositThirdPartyBridge />
       </template>
     </form>
   </div>
@@ -481,6 +482,8 @@ import { silentRouterChange } from "@/utils/helpers";
 import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/transitions";
 import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
 import { ETH_ADDRESS, WMNT_CONTRACT } from "@/zksync-web3-nova/src/utils";
+
+import DepositThirdPartyBridge from "@/components/transaction/DepositThirdPartyBridge.vue";
 
 // const okxIcon = "/img/okx-cryptopedia.svg";
 const launchIcon = "/img/launch.svg";

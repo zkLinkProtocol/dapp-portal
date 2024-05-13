@@ -75,8 +75,24 @@ export const useZkSyncTransfersHistoryStore = defineStore("zkSyncTransfersHistor
     url.searchParams.set("limit", TRANSACTIONS_FETCH_LIMIT.toString());
     return url;
   });
-  const transfers = ref<Transfer[]>([]);
 
+  const {
+    canLoadMore: canLoadMoreWithdrawals,
+    loadNext: loadNextWithdrawals,
+    reset: resetPaginatedWithdrawalsRequest,
+  } = usePaginatedRequest<Api.Response.Transfer>(() => {
+    if (!eraNetwork.value.blockExplorerApi)
+      throw new Error(`Block Explorer API is not available on ${eraNetwork.value.name}`);
+
+    const url = new URL(
+      `/address/${account.value.address}/withdrawalTransfers?limit=100`,
+      eraNetwork.value.blockExplorerApi
+    );
+    return url;
+  });
+
+  const transfers = ref<Transfer[]>([]);
+  const withdrawals = ref<Transfer[]>([]);
   const {
     inProgress: recentTransfersRequestInProgress,
     error: recentTransfersRequestError,
@@ -90,10 +106,27 @@ export const useZkSyncTransfersHistoryStore = defineStore("zkSyncTransfersHistor
       }
       const response = await loadNext();
       const mappedTransfers = response.items.map(mapApiTransfer);
-      useZkSyncWithdrawalsStore().updateWithdrawals();
       transfers.value = filterOutDuplicateTransfers(mappedTransfers);
+    },
+    { cache: 30000 }
+  );
+
+  const {
+    inProgress: requestWithdrawalsInProgress,
+    error: requestWithdrawalsError,
+    execute: requestWithdrawals,
+    reset: restRequestWithdrawals,
+    reload: reloadRequestWithdrawals,
+  } = usePromise(
+    async () => {
+      if (withdrawals.value.length) {
+        restRequestWithdrawals();
+      }
+      const response = await loadNextWithdrawals();
+      const mappedTransfers = response.items.map(mapApiTransfer);
+      withdrawals.value = filterOutDuplicateTransfers(mappedTransfers);
       //TODO put withdrawals into local storage
-      for (const withdrawal of transfers.value.filter((e) => e.type === "withdrawal")) {
+      for (const withdrawal of withdrawals.value.filter((e) => e.type === "withdrawal")) {
         if (!userTransactions.value.find((e) => e.transactionHash === withdrawal.transactionHash)) {
           const eraNetworks = getNetworkInfo(withdrawal);
           const obj = {
@@ -128,6 +161,7 @@ export const useZkSyncTransfersHistoryStore = defineStore("zkSyncTransfersHistor
           });
         }
       }
+      useZkSyncWithdrawalsStore().updateWithdrawals();
     },
     { cache: 30000 }
   );
@@ -169,5 +203,6 @@ export const useZkSyncTransfersHistoryStore = defineStore("zkSyncTransfersHistor
     previousTransfersRequestInProgress,
     previousTransfersRequestError,
     requestPreviousTransfers,
+    requestWithdrawals,
   };
 });
