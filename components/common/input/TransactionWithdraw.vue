@@ -117,7 +117,8 @@
           class="h-max"
           :toggled="selectTokenModalOpened"
           variant="light"
-          @click="selectTokenModalOpened = true"
+          @click="selectTokenModalOpened = props.isIntegrate ? false : true"
+          :no-chevron="props.isIntegrate"
         >
           <template #left-icon>
             <CommonContentLoader v-if="loading" class="block h-full w-full rounded-full" />
@@ -196,6 +197,10 @@ const props = defineProps({
   },
   mergeWithdrawalLimit: {
     type: String,
+  },
+  isIntegrate: {
+    type: Boolean,
+    default: false,
   },
 });
 
