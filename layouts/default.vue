@@ -7,21 +7,19 @@
   <div class="app-layout">
     <ModalWalletWarning />
 
-    <Header />
+    <Header v-if="showHeaderFooter" />
     <main class="app-layout-main">
       <NuxtPage />
     </main>
-    <Footer />
+    <Footer v-if="showHeaderFooter" />
   </div>
 </template>
 
 <script lang="ts" setup>
-// import { onBeforeMount } from "vue";
-// onBeforeMount(() => {
-//   if (window.innerWidth < 500) {
-//     window.eruda.init();
-//   }
-// });
+import { computed } from "vue";
+const showHeaderFooter = computed(() => {
+  return !window.location.pathname.includes("integrate");
+});
 </script>
 
 <style lang="scss" scoped>
