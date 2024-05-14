@@ -87,7 +87,14 @@ export const useOnboardStore = defineStore("onboard", () => {
   const connectors = [
     injected(),
     safe({
-      allowedDomains: [/app.safe.global$/],
+      allowedDomains: [
+        /app.safe.global$/,
+        /safe.zklink.io$/,
+        /safe.manta.network$/,
+        /multisig.mantle.xyz$/,
+        /safe.linea.build$/,
+        /blast-safe.io$/,
+      ],
       debug: true,
     }),
     walletConnect({ projectId: env.walletConnectProjectID, showQrModal: false, metadata }),
