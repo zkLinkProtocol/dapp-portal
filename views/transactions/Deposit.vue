@@ -33,6 +33,7 @@
     </div>
 
     <PageTitle v-if="step === 'form'">{{ pageTitle }}</PageTitle>
+    <PageDesc v-if="step === 'form' && pageDesc">{{ pageDesc }}</PageDesc>
     <PageTitle
       v-else-if="step === 'confirm'"
       :back-function="
@@ -527,6 +528,11 @@ const fromNetworkSelected = (networkKey?: string) => {
 const pageTitle = computed(() => {
   const titleParam = route.query.title;
   return props.isIntegrate ? titleParam : "Deposit";
+});
+
+const pageDesc = computed(() => {
+  const desc = route.query.desc;
+  return props.isIntegrate ? desc : "";
 });
 
 const step = ref<"form" | "confirm" | "submitted">("form");
