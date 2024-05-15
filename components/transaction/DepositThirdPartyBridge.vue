@@ -84,9 +84,9 @@ const fetchBridgePoints = async () => {
   ])) as any[];
   console.log(points, "points");
   const _bridgePoints = bridgePoints.value;
-  _bridgePoints[1].points = points[0].data;
-  _bridgePoints[2].points = points[1].data;
-  _bridgePoints[3].points = points[2].data;
+  _bridgePoints[1].points = points[0]?.data;
+  _bridgePoints[2].points = points[1]?.data;
+  _bridgePoints[3].points = points[2]?.data;
 
   bridgePoints.value = _bridgePoints;
 };
