@@ -62,11 +62,11 @@ const ThirdPartyBridges = [
     logo: "/img/Meson.svg",
     url: "https://meson.fi/zklink",
   },
-  {
-    name: "Owlto Finance",
-    logo: "/img/owlto.svg",
-    url: "https://owlto.finance/?to=zkLinkNova",
-  },
+  // {
+  //   name: "Owlto Finance",
+  //   logo: "/img/owlto.svg",
+  //   url: "https://owlto.finance/?to=zkLinkNova",
+  // },
   {
     name: "Symbiosis",
     logo: "/img/Symbiosys.svg",
