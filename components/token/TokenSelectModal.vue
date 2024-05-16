@@ -242,7 +242,7 @@ const buttonClicked = async (network: ZkSyncNetwork) => {
     if (!e.l1Address) {
       return false;
     }
-    if (isWithdraw.value && network.key === "mantle") {
+    if (isWithdraw.value && network.key === "mantle" && e.l1Address === ETH_ADDRESS) {
       return false;
     } else if (e.l1Address === ETH_ADDRESS) {
       return true;
