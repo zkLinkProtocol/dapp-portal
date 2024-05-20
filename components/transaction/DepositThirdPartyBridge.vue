@@ -62,11 +62,11 @@ const ThirdPartyBridges = [
     logo: "/img/Meson.svg",
     url: "https://meson.fi/zklink",
   },
-  {
-    name: "Owlto Finance",
-    logo: "/img/owlto.svg",
-    url: "https://owlto.finance/?to=zkLinkNova",
-  },
+  // {
+  //   name: "Owlto Finance",
+  //   logo: "/img/owlto.svg",
+  //   url: "https://owlto.finance/?to=zkLinkNova",
+  // },
   {
     name: "Symbiosis",
     logo: "/img/Symbiosys.svg",
@@ -79,15 +79,15 @@ const fetchBridgePoints = async () => {
   const points = (await Promise.all([
     $fetch(API_URL, { params: { name: "orbiter" } }),
     $fetch(API_URL, { params: { name: "meson" } }),
-    $fetch(API_URL, { params: { name: "owlet" } }),
+    // $fetch(API_URL, { params: { name: "owlet" } }),
     $fetch(API_URL, { params: { name: "symbiosis" } }),
   ])) as any[];
   console.log(points, "points");
   const _bridgePoints = bridgePoints.value;
-  for (let i = 0; i < points.length; i++) {
-    const { data } = points[i];
-    _bridgePoints[i].points = data;
-  }
+  _bridgePoints[1].points = points[0]?.data;
+  _bridgePoints[2].points = points[1]?.data;
+  _bridgePoints[3].points = points[2]?.data;
+
   bridgePoints.value = _bridgePoints;
 };
 

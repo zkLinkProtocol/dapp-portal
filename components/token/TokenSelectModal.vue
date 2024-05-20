@@ -242,7 +242,7 @@ const buttonClicked = async (network: ZkSyncNetwork) => {
     if (!e.l1Address) {
       return false;
     }
-    if (isWithdraw.value && network.key === "mantle") {
+    if (isWithdraw.value && network.key === "mantle" && e.l1Address === ETH_ADDRESS) {
       return false;
     } else if (e.l1Address === ETH_ADDRESS) {
       return true;
@@ -355,6 +355,6 @@ const closeModal = () => {
 .active {
   border-radius: 8px;
   background: rgba(23, 85, 244, 0.25);
-  border: 2px solid #1755f4;
+  /* border: 2px solid #1755f4; */
 }
 </style>
