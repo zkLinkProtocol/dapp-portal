@@ -513,6 +513,12 @@ import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 const showBridge = ref(true);
 const chainList = [
   {
+    name: "Orbiter Finance",
+    logo: "orbiter.svg",
+    url: "https://www.orbiter.finance/",
+    description: "https://www.orbiter.finance/",
+  },
+  {
     name: "Meson Finance",
     description: "https://meson.fi/",
     logo: "Meson.svg",
