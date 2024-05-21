@@ -64,6 +64,6 @@ export const getEstimateWithdrawalDelayDays = (txTime: string | number) => {
     return 14;
   } else {
     const gap = Math.ceil(14 - (transactionTime - LAST_BLAST_SYNCL2_TIME) / (24 * 3600 * 1000));
-    return gap >= 8 ? gap : 8;
+    return gap >= 8 ? gap : 8.5;
   }
 };

@@ -24,7 +24,7 @@
     <div class="tab">
       <div class="box" :class="{ active: showBridge }" @click="showBridge = true">
         <div class="name">Use the official Bridge</div>
-        <div class="time">Up to 8 days, no additional fee</div>
+        <div class="time">Up to 8.5 days, no additional fee</div>
       </div>
       <div class="box" :class="{ active: !showBridge }" @click="showBridge = false">
         <div class="name">Use a third party bridge</div>
@@ -194,12 +194,12 @@
             class="mb-block-padding-1/2 sm:mb-block-gap"
           >
             <p v-if="withdrawalManualFinalizationRequired">
-              You will be able to claim your withdrawal only after a {{ displayEstimateWithdrawalDelayDays }}-day
-              withdrawal delay.
+              You will be able to claim your withdrawal only after a maximum
+              {{ displayEstimateWithdrawalDelayDays }}-day withdrawal delay.
               <!-- <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">Learn more</a> -->
             </p>
             <p v-else>
-              You will receive funds only after a {{ displayEstimateWithdrawalDelayDays }}-day withdrawal delay.
+              You will receive funds only after a maximum {{ displayEstimateWithdrawalDelayDays }}-day withdrawal delay.
               <!-- <a class="underline underline-offset-2" :href="ZKSYNC_WITHDRAWAL_DELAY" target="_blank">Learn more</a> -->
             </p>
           </CommonAlert>
@@ -512,6 +512,12 @@ import WithdrawalSubmitted from "@/views/transactions/WithdrawalSubmitted.vue";
 import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 const showBridge = ref(true);
 const chainList = [
+  {
+    name: "Orbiter Finance",
+    logo: "orbiter.svg",
+    url: "https://www.orbiter.finance/?source=zkLink%20Nova&dest=Ethereum&token=ETH",
+    description: "https://www.orbiter.finance/",
+  },
   {
     name: "Meson Finance",
     description: "https://meson.fi/",

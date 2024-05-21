@@ -49,7 +49,7 @@ const formatTimeDiff = (diff: number, onlyDays = false): string => {
 
   if (props.format === "human-readable") {
     if (onlyDays) {
-      return `~ ${day + 1} day${day + 1 !== 1 ? "s" : ""}`;
+      return `~ ${day + 0.5} day${day + 1 !== 1 ? "s" : ""}`;
     }
     let formattedString = "";
     if (hours > 0) formattedString += `${day} day ${hours} hour${hours > 1 ? "s" : ""} `;
