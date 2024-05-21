@@ -11,7 +11,7 @@
         </template>
         <template v-else>
           Your funds will be available on <span class="font-medium">{{ transaction.to.destination.label }}</span> after
-          the {{ displayEstimateWithdrawTime }}-day delay. During this time, the transaction will be processed
+          a maximum {{ displayEstimateWithdrawTime }}-day delay. During this time, the transaction will be processed
           {{
             withdrawalManualFinalizationRequired
               ? "and become available for claiming."
