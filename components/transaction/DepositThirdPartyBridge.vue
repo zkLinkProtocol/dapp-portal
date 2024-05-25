@@ -45,7 +45,7 @@ const handleLink = (link: string) => {
 
 const ThirdPartyBridges = [
   {
-    name: "Free (Official Bridge of Merlin Chain)",
+    name: "Free",
     logo: "/img/Free.svg",
     url: "https://free.tech/zklink",
     desc: "Bridge M-BTC and solvBTC from Merlin to earn 1.5x Nova Points",
