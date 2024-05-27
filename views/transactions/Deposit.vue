@@ -24,14 +24,6 @@
       </div>
     </div>
 
-    <div class="mb-[10px]" v-else-if="route.query?.s === 'binance'">
-      <!-- <img src="/img/okx-cryptopedia.svg" class="h-[64px] w-[64px] rounded-[8px]" /> -->
-      <div class="z-2">
-        <img src="/img/banner-binance@2x.png" class="block hidden w-full md:block" />
-        <img src="/img/banner-binance-mobile@2x.png" class="block block w-full md:hidden" />
-      </div>
-    </div>
-
     <PageTitle v-if="step === 'form'">Deposit</PageTitle>
     <PageTitle
       v-else-if="step === 'confirm'"
