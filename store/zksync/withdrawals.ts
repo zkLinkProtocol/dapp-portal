@@ -275,48 +275,48 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
       } else {
         await setStatus(withdrawal);
         await sleep(200);
+        const transactionTransfers: Api.Response.Collection<Api.Response.Transfer> = await $fetch(
+          `${eraNetwork.value.blockExplorerApi}/transactions/${withdrawal.transactionHash}/transfers?limit=100&page=1`
+        );
+        const transfers = transactionTransfers.items.map(mapApiTransfer);
+        const withdrawalTransfer = transfers.find((e) => e.type === "withdrawal" && e.token && e.amount);
+        if (!withdrawalTransfer) continue;
+        if (new Date(withdrawalTransfer.timestamp).getTime() < Date.now() - FETCH_TIME_LIMIT) break;
+        const { selectedNetwork } = storeToRefs(useNetworkStore());
+        const eraNetworks = getNetworkInfo(withdrawal) || selectedNetwork.value;
+        const obj = {
+          iconUrl: eraNetworks.logoUrl,
+          key: "nova",
+          label: eraNetworks?.l1Network?.name,
+        };
+        const claimable = await checkWithdrawalFinalizeAvailable(withdrawal);
+        transactionStatusStore.saveTransaction({
+          type: "withdrawal",
+          transactionHash: withdrawal.transactionHash,
+          timestamp: withdrawalTransfer.timestamp,
+          token: {
+            ...withdrawalTransfer.token!,
+            amount: withdrawalTransfer.amount!,
+          },
+          from: {
+            address: withdrawalTransfer.from,
+            destination: destinations.value.nova,
+          },
+          to: {
+            address: withdrawalTransfer.to,
+            destination: obj,
+          },
+          info: {
+            expectedCompleteTimestamp: new Date(
+              new Date(withdrawalTransfer.timestamp).getTime() +
+                getEstimateWithdrawalDelayDays(withdrawalTransfer.timestamp) * 24 * 3600 * 1000
+            ).toISOString(),
+            completed: withdrawal.status === "Finalized",
+            withdrawalFinalizationAvailable: claimable,
+          },
+          gateway: withdrawalTransfer.gateway,
+        });
       }
-      const transactionTransfers: Api.Response.Collection<Api.Response.Transfer> = await $fetch(
-        `${eraNetwork.value.blockExplorerApi}/transactions/${withdrawal.transactionHash}/transfers?limit=100&page=1`
-      );
-      const transfers = transactionTransfers.items.map(mapApiTransfer);
-      const withdrawalTransfer = transfers.find((e) => e.type === "withdrawal" && e.token && e.amount);
-      if (!withdrawalTransfer) continue;
-      if (new Date(withdrawalTransfer.timestamp).getTime() < Date.now() - FETCH_TIME_LIMIT) break;
-      const { selectedNetwork } = storeToRefs(useNetworkStore());
-      const eraNetworks = getNetworkInfo(withdrawal) || selectedNetwork.value;
-      const obj = {
-        iconUrl: eraNetworks.logoUrl,
-        key: "nova",
-        label: eraNetworks?.l1Network?.name,
-      };
-      const claimable = await checkWithdrawalFinalizeAvailable(withdrawal);
-      transactionStatusStore.saveTransaction({
-        type: "withdrawal",
-        transactionHash: withdrawal.transactionHash,
-        timestamp: withdrawalTransfer.timestamp,
-        token: {
-          ...withdrawalTransfer.token!,
-          amount: withdrawalTransfer.amount!,
-        },
-        from: {
-          address: withdrawalTransfer.from,
-          destination: destinations.value.nova,
-        },
-        to: {
-          address: withdrawalTransfer.to,
-          destination: obj,
-        },
-        info: {
-          expectedCompleteTimestamp: new Date(
-            new Date(withdrawalTransfer.timestamp).getTime() +
-              getEstimateWithdrawalDelayDays(withdrawalTransfer.timestamp) * 24 * 3600 * 1000
-          ).toISOString(),
-          completed: withdrawal.status === "Finalized",
-          withdrawalFinalizationAvailable: claimable,
-        },
-        gateway: withdrawalTransfer.gateway,
-      });
     }
   };
 
