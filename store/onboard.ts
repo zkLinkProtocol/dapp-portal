@@ -327,10 +327,12 @@ export const useOnboardStore = defineStore("onboard", () => {
         account.value.address,
         account.value.open,
         account.value.isConnecting,
-        account.value.isReconnecting
+        account.value.isReconnecting,
+        web3modal.getState()
       );
       return account.value.isReconnecting || account.value.isConnecting;
     }),
+    web3ModalOpen: computed(() => web3modal.getState().open),
     connectingWalletError,
     connectorName,
     walletName: computed(() => walletName.value),

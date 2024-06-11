@@ -52,7 +52,7 @@
 
     <form v-else @submit.prevent="">
       <template v-if="step === 'form'">
-        <TransactionWithdrawalsAvailableForClaimAlert />
+        <TransactionWithdrawalsAvailableForClaimAlert v-if="!props.isIntegrate" />
         <EcosystemBlock
           v-if="eraNetwork.displaySettings?.showPartnerLinks && ecosystemBannerVisible"
           show-close-button
@@ -68,16 +68,18 @@
           :balances="availableBalances"
           :max-amount="maxAmount"
           :approve-required="!enoughAllowance"
-          :loading="tokensRequestInProgress || balanceInProgress"
+          :loading="tokensRequestInProgress || balanceInProgress || fetchErc20WithRouteParamInProgress"
           :merge-limit-exceeds="mergeLimitExceeds"
           class="mb-block-padding-1/2 sm:mb-block-gap"
+          :is-integrate="props.isIntegrate"
         >
           <template #dropdown>
             <CommonButtonDropdown
               :toggled="fromNetworkModalOpened"
               size="xs"
               variant="light"
-              @click="fromNetworkModalOpened = true"
+              @click="fromNetworkModalOpened = props.isIntegrate ? false : true"
+              :no-chevron="props.isIntegrate"
             >
               <template #left-icon>
                 <img :src="selectedNetwork.logoUrl" class="h-full w-full rounded-full" />
@@ -417,7 +419,7 @@
             </template>
           </template>
         </EthereumTransactionFooter>
-        <DepositThirdPartyBridge />
+        <DepositThirdPartyBridge v-if="!props.isIntegrate" />
       </template>
     </form>
   </div>
@@ -453,6 +455,7 @@ import type { TransactionDestination } from "@/store/destinations";
 import type { TransactionInfo } from "@/store/zksync/transactionStatus";
 import type { Token, TokenAmount } from "@/types";
 import type { BigNumberish } from "ethers";
+import type { Address } from "viem";
 
 import { useRoute, useRouter } from "#app";
 import { customBridgeTokens } from "@/data/customBridgeTokens";
@@ -460,6 +463,7 @@ import { getWaitTime } from "@/data/networks";
 import { useDestinationsStore } from "@/store/destinations";
 import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
+import { useSearchtokenStore } from "@/store/searchToken";
 import { usePreferencesStore } from "@/store/preferences";
 import { useZkSyncEthereumBalanceStore } from "@/store/zksync/ethereumBalance";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
@@ -473,9 +477,16 @@ import { checksumAddress, decimalToBigNumber, formatRawTokenPrice, parseTokenAmo
 import { silentRouterChange } from "@/utils/helpers";
 import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/transitions";
 import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
-import { ETH_ADDRESS, WMNT_CONTRACT } from "@/zksync-web3-nova/src/utils";
+import { ETH_ADDRESS, WMNT_CONTRACT, isSameAddress, fetchErc20 } from "@/zksync-web3-nova/src/utils";
 
 import DepositThirdPartyBridge from "@/components/transaction/DepositThirdPartyBridge.vue";
+
+const props = defineProps({
+  isIntegrate: {
+    type: Boolean,
+    default: false,
+  },
+});
 
 // const okxIcon = "/img/okx-cryptopedia.svg";
 const launchIcon = "/img/launch.svg";
@@ -495,7 +506,8 @@ const { destinations } = storeToRefs(useDestinationsStore());
 const { l1BlockExplorerUrl, selectedNetwork, selectedNetworkKey } = storeToRefs(useNetworkStore());
 const { l1Tokens, tokensRequestInProgress, tokensRequestError } = storeToRefs(tokensStore);
 const { balance, balanceInProgress, balanceError } = storeToRefs(zkSyncEthereumBalance);
-
+const searchtokenStore = useSearchtokenStore();
+const fetchErc20WithRouteParamInProgress = ref(false);
 const toNetworkModalOpened = ref(false);
 const fromNetworkModalOpened = ref(false);
 const fromNetworkSelected = (networkKey?: string) => {
@@ -503,6 +515,17 @@ const fromNetworkSelected = (networkKey?: string) => {
     router.replace({ name: "withdraw", query: route.query });
   }
 };
+
+const pageTitle = computed(() => {
+  const titleParam = route.query.title;
+  return props.isIntegrate ? titleParam : "Deposit";
+});
+
+const pageDesc = computed(() => {
+  const desc = route.query.desc;
+  return props.isIntegrate ? desc : "";
+});
+
 const step = ref<"form" | "confirm" | "submitted">("form");
 const isMerge = ref<true | false>(true);
 const destination = computed(() => destinations.value.nova);
@@ -938,6 +961,28 @@ const fetchBalances = async (force = false) => {
       selectedTokenAddress.value = tokenWithHighestBalancePrice.value?.address;
     }
   });
+  // fetch token with address in route params when is integrate
+  if (props.isIntegrate && route.query.token) {
+    if (!balance.value?.find((item) => isSameAddress(item.address, route.query.token as string))) {
+      fetchErc20WithRouteParamInProgress.value = true;
+      fetchErc20(
+        route.query.token as Address,
+        onboardStore.getPublicClient(selectedNetwork.value.l1Network?.id),
+        account.value.address
+      )
+        .then((token) => {
+          if (token) {
+            searchtokenStore.saveSearchToken(token);
+            setTimeout(() => {
+              zkSyncEthereumBalance.saveTokenRequest().then();
+            }, 1);
+          }
+        })
+        .finally(() => {
+          fetchErc20WithRouteParamInProgress.value = false;
+        });
+    }
+  }
 };
 fetchBalances();
 
