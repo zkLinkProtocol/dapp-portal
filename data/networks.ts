@@ -19,6 +19,7 @@ import {
   sepolia,
   zkSync,
   zkSyncSepoliaTestnet,
+  scroll,
 } from "@wagmi/core/chains";
 import { defineChain } from "viem";
 
@@ -53,7 +54,7 @@ export const mantaSepolia = /*#__PURE__*/ defineChain({
       address: "0x5Be4F807e0ae836Fc754dDEDDd72c0F4A28C8d43",
       blockCreated: 468626,
     },
-  }
+  },
 });
 
 export const l1Networks = {
@@ -143,6 +144,10 @@ export const l1Networks = {
   base: {
     ...base,
     name: "Base Mainnet",
+  },
+  scroll: {
+    ...scroll,
+    name: "Scroll Mainnet",
   },
   baseSepoliaTestnet: {
     ...baseSepolia,
@@ -325,6 +330,23 @@ export const nexusNode: ZkSyncNetwork[] = [
     isEthGasToken: true,
     l1Network: l1Networks.base,
     wethContract: ["0x4200000000000000000000000000000000000006"],
+  },
+  {
+    id: 810180,
+    key: "scroll",
+    name: "zkLink Nova",
+    rpcUrl: "https://rpc.zklink.io",
+    logoUrl: "/img/scroll.svg",
+    blockExplorerUrl: "https://explorer.zklink.io",
+    blockExplorerApi: "https://explorer-api.zklink.io",
+    withdrawalFinalizerApi: "https://withdrawal-api.zklink.io",
+    mainContract: "0x119B9459D9119D07c23aD06778AeaBec804Fd1a2",
+    erc20BridgeL1: "0x3C7c0ebFCD5786ef48df5ed127cdDEb806db976c",
+    erc20BridgeL2: "0xC97c5E43c14D4F524347795410C299db1FA331b3",
+    l1Gateway: "0x986c905087a663db3C81ad319b94c1E9dd388e92",
+    isEthGasToken: true,
+    l1Network: l1Networks.scroll,
+    wethContract: ["0x5300000000000000000000000000000000000004"],
   },
 ];
 

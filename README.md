@@ -94,6 +94,21 @@ npm run generate
 
 📘 Familiarize yourself with the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) for a deeper dive.
 
+
+### ⚙️ Integration
+#### Integrate the deposit functionality into your dapp using an iframe.
+
+```
+<iframe src="https://portal.zklink.io/deposit-integrate?network=ethereum&token=0x176211869cA2b568f2A7D4EE941E073a821EE1ff&title=Bridge&desc=Bridge+your+asset+to+Nova+to+enjoy+dapps&desc_size=18" width="100%" height="100%"></iframe>
+```
+#### Params:
+* network: network id, Available options are: ethereum， primary(for Linea), zksync, arbitrum, mantle, manta, optimism, base
+* token: corresponds to the token address on selected network, the token address for ETH is "0x0000000000000000000000000000000000000000".
+* title: title of the deposit page
+* title_size: font size of the title
+* desc: description of the deposit page
+* desc_size: font size of the description
+
 ---
 
 ## 🤝 Contributing
