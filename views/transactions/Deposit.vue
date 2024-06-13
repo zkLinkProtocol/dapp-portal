@@ -905,7 +905,11 @@ const makeTransaction = async () => {
     );
     waitForCompletion(transactionInfo.value)
       .then(async (completedTransaction) => {
-        transactionInfo.value = completedTransaction;
+        const hash = window.location.pathname.substr(location.pathname.indexOf("/transaction/") + 13);
+        console.log("hash: ", hash);
+        if (completedTransaction.transactionHash === hash) {
+          transactionInfo.value = completedTransaction;
+        }
         setTimeout(() => {
           transfersHistoryStore.reloadRecentTransfers().catch(() => undefined);
           fetchBalances(true).catch(() => undefined);
