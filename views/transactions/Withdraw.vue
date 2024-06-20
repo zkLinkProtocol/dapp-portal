@@ -75,7 +75,7 @@
             :merge-withdrawal-limit="mergeTokenLockedBalance"
           >
             <template #token-dropdown-bottom v-if="type === 'withdrawal' && account.address">
-              <CommonAlert class="sticky bottom-0 mt-3" variant="neutral" :icon="InformationCircleIcon">
+              <CommonAlert class="bottom-0 mt-3" variant="neutral" :icon="InformationCircleIcon">
                 <p>Only tokens available for withdrawal are displayed</p>
               </CommonAlert>
             </template>

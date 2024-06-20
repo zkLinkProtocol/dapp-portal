@@ -3,7 +3,7 @@ import { computed } from "vue";
 import type { Api, Token, TokenAmount } from "@/types";
 import type { Ref } from "vue";
 
-export const groupBalancesByAmount = <T = TokenAmount>(balances: Ref<T[]>) =>
+export const groupBalancesByAmount = <T = TokenAmount>(balances: Ref<T[]>, networkKey?: string) =>
   computed(() => {
     const groups: Record<string, { title: string | null; balances: T[] }> = {
       default: {
@@ -32,7 +32,19 @@ export const groupBalancesByAmount = <T = TokenAmount>(balances: Ref<T[]>) =>
         groups.small.balances.push(balanceItem);
       }
     }
-    return [groups.default, groups.small, groups.zero].filter((group) => group.balances.length);
+    const res = [groups.default, groups.small, groups.zero].filter((group) => group.balances.length);
+    if (networkKey === "ALL") {
+      const result = { title: null, balances: [] as TokenAmount[] };
+      for (const group of res) {
+        result.balances.push(...(group.balances as TokenAmount[]));
+      }
+      result.balances.forEach(
+        (item) => (item.usdBalance = Number(formatRawTokenPrice(item.amount, item.decimals, item.price ?? 0)))
+      );
+      result.balances.sort((a, b) => (b.usdBalance ?? 0) - (a.usdBalance ?? 0));
+      return [result];
+    }
+    return res;
   });
 
 export const mapApiToken = (token: Api.Response.Token): Token => {

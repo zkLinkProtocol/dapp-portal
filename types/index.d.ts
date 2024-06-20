@@ -12,7 +12,7 @@ export type Token = {
   networkKey?: string;
   l2Address: string;
 };
-export type TokenAmount = Token & { amount: BigNumberish };
+export type TokenAmount = Token & { amount: BigNumberish, usdBalance?: number };
 
 export declare namespace Api {
   namespace Response {

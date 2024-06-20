@@ -9,7 +9,7 @@
     <template #default>
       <CommonButtonLineBodyInfo class="text-left">
         <template #label>
-          <div class="truncate">{{ symbol }}</div>
+          <div class="truncate">{{ symbol }} {{ networkKey ? ` (${getNetworkName(networkKey)})` : "" }}</div>
         </template>
         <template v-if="name" #underline>
           <CommonButtonLabel
@@ -43,6 +43,11 @@ import type { Component, PropType } from "vue";
 
 import { iconsList } from "@/data/iconlists";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
+
+const getNetworkName = (networkKey: string) => {
+  if (!networkKey) return "";
+  return networkKey === "primary" ? "Linea" : networkKey[0].toUpperCase() + networkKey.slice(1);
+};
 
 defineProps({
   as: {
