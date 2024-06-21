@@ -57,14 +57,14 @@
         </template>
         <template v-else-if="balanceGroups.length || !search">
           <div v-for="(group, index) in balanceGroups" :key="index" class="category">
-            <TypographyCategoryLabel
+            <!-- <TypographyCategoryLabel
               v-if="selectChain !== 'ALL'"
               size="sm"
               variant="darker"
               class="group-category-label"
             >
               {{ group.title || "Your assets" }}
-            </TypographyCategoryLabel>
+            </TypographyCategoryLabel> -->
             <div class="-mx-block-padding-1/4 sm:-mx-block-padding-1/2">
               <TokenBalance
                 v-for="item in group.balances"
@@ -166,6 +166,9 @@ const props = defineProps({
     type: Array as PropType<TokenAmount[]>,
     default: () => [],
   },
+  from: {
+    type: String,
+  },
 });
 const emit = defineEmits<{
   (eventName: "update:opened", value: boolean): void;
@@ -186,8 +189,7 @@ watch(
     }
   }
 );
-// const selectChain = ref(selectedNetwork.value.key);
-const selectChain = ref("ALL");
+const selectChain = ref(props.from === "deposit" ? selectedNetwork.value.key : "ALL");
 const showLoading = ref(false);
 const hasBalances = computed(() => props.balances.length > 0);
 const onboardStore = useOnboardStore();
@@ -253,9 +255,7 @@ const buttonClicked = async (network: ZkSyncNetwork | "ALL") => {
     chainLists.value = balance.value.filter((e) => {
       return Number(e.amount) > 0;
     });
-    chainList.value = filterTokens(
-      chainLists.value.filter((e) => e.address !== ETH_ADDRESS && e.address.toLowerCase() !== L2_ETH_TOKEN_ADDRESS)
-    ) as TokenAmount[];
+    chainList.value = filterTokens(chainLists.value) as TokenAmount[];
     balanceGroups = groupBalancesByAmount(chainList, "ALL");
   } else {
     if (isNetworkSelected(network)) {
@@ -298,14 +298,9 @@ const displayedTokens = computed(() =>
 );
 
 const displayedBalances = computed(
-  () =>
-    filterTokens(
-      balance.value.filter(
-        (e) => Number(e.amount) > 0 && e.address !== ETH_ADDRESS && e.address.toLowerCase() !== L2_ETH_TOKEN_ADDRESS
-      )
-    ) as TokenAmount[]
+  () => filterTokens(selectChain.value === "ALL" ? balance.value : props.balances) as TokenAmount[]
 );
-let balanceGroups = groupBalancesByAmount(displayedBalances, "ALL");
+let balanceGroups = groupBalancesByAmount(displayedBalances, selectChain.value);
 const selectedTokenAddress = computed({
   get: () => props.tokenAddress,
   set: (value) => emit("update:tokenAddress", value),
@@ -316,7 +311,11 @@ const selectedToken = computed({
       return undefined;
     }
     return props.tokens
-      .filter((e) => e.address !== ETH_ADDRESS && e.address.toLowerCase() !== L2_ETH_TOKEN_ADDRESS)
+      .filter(
+        (e) =>
+          selectedNetwork.value.isEthGasToken ||
+          (e.address !== ETH_ADDRESS && e.address.toLowerCase() !== L2_ETH_TOKEN_ADDRESS)
+      )
       .find((e) => e.address === selectedTokenAddress.value);
   },
   set: (value) => {

@@ -9,7 +9,7 @@
     <template #default>
       <CommonButtonLineBodyInfo class="text-left">
         <template #label>
-          <div class="truncate">{{ symbol }} {{ networkKey ? ` (${getNetworkName(networkKey)})` : "" }}</div>
+          <div class="truncate">{{ symbol }}</div>
         </template>
         <template v-if="name" #underline>
           <CommonButtonLabel
@@ -21,10 +21,10 @@
             class="flex gap-1"
             @click.stop=""
           >
-            <span class="truncate">{{ name }}</span>
+            <span class="truncate">{{ name }} {{ networkKey ? ` (${getNetworkName(networkKey)})` : "" }}</span>
             <ArrowTopRightOnSquareIcon class="h-6 w-6 flex-shrink-0" />
           </CommonButtonLabel>
-          <div v-else class="truncate">{{ name }}</div>
+          <div v-else class="truncate">{{ name }} {{ networkKey ? ` (${getNetworkName(networkKey)})` : "" }}</div>
         </template>
       </CommonButtonLineBodyInfo>
     </template>
