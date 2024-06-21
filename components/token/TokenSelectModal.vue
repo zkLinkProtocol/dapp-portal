@@ -232,7 +232,7 @@ const changeToken = (item: any) => {
     return;
   }
   const url = new URL(route.fullPath, window.location.origin);
-  url.searchParams.set("network", selectChain.value === "ALL" ? item.networkKey : selectChain.value);
+  url.searchParams.set("network", selectChain.value === "ALL" ? item.networkKey ?? "ethereum" : selectChain.value);
   url.searchParams.set("tokenAddress", item.address);
   window.location.href = url.toString();
 };
