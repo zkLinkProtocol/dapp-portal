@@ -35,7 +35,11 @@
     >
       Confirm transaction
     </PageTitle>
-
+    <p class="mpc-tips-desc">
+      Please note that if you are using an <span>MPC</span> wallet (e.g., <span>Rainmaker, Bybit Wallet</span>, etc.)
+      that currently does not support zkLink Nova, you may not be able to move your funds after depositing your assets
+      to Nova.
+    </p>
     <NetworkSelectModal
       v-model:opened="fromNetworkModalOpened"
       title="From"
@@ -905,7 +909,11 @@ const makeTransaction = async () => {
     );
     waitForCompletion(transactionInfo.value)
       .then(async (completedTransaction) => {
-        transactionInfo.value = completedTransaction;
+        const hash = window.location.pathname.substr(location.pathname.indexOf("/transaction/") + 13);
+        console.log("hash: ", hash);
+        if (completedTransaction.transactionHash === hash) {
+          transactionInfo.value = completedTransaction;
+        }
         setTimeout(() => {
           transfersHistoryStore.reloadRecentTransfers().catch(() => undefined);
           fetchBalances(true).catch(() => undefined);
@@ -1124,6 +1132,23 @@ onMounted(() => {
   background: #1f2127;
   a {
     color: #1755f4;
+  }
+}
+.mpc-tips-desc {
+  color: #f29914;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 24px; /* 171.429% */
+  letter-spacing: -0.07px;
+  margin-bottom: 20px;
+  > span {
+    color: #f29914;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px;
+    letter-spacing: -0.07px;
   }
 }
 </style>
