@@ -248,9 +248,7 @@ const buttonClicked = async (network: ZkSyncNetwork | "ALL") => {
       return;
     }
     selectChain.value = "ALL";
-    chainLists.value = balance.value.filter((e) => {
-      return Number(e.amount) > 0;
-    });
+    chainLists.value = balance.value;
     chainList.value = filterTokens(chainLists.value) as TokenAmount[];
     balanceGroups = groupBalancesByAmount(chainList, props.from);
   } else {

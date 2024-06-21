@@ -37,7 +37,7 @@ export const groupBalancesByAmount = <T = TokenAmount>(balances: Ref<T[]>, type 
       return res;
     } else {
       const balanceWithUsd = (balances.value as TokenAmount[])
-        .filter((e) => Number(e.amount) > 0)
+        .filter((e) => Number(e.amount) > 0 && (e.l1Address || (!e.l1Address && isMergeToken(e.address))))
         .map((item) => ({
           ...item,
           usdBalance: Number(formatRawTokenPrice(item.amount, item.decimals, item.price ?? 0)),
