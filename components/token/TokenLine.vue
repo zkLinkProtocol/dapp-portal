@@ -21,10 +21,10 @@
             class="flex gap-1"
             @click.stop=""
           >
-            <span class="truncate">{{ name }}</span>
+            <span class="truncate">{{ name }} {{ networkKey ? ` (${getNetworkName(networkKey)})` : "" }}</span>
             <ArrowTopRightOnSquareIcon class="h-6 w-6 flex-shrink-0" />
           </CommonButtonLabel>
-          <div v-else class="truncate">{{ name }}</div>
+          <div v-else class="truncate">{{ name }} {{ networkKey ? ` (${getNetworkName(networkKey)})` : "" }}</div>
         </template>
       </CommonButtonLineBodyInfo>
     </template>
@@ -43,6 +43,11 @@ import type { Component, PropType } from "vue";
 
 import { iconsList } from "@/data/iconlists";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
+
+const getNetworkName = (networkKey: string) => {
+  if (!networkKey) return "";
+  return networkKey === "primary" ? "Linea" : networkKey[0].toUpperCase() + networkKey.slice(1);
+};
 
 defineProps({
   as: {

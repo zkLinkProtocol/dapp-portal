@@ -5,13 +5,14 @@ export const confirmedSupportedWallets: WalletEntry[] = [
 
   { walletName: "Binance Web3", type: "injected" },
   { walletName: "Injected", type: "injected" },
-  { walletName: "OKX", type: "injected" },  
+  { walletName: "OKX", type: "injected" },
   { walletName: "GateWallet", type: "injected" },
   { walletName: "MetaMask", type: "injected" },
   { walletName: "BitKeep", type: "injected" },
   { walletName: "BlockWallet", type: "injected" },
   { walletName: "MathWallet", type: "injected" },
   { walletName: "ImToken", type: "injected" },
+  { walletName: "Bitget", type: "injected" },
 
   { walletName: "GateWallet", type: "walletConnect" },
   { walletName: "MetaMask", type: "walletConnect" },

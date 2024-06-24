@@ -3,36 +3,49 @@ import { computed } from "vue";
 import type { Api, Token, TokenAmount } from "@/types";
 import type { Ref } from "vue";
 
-export const groupBalancesByAmount = <T = TokenAmount>(balances: Ref<T[]>) =>
+export const groupBalancesByAmount = <T = TokenAmount>(balances: Ref<T[]>, type = "deposit") =>
   computed(() => {
-    const groups: Record<string, { title: string | null; balances: T[] }> = {
-      default: {
-        title: null,
-        balances: [],
-      },
-      small: {
-        title: "Small balances",
-        balances: [],
-      },
-      zero: {
-        title: "Zero balances",
-        balances: [],
-      },
-    };
-    for (const balanceItem of balances.value as (T & TokenAmount)[]) {
-      const decimalBalance =
-        typeof balanceItem.price === "number"
-          ? removeSmallAmount(balanceItem.amount, balanceItem.decimals, balanceItem.price)
-          : parseTokenAmount(balanceItem.amount, balanceItem.decimals);
-      if (!isOnlyZeroes(decimalBalance)) {
-        groups.default.balances.push(balanceItem);
-      } else if (decimalBalance === "0") {
-        groups.zero.balances.push(balanceItem);
-      } else {
-        groups.small.balances.push(balanceItem);
+    if (type === "deposit") {
+      const groups: Record<string, { title: string | null; balances: T[] }> = {
+        default: {
+          title: null,
+          balances: [],
+        },
+        small: {
+          title: "Small balances",
+          balances: [],
+        },
+        zero: {
+          title: "Zero balances",
+          balances: [],
+        },
+      };
+      for (const balanceItem of balances.value as (T & TokenAmount)[]) {
+        const decimalBalance =
+          typeof balanceItem.price === "number"
+            ? removeSmallAmount(balanceItem.amount, balanceItem.decimals, balanceItem.price)
+            : parseTokenAmount(balanceItem.amount, balanceItem.decimals);
+        if (!isOnlyZeroes(decimalBalance)) {
+          groups.default.balances.push(balanceItem);
+        } else if (decimalBalance === "0") {
+          groups.zero.balances.push(balanceItem);
+        } else {
+          groups.small.balances.push(balanceItem);
+        }
       }
+      const res = [groups.default, groups.small, groups.zero].filter((group) => group.balances.length);
+      return res;
+    } else {
+      const balanceWithUsd = (balances.value as TokenAmount[])
+        .filter((e) => Number(e.amount) > 0 && (e.l1Address || (!e.l1Address && isMergeToken(e.address))))
+        .map((item) => ({
+          ...item,
+          usdBalance: Number(formatRawTokenPrice(item.amount, item.decimals, item.price ?? 0)),
+        })) as TokenAmount[];
+
+      balanceWithUsd.sort((a, b) => (b.usdBalance ?? 0) - (a.usdBalance ?? 0));
+      return [{ title: null, balances: balanceWithUsd }];
     }
-    return [groups.default, groups.small, groups.zero].filter((group) => group.balances.length);
   });
 
 export const mapApiToken = (token: Api.Response.Token): Token => {

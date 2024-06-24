@@ -7,15 +7,16 @@
     @after-leave="search = ''"
   >
     <div v-if="title === 'Choose chain and token'" class="mb-4">
-      <div class="flex gap-2 flex-wrap">
+      <div class="flex flex-wrap gap-2">
         <div
           v-for="(group, groupIndex) in arr"
           :key="groupIndex"
           class="chainBox cursor-pointer"
           :class="{ active: selectChain === group.key }"
-          @click="buttonClicked(zkSyncNetwork.find(item => item.key === group.key)!);"
+          @click="buttonClicked(group.key === 'ALL' ? 'ALL' : zkSyncNetwork.find((item) => item.key === group.key)!)"
         >
-          <img :src="group.iconUrl" :alt="group.label" />
+          <img v-if="group.iconUrl" :src="group.iconUrl" :alt="group.label" />
+          <p v-else>{{ group.label }}</p>
         </div>
       </div>
       <p v-if="!arr.length" class="mt-block-padding-1/2 text-center">No chains found</p>
@@ -56,7 +57,7 @@
         </template>
         <template v-else-if="balanceGroups.length || !search">
           <div v-for="(group, index) in balanceGroups" :key="index" class="category">
-            <TypographyCategoryLabel size="sm" variant="darker" class="group-category-label">
+            <TypographyCategoryLabel v-if="from === 'deposit'" size="sm" variant="darker" class="group-category-label">
               {{ group.title || "Your assets" }}
             </TypographyCategoryLabel>
             <div class="-mx-block-padding-1/4 sm:-mx-block-padding-1/2">
@@ -95,21 +96,24 @@ import { MagnifyingGlassIcon } from "@heroicons/vue/24/outline";
 import { ethers } from "ethers";
 import { storeToRefs } from "pinia";
 
+import useNetworks from "@/composables/useNetworks";
+
+import type { ZkSyncNetwork } from "@/data/networks";
 import type { Token, TokenAmount } from "@/types";
 import type { Address } from "viem";
 import type { PropType } from "vue";
 
+import { useRoute } from "#app";
 import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
 import { useSearchtokenStore } from "@/store/searchToken";
 import { useZkSyncEthereumBalanceStore } from "@/store/zksync/ethereumBalance";
+import { useZkSyncProviderStore } from "@/store/zksync/provider";
+import { useZkSyncWalletStore } from "@/store/zksync/wallet";
+import { isSupportedMergeToken } from "@/utils/constants";
 import { groupBalancesByAmount } from "@/utils/mappers";
 import { ETH_ADDRESS, fetchErc20, L2_ETH_TOKEN_ADDRESS } from "~/zksync-web3-nova/src/utils";
-import useNetworks from "@/composables/useNetworks";
-import type { ZkSyncNetwork } from "@/data/networks";
-import { useZkSyncWalletStore } from "@/store/zksync/wallet";
-import { useZkSyncProviderStore } from "@/store/zksync/provider";
-import { useRoute } from "#app";
+
 const route = useRoute();
 const providerStore = useZkSyncProviderStore();
 const { zkSyncNetworks } = useNetworks();
@@ -125,6 +129,10 @@ zkSyncNetwork.map((i) => {
     label: i.l1Network?.name,
   };
   arr.push(obj);
+});
+arr.unshift({
+  key: "ALL",
+  label: "All",
 });
 const props = defineProps({
   title: {
@@ -153,6 +161,10 @@ const props = defineProps({
     type: Array as PropType<TokenAmount[]>,
     default: () => [],
   },
+  from: {
+    type: String,
+    default: "deposit",
+  },
 });
 const emit = defineEmits<{
   (eventName: "update:opened", value: boolean): void;
@@ -169,11 +181,11 @@ watch(
   (value) => {
     if (chainList.value.length > 0) {
       searchList.value = filterTokens(chainList.value) as TokenAmount[];
-      balanceGroups = groupBalancesByAmount(searchList);
+      balanceGroups = groupBalancesByAmount(searchList, props.from);
     }
   }
 );
-const selectChain = ref(selectedNetwork.value.key);
+const selectChain = ref(props.from === "deposit" ? selectedNetwork.value.key : "ALL");
 const showLoading = ref(false);
 const hasBalances = computed(() => props.balances.length > 0);
 const onboardStore = useOnboardStore();
@@ -218,7 +230,7 @@ const changeToken = (item: any) => {
     return;
   }
   const url = new URL(route.fullPath, window.location.origin);
-  url.searchParams.set("network", selectChain.value);
+  url.searchParams.set("network", selectChain.value === "ALL" ? item.networkKey ?? "ethereum" : selectChain.value);
   url.searchParams.set("tokenAddress", item.address);
   window.location.href = url.toString();
 };
@@ -230,34 +242,44 @@ const isWithdraw = computed(() => {
   return props.title === "Choose chain and token";
 });
 
-const buttonClicked = async (network: ZkSyncNetwork) => {
-  if (isNetworkSelected(network)) {
-    return;
+const buttonClicked = async (network: ZkSyncNetwork | "ALL") => {
+  if (network === "ALL") {
+    if (selectChain.value === "ALL") {
+      return;
+    }
+    selectChain.value = "ALL";
+    chainLists.value = balance.value;
+    chainList.value = filterTokens(chainLists.value) as TokenAmount[];
+    balanceGroups = groupBalancesByAmount(chainList, props.from);
+  } else {
+    if (isNetworkSelected(network)) {
+      return;
+    }
+    selectChain.value = network.key;
+    chainLists.value = balance.value.filter((e) => {
+      if (isSupportedMergeToken(e.address, network.key)) {
+        return true;
+      }
+      if (!e.l1Address) {
+        return false;
+      }
+      if (isWithdraw.value && network.key === "mantle" && e.l1Address === ETH_ADDRESS) {
+        return false;
+      } else if (e.l1Address === ETH_ADDRESS) {
+        return true;
+      }
+      if (e.networkKey === network.key) {
+        return true;
+      }
+      return false;
+    });
+    chainList.value = filterTokens(
+      chainLists.value.filter(
+        (e) => network.isEthGasToken || (e.address !== ETH_ADDRESS && e.address.toLowerCase() !== L2_ETH_TOKEN_ADDRESS)
+      )
+    ) as TokenAmount[];
+    balanceGroups = groupBalancesByAmount(chainList, props.from);
   }
-  selectChain.value = network.key;
-  chainLists.value = balance.value.filter((e) => {
-    if (isSupportedMergeToken(e.address, network.key)) {
-      return true;
-    }
-    if (!e.l1Address) {
-      return false;
-    }
-    if (isWithdraw.value && network.key === "mantle" && e.l1Address === ETH_ADDRESS) {
-      return false;
-    } else if (e.l1Address === ETH_ADDRESS) {
-      return true;
-    }
-    if (e.networkKey === network.key) {
-      return true;
-    }
-    return false;
-  });
-  chainList.value = filterTokens(
-    chainLists.value.filter(
-      (e) => network.isEthGasToken || (e.address !== ETH_ADDRESS && e.address.toLowerCase() !== L2_ETH_TOKEN_ADDRESS)
-    )
-  ) as TokenAmount[];
-  balanceGroups = groupBalancesByAmount(chainList);
 };
 const displayedTokens = computed(() =>
   filterTokens(
@@ -270,16 +292,9 @@ const displayedTokens = computed(() =>
 );
 
 const displayedBalances = computed(
-  () =>
-    filterTokens(
-      props.balances.filter(
-        (e) =>
-          selectedNetwork.value.isEthGasToken ||
-          (e.address !== ETH_ADDRESS && e.address.toLowerCase() !== L2_ETH_TOKEN_ADDRESS)
-      )
-    ) as TokenAmount[]
+  () => filterTokens(selectChain.value === "ALL" ? balance.value : props.balances) as TokenAmount[]
 );
-let balanceGroups = groupBalancesByAmount(displayedBalances);
+let balanceGroups = groupBalancesByAmount(displayedBalances, props.from);
 const selectedTokenAddress = computed({
   get: () => props.tokenAddress,
   set: (value) => emit("update:tokenAddress", value),
@@ -319,6 +334,7 @@ const closeModal = () => {
 .token-select-modal {
   .modal-card {
     @apply grid h-full grid-rows-[max-content_max-content_1fr];
+    max-height: 680px !important;
   }
   .category:first-child .group-category-label {
     @apply pt-0;
