@@ -47,7 +47,7 @@ const ThirdPartyBridges = [
   {
     name: "Free",
     logo: "/img/Free.svg",
-    url: "https://free.tech/zklink",
+    url: "https://free.tech/",
     desc: "Bridge Bitcoin assets to earn Nova Points.",
     noTooltip: true,
     noPoints: true,
