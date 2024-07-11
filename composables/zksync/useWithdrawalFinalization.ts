@@ -127,27 +127,32 @@ export default (transactionInfo: ComputedRef<TransactionInfo>) => {
       const publicClient = onboardStore.getPublicClient(eraNetwork.l1Network?.id);
       if (!publicClient) return;
       const transactionParams = await getTransactionParams();
-      const [price, limit] = await Promise.all([
-        retry(async () => BigNumber.from((await publicClient.getGasPrice()).toString())),
-        retry(async () => {
-          return BigNumber.from(
-            (
-              await publicClient.estimateContractGas({
-                ...transactionParams,
-              })
-            ).toString()
-          );
-        }),
-      ]);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      gasPrice.value = price;
-      gasLimit.value = limit;
-
-      return {
-        transactionParams,
-        gasPrice: gasPrice.value,
-        gasLimit: gasLimit.value,
-      };
+      try {
+        const [price, limit] = await Promise.all([
+          retry(async () => BigNumber.from((await publicClient.getGasPrice()).toString())),
+          retry(async () => {
+            return BigNumber.from(
+              (
+                await publicClient.estimateContractGas({
+                  ...transactionParams,
+                })
+              ).toString()
+            );
+          }),
+        ]);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        gasPrice.value = price;
+        gasLimit.value = limit;
+        return {
+          transactionParams,
+          gasPrice: gasPrice.value,
+          gasLimit: gasLimit.value,
+        };
+      } catch (e) {
+        console.error("transactionHash: ", transactionInfo.value.transactionHash);
+        console.error("transactionParams: ", transactionParams);
+        throw e;
+      }
     },
     { cache: 1000 * 8 }
   );
