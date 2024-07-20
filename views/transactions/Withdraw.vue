@@ -513,6 +513,12 @@ import { ETH_ADDRESS } from "~/zksync-web3-nova/src/utils";
 const showBridge = ref(true);
 const chainList = [
   {
+    name: "zkJump",
+    logo: "zkJump.svg",
+    url: "https://zkjump.io/app",
+    description: "Bridge your $ZKL from Nova to Ethereum in minutes",
+  },
+  {
     name: "Orbiter Finance",
     logo: "orbiter.svg",
     url: "https://www.orbiter.finance/?source=zkLink%20Nova&dest=Ethereum&token=ETH",
