@@ -62,6 +62,11 @@ export const l1Networks = {
     ...mainnet,
     name: "Ethereum",
     network: "mainnet",
+    rpcUrls: {
+      default: {
+        http: ["https://rpc.ankr.com/eth", "https://cloudflare-eth.com"],
+      },
+    },
   },
   goerli: {
     ...goerli,
