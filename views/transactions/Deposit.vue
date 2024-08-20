@@ -382,6 +382,9 @@
               >
                 Continue
               </CommonButton>
+              <CommonButton v-if="fromLink" variant="light" class="w-full mt-5" @click="handleGoBack()">
+                Go Back
+              </CommonButton>
             </template>
             <template v-else-if="step === 'confirm'">
               <transition v-bind="TransitionAlertScaleInOutTransition">
@@ -418,6 +421,9 @@
                   <span v-else-if="transactionStatus === 'waiting-for-signature'">Waiting for confirmation</span>
                   <span v-else>Deposit now</span>
                 </transition>
+              </CommonButton>
+              <CommonButton v-if="fromLink" variant="light" class="w-full mt-5" @click="handleGoBack()">
+                Go Back
               </CommonButton>
               <TransactionButtonUnderlineConfirmTransaction :opened="transactionStatus === 'waiting-for-signature'" />
             </template>
@@ -467,8 +473,8 @@ import { getWaitTime } from "@/data/networks";
 import { useDestinationsStore } from "@/store/destinations";
 import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
-import { useSearchtokenStore } from "@/store/searchToken";
 import { usePreferencesStore } from "@/store/preferences";
+import { useSearchtokenStore } from "@/store/searchToken";
 import { useZkSyncEthereumBalanceStore } from "@/store/zksync/ethereumBalance";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncTokensStore } from "@/store/zksync/tokens";
@@ -528,6 +534,14 @@ const pageTitle = computed(() => {
 const pageDesc = computed(() => {
   const desc = route.query.desc;
   return props.isIntegrate ? desc : "";
+});
+
+const receipt = computed(() => {
+  return route.query.receipt;
+});
+
+const fromLink = computed(() => {
+  return route.query.fromLink;
 });
 
 const step = ref<"form" | "confirm" | "submitted">("form");
@@ -662,7 +676,11 @@ const queryAddress = useRouteQuery<string | undefined>("address", undefined, {
   transform: String,
   mode: "replace",
 });
-const address = ref((queryAddress.value !== "undefined" && queryAddress.value) || "");
+const address = ref(
+  (receipt.value && isAddress(receipt.value as string)
+    ? (receipt.value as string)
+    : queryAddress.value !== "undefined" && queryAddress.value) || ""
+);
 const isAddressInputValid = computed(() => {
   if (address.value) {
     return isAddress(address.value);
@@ -827,6 +845,10 @@ const buttonContinue = () => {
   } else if (step.value === "confirm") {
     makeTransaction();
   }
+};
+
+const handleGoBack = () => {
+  window.open(fromLink.value as string, "_self");
 };
 
 const buttonWrap = () => {
