@@ -263,6 +263,30 @@
         </CommonHeightTransition>
         <!-- MNT and WETH Tips end-->
 
+        <!-- op disable Tips-->
+        <CommonHeightTransition v-if="step === 'form'" :opened="selectedNetwork.key === 'optimism'">
+          <CommonCardWithLineButtons class="mt-4">
+            <DestinationItem as="div">
+              <template #underline>
+                Deposits from Optimism are temporarily paused due to the upcoming Optimism Network
+                <a
+                  class="text-[#1755f4] underline underline-offset-2 cursor-pointer"
+                  href="https://gov.optimism.io/t/upgrade-proposal-10-granite-network-upgrade/8733"
+                  target="_blank"
+                  >upgrade</a
+                >. They will resume once the upgrade is complete.Deposits from Optimism are temporarily paused due to
+                the upcoming Optimism Network upgrade. They will resume once the upgrade is complete.
+              </template>
+              <template #image>
+                <div class="aspect-square h-full w-full rounded-full bg-warning-400 p-3 text-black">
+                  <LockClosedIcon aria-hidden="true" />
+                </div>
+              </template>
+            </DestinationItem>
+          </CommonCardWithLineButtons>
+        </CommonHeightTransition>
+        <!-- op disableTips end-->
+
         <CommonHeightTransition
           v-if="step === 'form'"
           :opened="(!enoughAllowance && !continueButtonDisabled) || !!setAllowanceReceipt"
@@ -821,6 +845,9 @@ watch(
 );
 
 const continueButtonDisabled = computed(() => {
+  if (selectedNetwork.value.key === "optimism") {
+    return true;
+  }
   if (
     !transaction.value ||
     !enoughBalanceToCoverFee.value ||
