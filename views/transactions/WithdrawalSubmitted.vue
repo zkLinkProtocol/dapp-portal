@@ -11,7 +11,8 @@
         </template>
         <template v-else>
           Your funds will be available on <span class="font-medium">{{ transaction.to.destination.label }}</span> after
-          a maximum {{ displayEstimateWithdrawTime }}-day delay. During this time, the transaction will be processed
+          a minimum delay of 8 days. (On average, it takes around 8.5 days). During this time, the transaction will be
+          processed
           {{
             withdrawalManualFinalizationRequired
               ? "and become available for claiming."
@@ -29,10 +30,16 @@
           <p>You can claim your withdrawal now.</p>
         </CommonAlert>
         <CommonAlert v-else variant="warning" :icon="ExclamationTriangleIcon" class="mb-4">
-          <p>
-            You will have to claim your withdrawal once it's processed. Claiming will require paying the fee on the
-            destination network.
-          </p>
+          <div class="flex flex-col">
+            <p>
+              You will have to claim your withdrawal once it's processed. Claiming will require paying the fee on the
+              destination network.
+            </p>
+            <p class="mt-2">
+              Due to a recent update to the Optimism fraud-proof mechanism, all transactions on Nova require
+              re-verification. As a result, any recent withdrawals will now take additional days to complete.
+            </p>
+          </div>
         </CommonAlert>
       </template>
     </CommonHeightTransition>
