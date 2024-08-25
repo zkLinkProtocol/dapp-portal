@@ -22,7 +22,7 @@
       </p>
       <template v-if="withdrawalManualFinalizationRequired">
         <CommonAlert
-          v-if="withdrawalFinalizationAvailable"
+          v-if="withdrawalFinalizationAvailable && is829Passed"
           variant="warning"
           :icon="ExclamationTriangleIcon"
           class="mb-4"
@@ -62,7 +62,7 @@
       "
       :is-withdraw="true"
     >
-      <template #to-button v-if="withdrawalFinalizationAvailable">
+      <template #to-button v-if="withdrawalFinalizationAvailable && is829Passed">
         <template v-if="!(network.chain?.id === getNetworkInfo().l1Network?.id)">
           <CommonButton
             size="xs"
@@ -91,7 +91,7 @@
         </CommonButton>
       </template>
     </TransactionProgress>
-    <CommonHeightTransition :opened="withdrawalFinalizationAvailable">
+    <CommonHeightTransition :opened="withdrawalFinalizationAvailable && is829Passed">
       <div>
         <CommonErrorBlock v-if="feeError" class="mt-2" @try-again="estimate">
           Fee estimation error: {{ feeError.message }}
@@ -225,6 +225,11 @@ const withdrawalFinalizationAvailable = computed(() => {
 
 const displayEstimateWithdrawTime = computed(() => {
   return getEstimateWithdrawalDelayDays(props.transaction.timestamp);
+});
+
+const is829Passed = computed(() => {
+  const time829 = 1724889600000;
+  return Date.now() > time829;
 });
 
 const {
