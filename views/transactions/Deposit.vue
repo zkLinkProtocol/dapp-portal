@@ -24,14 +24,6 @@
       </div>
     </div>
 
-    <div class="mb-[10px]" v-else-if="route.query?.s === 'binance'">
-      <!-- <img src="/img/okx-cryptopedia.svg" class="h-[64px] w-[64px] rounded-[8px]" /> -->
-      <div class="z-2">
-        <img src="/img/banner-binance@2x.png" class="block hidden w-full md:block" />
-        <img src="/img/banner-binance-mobile@2x.png" class="block block w-full md:hidden" />
-      </div>
-    </div>
-
     <PageTitle v-if="step === 'form'">Deposit</PageTitle>
     <PageTitle
       v-else-if="step === 'confirm'"
@@ -43,7 +35,11 @@
     >
       Confirm transaction
     </PageTitle>
-
+    <p class="mpc-tips-desc">
+      Please note that if you are using an <span>MPC</span> wallet (e.g., <span>Rainmaker, Bybit Wallet</span>, etc.)
+      that currently does not support zkLink Nova, you may not be able to move your funds after depositing your assets
+      to Nova.
+    </p>
     <NetworkSelectModal
       v-model:opened="fromNetworkModalOpened"
       title="From"
@@ -60,7 +56,7 @@
 
     <form v-else @submit.prevent="">
       <template v-if="step === 'form'">
-        <TransactionWithdrawalsAvailableForClaimAlert />
+        <TransactionWithdrawalsAvailableForClaimAlert v-if="!props.isIntegrate" />
         <EcosystemBlock
           v-if="eraNetwork.displaySettings?.showPartnerLinks && ecosystemBannerVisible"
           show-close-button
@@ -76,16 +72,18 @@
           :balances="availableBalances"
           :max-amount="maxAmount"
           :approve-required="!enoughAllowance"
-          :loading="tokensRequestInProgress || balanceInProgress"
+          :loading="tokensRequestInProgress || balanceInProgress || fetchErc20WithRouteParamInProgress"
           :merge-limit-exceeds="mergeLimitExceeds"
           class="mb-block-padding-1/2 sm:mb-block-gap"
+          :is-integrate="props.isIntegrate"
         >
           <template #dropdown>
             <CommonButtonDropdown
               :toggled="fromNetworkModalOpened"
               size="xs"
               variant="light"
-              @click="fromNetworkModalOpened = true"
+              @click="fromNetworkModalOpened = props.isIntegrate ? false : true"
+              :no-chevron="props.isIntegrate"
             >
               <template #left-icon>
                 <img :src="selectedNetwork.logoUrl" class="h-full w-full rounded-full" />
@@ -265,6 +263,29 @@
         </CommonHeightTransition>
         <!-- MNT and WETH Tips end-->
 
+        <!-- op disable Tips-->
+        <CommonHeightTransition v-if="step === 'form'" :opened="selectedNetwork.key === 'optimism'">
+          <CommonCardWithLineButtons class="mt-4">
+            <DestinationItem as="div">
+              <template #underline>
+                Deposits from Optimism are temporarily paused due to the upcoming Optimism Network
+                <a
+                  class="text-[#1755f4] underline underline-offset-2 cursor-pointer"
+                  href="https://gov.optimism.io/t/upgrade-proposal-10-granite-network-upgrade/8733"
+                  target="_blank"
+                  >upgrade</a
+                >.
+              </template>
+              <template #image>
+                <div class="aspect-square h-full w-full rounded-full bg-warning-400 p-3 text-black">
+                  <ExclamationTriangleIcon aria-hidden="true" />
+                </div>
+              </template>
+            </DestinationItem>
+          </CommonCardWithLineButtons>
+        </CommonHeightTransition>
+        <!-- op disableTips end-->
+
         <CommonHeightTransition
           v-if="step === 'form'"
           :opened="(!enoughAllowance && !continueButtonDisabled) || !!setAllowanceReceipt"
@@ -384,6 +405,9 @@
               >
                 Continue
               </CommonButton>
+              <CommonButton v-if="fromLink" variant="light" class="w-full mt-5" @click="handleGoBack()">
+                Go Back
+              </CommonButton>
             </template>
             <template v-else-if="step === 'confirm'">
               <transition v-bind="TransitionAlertScaleInOutTransition">
@@ -421,11 +445,14 @@
                   <span v-else>Deposit now</span>
                 </transition>
               </CommonButton>
+              <CommonButton v-if="fromLink" variant="light" class="w-full mt-5" @click="handleGoBack()">
+                Go Back
+              </CommonButton>
               <TransactionButtonUnderlineConfirmTransaction :opened="transactionStatus === 'waiting-for-signature'" />
             </template>
           </template>
         </EthereumTransactionFooter>
-        <DepositThirdPartyBridge />
+        <DepositThirdPartyBridge v-if="!props.isIntegrate" />
       </template>
     </form>
   </div>
@@ -461,6 +488,7 @@ import type { TransactionDestination } from "@/store/destinations";
 import type { TransactionInfo } from "@/store/zksync/transactionStatus";
 import type { Token, TokenAmount } from "@/types";
 import type { BigNumberish } from "ethers";
+import type { Address } from "viem";
 
 import { useRoute, useRouter } from "#app";
 import { customBridgeTokens } from "@/data/customBridgeTokens";
@@ -469,6 +497,7 @@ import { useDestinationsStore } from "@/store/destinations";
 import { useNetworkStore } from "@/store/network";
 import { useOnboardStore } from "@/store/onboard";
 import { usePreferencesStore } from "@/store/preferences";
+import { useSearchtokenStore } from "@/store/searchToken";
 import { useZkSyncEthereumBalanceStore } from "@/store/zksync/ethereumBalance";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncTokensStore } from "@/store/zksync/tokens";
@@ -481,9 +510,16 @@ import { checksumAddress, decimalToBigNumber, formatRawTokenPrice, parseTokenAmo
 import { silentRouterChange } from "@/utils/helpers";
 import { TransitionAlertScaleInOutTransition, TransitionOpacity } from "@/utils/transitions";
 import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
-import { ETH_ADDRESS, WMNT_CONTRACT } from "@/zksync-web3-nova/src/utils";
+import { ETH_ADDRESS, WMNT_CONTRACT, isSameAddress, fetchErc20 } from "@/zksync-web3-nova/src/utils";
 
 import DepositThirdPartyBridge from "@/components/transaction/DepositThirdPartyBridge.vue";
+
+const props = defineProps({
+  isIntegrate: {
+    type: Boolean,
+    default: false,
+  },
+});
 
 // const okxIcon = "/img/okx-cryptopedia.svg";
 const launchIcon = "/img/launch.svg";
@@ -503,7 +539,8 @@ const { destinations } = storeToRefs(useDestinationsStore());
 const { l1BlockExplorerUrl, selectedNetwork, selectedNetworkKey } = storeToRefs(useNetworkStore());
 const { l1Tokens, tokensRequestInProgress, tokensRequestError } = storeToRefs(tokensStore);
 const { balance, balanceInProgress, balanceError } = storeToRefs(zkSyncEthereumBalance);
-
+const searchtokenStore = useSearchtokenStore();
+const fetchErc20WithRouteParamInProgress = ref(false);
 const toNetworkModalOpened = ref(false);
 const fromNetworkModalOpened = ref(false);
 const fromNetworkSelected = (networkKey?: string) => {
@@ -511,6 +548,25 @@ const fromNetworkSelected = (networkKey?: string) => {
     router.replace({ name: "withdraw", query: route.query });
   }
 };
+
+const pageTitle = computed(() => {
+  const titleParam = route.query.title;
+  return props.isIntegrate ? titleParam : "Deposit";
+});
+
+const pageDesc = computed(() => {
+  const desc = route.query.desc;
+  return props.isIntegrate ? desc : "";
+});
+
+const receipt = computed(() => {
+  return route.query.receipt;
+});
+
+const fromLink = computed(() => {
+  return route.query.fromLink;
+});
+
 const step = ref<"form" | "confirm" | "submitted">("form");
 const isMerge = ref<true | false>(true);
 const destination = computed(() => destinations.value.nova);
@@ -643,7 +699,11 @@ const queryAddress = useRouteQuery<string | undefined>("address", undefined, {
   transform: String,
   mode: "replace",
 });
-const address = ref((queryAddress.value !== "undefined" && queryAddress.value) || "");
+const address = ref(
+  (receipt.value && isAddress(receipt.value as string)
+    ? (receipt.value as string)
+    : queryAddress.value !== "undefined" && queryAddress.value) || ""
+);
 const isAddressInputValid = computed(() => {
   if (address.value) {
     return isAddress(address.value);
@@ -784,6 +844,9 @@ watch(
 );
 
 const continueButtonDisabled = computed(() => {
+  if (selectedNetwork.value.key === "optimism") {
+    return true;
+  }
   if (
     !transaction.value ||
     !enoughBalanceToCoverFee.value ||
@@ -808,6 +871,10 @@ const buttonContinue = () => {
   } else if (step.value === "confirm") {
     makeTransaction();
   }
+};
+
+const handleGoBack = () => {
+  window.open(fromLink.value as string, "_self");
 };
 
 const buttonWrap = () => {
@@ -890,7 +957,11 @@ const makeTransaction = async () => {
     );
     waitForCompletion(transactionInfo.value)
       .then(async (completedTransaction) => {
-        transactionInfo.value = completedTransaction;
+        const hash = window.location.pathname.substr(location.pathname.indexOf("/transaction/") + 13);
+        console.log("hash: ", hash);
+        if (completedTransaction.transactionHash === hash) {
+          transactionInfo.value = completedTransaction;
+        }
         setTimeout(() => {
           transfersHistoryStore.reloadRecentTransfers().catch(() => undefined);
           fetchBalances(true).catch(() => undefined);
@@ -946,6 +1017,28 @@ const fetchBalances = async (force = false) => {
       selectedTokenAddress.value = tokenWithHighestBalancePrice.value?.address;
     }
   });
+  // fetch token with address in route params when is integrate
+  if (props.isIntegrate && route.query.token) {
+    if (!balance.value?.find((item) => isSameAddress(item.address, route.query.token as string))) {
+      fetchErc20WithRouteParamInProgress.value = true;
+      fetchErc20(
+        route.query.token as Address,
+        onboardStore.getPublicClient(selectedNetwork.value.l1Network?.id),
+        account.value.address
+      )
+        .then((token) => {
+          if (token) {
+            searchtokenStore.saveSearchToken(token);
+            setTimeout(() => {
+              zkSyncEthereumBalance.saveTokenRequest().then();
+            }, 1);
+          }
+        })
+        .finally(() => {
+          fetchErc20WithRouteParamInProgress.value = false;
+        });
+    }
+  }
 };
 fetchBalances();
 
@@ -1087,6 +1180,23 @@ onMounted(() => {
   background: #1f2127;
   a {
     color: #1755f4;
+  }
+}
+.mpc-tips-desc {
+  color: #f29914;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 24px; /* 171.429% */
+  letter-spacing: -0.07px;
+  margin-bottom: 20px;
+  > span {
+    color: #f29914;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px;
+    letter-spacing: -0.07px;
   }
 }
 </style>

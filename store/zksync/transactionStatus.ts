@@ -94,7 +94,7 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
 
   const getDepositL2TransactionHash = async (l1TransactionHash: string) => {
     const publicClient = onboardStore.getPublicClient();
-    const transaction = await publicClient.waitForTransactionReceipt({
+    const transaction = await publicClient?.getTransactionReceipt({
       hash: l1TransactionHash as Hash,
     });
     for (const log of transaction.logs) {
@@ -116,7 +116,7 @@ export const useZkSyncTransactionStatusStore = defineStore("zkSyncTransactionSta
 
   const getDepositL2TransactionHashForSecondary = async (l1TransactionHash: string): Promise<Hash> => {
     const publicClient = onboardStore.getPublicClient();
-    const transaction = await publicClient.waitForTransactionReceipt({
+    const transaction = await publicClient.getTransactionReceipt({
       hash: l1TransactionHash as Hash,
     });
     console.log("getDepositL2TransactionHashForSecondary", l1TransactionHash);

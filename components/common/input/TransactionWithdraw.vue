@@ -7,6 +7,7 @@
       :tokens="tokens"
       :balances="balances"
       :title="from === 'withdraw' ? 'Choose chain and token' : 'Choose token'"
+      :from="from"
     >
       <template #body-bottom v-if="$slots['token-dropdown-bottom']">
         <slot name="token-dropdown-bottom" />
@@ -117,7 +118,8 @@
           class="h-max"
           :toggled="selectTokenModalOpened"
           variant="light"
-          @click="selectTokenModalOpened = true"
+          @click="selectTokenModalOpened = props.isIntegrate ? false : true"
+          :no-chevron="props.isIntegrate"
         >
           <template #left-icon>
             <CommonContentLoader v-if="loading" class="block h-full w-full rounded-full" />
@@ -196,6 +198,10 @@ const props = defineProps({
   },
   mergeWithdrawalLimit: {
     type: String,
+  },
+  isIntegrate: {
+    type: Boolean,
+    default: false,
   },
 });
 

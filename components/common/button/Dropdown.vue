@@ -48,6 +48,7 @@ defineProps({
 
 .noClick {
   background: transparent !important;
+  cursor: default;
   :hover {
     background: transparent !important;
   }
