@@ -11,7 +11,12 @@
       </CommonErrorBlock>
     </transition>
     <div v-if="buttonStep === 'connect'" class="transaction-footer-row">
-      <CommonButton variant="primary" :disabled="isConnectingWallet" class="w-full" @click="onboardStore.openModal">
+      <CommonButton
+        variant="primary"
+        :disabled="isConnectingWallet && web3ModalOpen"
+        class="w-full"
+        @click="onboardStore.openModal"
+      >
         Connect wallet
       </CommonButton>
     </div>
@@ -116,7 +121,9 @@ const {
   connectorName,
   walletName,
   network,
+  web3ModalOpen,
 } = storeToRefs(onboardStore);
+
 const { selectedNetwork, l1Network } = storeToRefs(useNetworkStore());
 const { primaryNetwork, zkSyncNetworks } = useNetworks();
 const getNetworkInfo = () => {

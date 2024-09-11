@@ -87,7 +87,14 @@ export const useOnboardStore = defineStore("onboard", () => {
   const connectors = [
     injected(),
     safe({
-      allowedDomains: [/app.safe.global$/],
+      allowedDomains: [
+        /app.safe.global$/,
+        /safe.zklink.io$/,
+        /safe.manta.network$/,
+        /multisig.mantle.xyz$/,
+        /safe.linea.build$/,
+        /blast-safe.io$/,
+      ],
       debug: true,
     }),
     walletConnect({ projectId: env.walletConnectProjectID, showQrModal: false, metadata }),
@@ -320,10 +327,12 @@ export const useOnboardStore = defineStore("onboard", () => {
         account.value.address,
         account.value.open,
         account.value.isConnecting,
-        account.value.isReconnecting
+        account.value.isReconnecting,
+        web3modal.getState()
       );
       return account.value.isReconnecting || account.value.isConnecting;
     }),
+    web3ModalOpen: computed(() => web3modal.getState().open),
     connectingWalletError,
     connectorName,
     walletName: computed(() => walletName.value),

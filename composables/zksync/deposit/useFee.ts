@@ -16,6 +16,7 @@ import type { UsePromiseExecuteOptions } from "~/composables/usePromise";
 import { useNetworkStore } from "@/store/network";
 import { retry } from "@/utils/helpers";
 import { calculateFee } from "@/utils/helpers";
+import { isSameAddress } from "@/zksync-web3-nova/src/utils";
 export type DepositFeeValues = {
   maxFeePerGas?: BigNumber;
   maxPriorityFeePerGas?: BigNumber;
@@ -170,6 +171,13 @@ export default (
       if (params.tokenAddress !== feeToken.value?.address && fee.value && fee.value.l1GasLimit) {
         //for ERC20 gasLimit mul 2
         fee.value.l1GasLimit = fee.value.l1GasLimit.mul(2); //maybe mul(3).div(2) is better
+        if (
+          isSameAddress(params.tokenAddress ?? "", "0x09E18590E8f76b6Cf471b3cd75fE1A1a9D2B2c2b") &&
+          selectedNetwork.value.key === "arbitrum"
+        ) {
+          // sepcial handle for AiDoge coin
+          fee.value.l1GasLimit = BigNumber.from(2000000);
+        }
       }
 
       if (fee.value) {

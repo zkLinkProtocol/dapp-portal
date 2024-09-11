@@ -25,19 +25,29 @@ export const MERGE_TOKENS =
         {
           symbol: "USDT",
           address: "0x2F8A25ac62179B31D62D7F80884AE57464699059",
-          targetNetworkKeys: ["ethereum", "arbitrum", "zksync", "primary", "manta", "mantle", "optimism"],
+          targetNetworkKeys: ["ethereum", "arbitrum", "zksync", "primary", "manta", "mantle", "optimism", "scroll"],
           decimals: 6,
         },
         {
           symbol: "WBTC",
           address: "0xDa4AaEd3A53962c83B35697Cd138cc6df43aF71f",
-          targetNetworkKeys: ["ethereum", "arbitrum", "zksync", "primary", "manta", "mantle", "optimism"],
+          targetNetworkKeys: ["ethereum", "arbitrum", "zksync", "primary", "manta", "mantle", "optimism", "scroll"],
           decimals: 18,
         },
         {
           symbol: "USDC",
           address: "0x1a1A3b2ff016332e866787B311fcB63928464509",
-          targetNetworkKeys: ["ethereum", "arbitrum", "zksync", "primary", "manta", "mantle", "optimism", "base"],
+          targetNetworkKeys: [
+            "ethereum",
+            "arbitrum",
+            "zksync",
+            "primary",
+            "manta",
+            "mantle",
+            "optimism",
+            "base",
+            "scroll",
+          ],
           decimals: 6,
         },
         {

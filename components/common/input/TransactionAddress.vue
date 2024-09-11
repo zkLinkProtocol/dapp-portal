@@ -5,14 +5,17 @@
         <div class="font-bold">{{ label }}</div>
         <slot name="dropdown" />
       </div>
-      <div v-if="!addressInputHidden && defaultLabel && isConnected">
+      <div v-if="receipt">
+        <span class="font-bold">To account {{ shortenAddress(receipt) }}</span>
+      </div>
+      <div v-else-if="!addressInputHidden && defaultLabel && isConnected">
         <span class="font-bold">{{ inputVisible ? "To another account" : defaultLabel }}</span>
         <CommonButtonLabel variant="light" class="ml-1" @click="toggleCustomValue()">
           {{ inputVisible ? "Use my account" : "Change" }}
         </CommonButtonLabel>
       </div>
     </div>
-    <div v-show="inputVisible" class="mt-4">
+    <div v-show="inputVisible && !receipt" class="mt-4">
       <div class="flex items-center gap-2">
         <CommonInputLine
           v-model.trim="inputted"
@@ -70,6 +73,7 @@ import { isAddress } from "viem";
 
 import useEns from "@/composables/useEnsName";
 
+import { useRoute } from "#app";
 import { useOnboardStore } from "@/store/onboard";
 import { usePreferencesStore } from "@/store/preferences";
 import { isMobile } from "@/utils/helpers";
@@ -90,6 +94,17 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+});
+
+const route = useRoute();
+
+const receipt = computed(() => {
+  const receipt = route.query.receipt as string;
+  if (isAddress(receipt)) {
+    return receipt;
+  } else {
+    return "";
+  }
 });
 
 const emit = defineEmits<{

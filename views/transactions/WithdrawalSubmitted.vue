@@ -11,7 +11,8 @@
         </template>
         <template v-else>
           Your funds will be available on <span class="font-medium">{{ transaction.to.destination.label }}</span> after
-          the {{ displayEstimateWithdrawTime }}-day delay. During this time, the transaction will be processed
+          a minimum delay of 8 days. (On average, it takes around 8.5 days). During this time, the transaction will be
+          processed
           {{
             withdrawalManualFinalizationRequired
               ? "and become available for claiming."
@@ -21,7 +22,7 @@
       </p>
       <template v-if="withdrawalManualFinalizationRequired">
         <CommonAlert
-          v-if="withdrawalFinalizationAvailable"
+          v-if="withdrawalFinalizationAvailable && is829Passed"
           variant="warning"
           :icon="ExclamationTriangleIcon"
           class="mb-4"
@@ -29,10 +30,16 @@
           <p>You can claim your withdrawal now.</p>
         </CommonAlert>
         <CommonAlert v-else variant="warning" :icon="ExclamationTriangleIcon" class="mb-4">
-          <p>
-            You will have to claim your withdrawal once it's processed. Claiming will require paying the fee on the
-            destination network.
-          </p>
+          <div class="flex flex-col">
+            <p>
+              You will have to claim your withdrawal once it's processed. Claiming will require paying the fee on the
+              destination network.
+            </p>
+            <p class="mt-2">
+              Due to a recent update to the Optimism fraud-proof mechanism, all transactions on Nova require
+              re-verification. As a result, any recent withdrawals will now take additional days to complete.
+            </p>
+          </div>
         </CommonAlert>
       </template>
     </CommonHeightTransition>
@@ -55,7 +62,7 @@
       "
       :is-withdraw="true"
     >
-      <template #to-button v-if="withdrawalFinalizationAvailable">
+      <template #to-button v-if="withdrawalFinalizationAvailable && is829Passed">
         <template v-if="!(network.chain?.id === getNetworkInfo().l1Network?.id)">
           <CommonButton
             size="xs"
@@ -84,7 +91,7 @@
         </CommonButton>
       </template>
     </TransactionProgress>
-    <CommonHeightTransition :opened="withdrawalFinalizationAvailable">
+    <CommonHeightTransition :opened="withdrawalFinalizationAvailable && is829Passed">
       <div>
         <CommonErrorBlock v-if="feeError" class="mt-2" @try-again="estimate">
           Fee estimation error: {{ feeError.message }}
@@ -218,6 +225,11 @@ const withdrawalFinalizationAvailable = computed(() => {
 
 const displayEstimateWithdrawTime = computed(() => {
   return getEstimateWithdrawalDelayDays(props.transaction.timestamp);
+});
+
+const is829Passed = computed(() => {
+  const time829 = 1724889600000;
+  return Date.now() > time829;
 });
 
 const {
