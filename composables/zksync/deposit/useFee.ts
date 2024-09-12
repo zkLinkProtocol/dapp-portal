@@ -182,15 +182,22 @@ export default (
 
       if (fee.value) {
         if (signer._providerL2().isLineaChain() && fee.value.maxFeePerGas && fee.value.maxPriorityFeePerGas) {
-          const lineaFeeSuggest = await suggestMaxPriorityFee(signer._providerL1(), "latest");
-          console.log("linea feesuggest", lineaFeeSuggest.maxPriorityFeeSuggestions);
-          fee.value.maxPriorityFeePerGas = BigNumber.from(lineaFeeSuggest.maxPriorityFeeSuggestions.fast);
-          fee.value.maxFeePerGas = fee.value.maxPriorityFeePerGas;
+          try {
+            const lineaFeeSuggest = await suggestMaxPriorityFee(signer._providerL1(), "latest");
+            console.log("linea feesuggest", lineaFeeSuggest.maxPriorityFeeSuggestions);
+            fee.value.maxPriorityFeePerGas = BigNumber.from(lineaFeeSuggest.maxPriorityFeeSuggestions.fast);
+            fee.value.maxFeePerGas = fee.value.maxPriorityFeePerGas;
+          } catch (e) {
+            console.error("linea fee suggest error", e);
+          }
         }
       }
       /* It can be either maxFeePerGas or gasPrice */
-      if (fee.value && !fee.value?.maxFeePerGas) {
+      if (fee.value && (!fee.value?.maxFeePerGas || Number(fee.value?.maxFeePerGas) === 0)) {
         fee.value.gasPrice = await getGasPrice();
+        if (Number(fee.value?.maxFeePerGas) === 0) {
+          fee.value.maxFeePerGas = fee.value.gasPrice;
+        }
       }
     },
     { cache: false }

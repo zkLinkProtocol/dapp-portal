@@ -75,6 +75,11 @@ export const l1Networks = {
   sepolia: {
     ...sepolia,
     name: "Ethereum Sepolia Testnet",
+    rpcUrls: {
+      default: {
+        http: ["https://eth-sepolia.public.blastapi.io"],
+      },
+    },
   },
   linea: {
     ...linea,
