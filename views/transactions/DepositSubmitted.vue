@@ -53,7 +53,7 @@ import type { PropType } from "vue";
 
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 
-const fromLink = useRouteQuery<string | undefined>("fromLink", undefined, {
+const fromLink = useRouteQuery<string | undefined>("fromLink", "", {
   transform: String,
   mode: "replace",
 });
