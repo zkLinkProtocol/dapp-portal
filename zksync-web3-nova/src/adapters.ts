@@ -1,3 +1,4 @@
+import { suggestMaxPriorityFee } from "@rainbow-me/fee-suggestions";
 import { BigNumber, ethers, utils } from "ethers";
 import { Interface } from "ethers/lib/utils";
 
@@ -153,9 +154,14 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     }): Promise<BigNumber> {
       const zksyncContract = await this.getMainContract();
       const parameters = { ...layer1TxDefaults(), ...params };
-      parameters.gasPrice ??= (await this._providerL1().getGasPrice()).mul(2);
+      if (this._providerL2().isLineaChain()) {
+        const lineaFeeSuggest = await suggestMaxPriorityFee(this._providerL1() as any, "latest");
+        console.log("linea feesuggest", lineaFeeSuggest.maxPriorityFeeSuggestions);
+        parameters.gasPrice = BigNumber.from(lineaFeeSuggest.maxPriorityFeeSuggestions.fast);
+      } else {
+        parameters.gasPrice ??= (await this._providerL1().getGasPrice()).mul(2);
+      }
       parameters.gasPerPubdataByte ??= REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
-
       const gasPrice = this._providerL2().isPrimaryChain() ? parameters.gasPrice : await this.getTxGasPrice();
 
       return BigNumber.from(
@@ -655,7 +661,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
       return await l1Bridge.isWithdrawalFinalized(log.l1BatchNumber, proof!.id);
     }
-    
+
     async claimFailedDeposit(depositHash: BytesLike, overrides?: ethers.Overrides) {
       const receipt = await this._providerL2().getTransactionReceipt(ethers.utils.hexlify(depositHash));
       const successL2ToL1LogIndex = receipt.l2ToL1Logs.findIndex(
