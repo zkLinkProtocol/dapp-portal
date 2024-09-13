@@ -45,7 +45,6 @@ export default (getL1Signer: () => Promise<L1Signer | undefined>) => {
       if (overrides.gasPrice && overrides.maxFeePerGas) {
         overrides.gasPrice = undefined;
       }
-
       status.value = "waiting-for-signature";
       const depositResponse = await wallet.deposit({
         to: transaction.to,
