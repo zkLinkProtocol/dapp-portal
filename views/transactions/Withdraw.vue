@@ -634,6 +634,7 @@ const availableTokens = computed(() => {
   }
   return Object.values(tokens.value);
 });
+
 const availableBalances = computed(() => {
   if (props.type === "withdrawal") {
     if (!tokens.value) return [];

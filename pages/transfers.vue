@@ -48,7 +48,7 @@
         </CommonCardWithLineButtons>
       </template>
       <div class="flex items-center justify-between" v-if="!hasOnlyRecentBridgeOperations">
-        <TypographyCategoryLabel>Completed transfers</TypographyCategoryLabel>
+        <TypographyCategoryLabel>Completed transactions</TypographyCategoryLabel>
         <div class="flex items-center filter-checkbox">
           <label for="show-deposits-withdrawals-only" class="mr-2">Show Deposits & Withdrawas only</label>
           <input type="checkbox" id="show-deposits-withdrawals-only" v-model="showDepositsWithdrawalsOnly" />
