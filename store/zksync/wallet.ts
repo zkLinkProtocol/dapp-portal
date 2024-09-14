@@ -104,6 +104,7 @@ export const useZkSyncWalletStore = defineStore("zkSyncWallet", () => {
           symbol: token!.symbol!,
           decimals: token!.decimals,
           amount: balance,
+          networkKey: token!.networkKey || undefined,
         };
       });
     //add merge tokens
@@ -117,6 +118,7 @@ export const useZkSyncWalletStore = defineStore("zkSyncWallet", () => {
           symbol: token!.symbol!,
           decimals: token!.decimals,
           amount: "0",
+          networkKey: token!.networkKey || undefined,
         });
       }
     }
