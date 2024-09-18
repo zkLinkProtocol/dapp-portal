@@ -3,7 +3,7 @@
   "description": "zkLink Portal provides Wallet and Bridge functionality for interacting with zkLink Nova",
   "private": true,
   "scripts": {
-    "dev": "nuxt dev --port 3333",
+    "dev": "nuxt dev --port 3333 --host 0.0.0.0",
     "dev:node:memory": "cross-env NODE_TYPE=memory npm run dev",
     "dev:node:docker": "cross-env NODE_TYPE=dockerized npm run dev",
     "dev:node:nexus-goerli": "cross-env NODE_TYPE=nexus-goerli npm run dev",
