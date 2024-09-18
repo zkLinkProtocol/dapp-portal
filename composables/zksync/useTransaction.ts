@@ -84,6 +84,7 @@ export default (getSigner: () => Promise<Signer | undefined>, getProvider: () =>
 
       return tx;
     } catch (err) {
+      console.error(err);
       error.value = formatError(err as Error);
       status.value = "not-started";
     }

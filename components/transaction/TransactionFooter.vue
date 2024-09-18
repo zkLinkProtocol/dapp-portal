@@ -22,7 +22,8 @@
         v-if="
           connectorName !== 'WalletConnect' ||
           (connectorName === 'WalletConnect' &&
-            (walletName?.includes('OKX') || walletName?.includes('MetaMask') || walletName?.includes('Binance')))
+            (walletName?.includes('OKX') || walletName?.includes('MetaMask') || walletName?.includes('Binance'))) ||
+          walletName?.includes('Bybit')
         "
         type="submit"
         :disabled="switchingNetworkInProgress"
