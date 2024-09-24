@@ -1,5 +1,5 @@
+import TopLevelAwaitPlugin from "vite-plugin-top-level-await";
 import { portal as portalMeta } from "./data/meta";
-
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   app: {
@@ -114,6 +114,7 @@ export default defineNuxtConfig({
       "process.env.NODE_TYPE": JSON.stringify(process.env.NODE_TYPE),
       "process.env.WALLET_CONNECT_PROJECT_ID": JSON.stringify(process.env.WALLET_CONNECT_PROJECT_ID),
     },
+    plugins: [TopLevelAwaitPlugin()],
     css: {
       preprocessorOptions: {
         scss: {
@@ -130,4 +131,5 @@ export default defineNuxtConfig({
       },
     },
   },
+  devtools: { enabled: true },
 });
