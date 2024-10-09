@@ -19,6 +19,7 @@ import {
 } from "./utils";
 import { zkSyncProvider } from "./zkSyncProvider"; //TODO the filename is not accurate
 import { IERC20MetadataFactory, IL1BridgeFactory, IL2BridgeFactory, IZkSyncFactory } from "../typechain";
+import { L1SharedBridge__factory } from "../typechain/BridgeHub";
 
 import { abi as primaryGetterAbi } from "../abi/GettersFacet.json";
 import WrappedMNTAbi from "../abi/WrappedMNT.json";
@@ -648,6 +649,14 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
       // to get the index of the corresponding L2->L1 log,
       // which is returned as `proof.id`.
       const proof = await this._providerL2().getLogProof(withdrawalHash, l2ToL1LogIndex);
+
+      const bridgeHubUpgradeBatch = process.env.NODE_TYPE === "nexus" ? 100000 : 16888; //TODO: update batch for mainnet
+      const HubContract = process.env.NODE_TYPE === "nexus" ? "" : "0x0A001c26192C54f7EdaA031ab9063d274519f19d";
+      if (log.l1BatchNumber > bridgeHubUpgradeBatch && this._providerL2().isPrimaryChain() && HubContract) {
+        const hub = L1SharedBridge__factory.connect(HubContract, this._signerL1());
+
+        return await hub.isWithdrawalFinalized(this._providerL2().network.chainId, log.l1BatchNumber, proof!.id);
+      }
 
       if (isETH(sender)) {
         const contractAddress = await this._providerL2().getMainContractAddress();
