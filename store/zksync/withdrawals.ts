@@ -66,7 +66,10 @@ export const useZkSyncWithdrawalsStore = defineStore("zkSyncWithdrawals", () => 
     const isFinalized = await eraWalletStore
       .getPrimaryL1VoidSigner()
       .isWithdrawalFinalized(transactionHash)
-      .catch(() => false);
+      .catch((e) => {
+        console.error(e);
+        return false;
+      });
     return isFinalized;
   };
 
