@@ -13,11 +13,15 @@ export const confirmedSupportedWallets: WalletEntry[] = [
   { walletName: "MathWallet", type: "injected" },
   { walletName: "ImToken", type: "injected" },
   { walletName: "Bitget", type: "injected" },
+  { walletName: "Bybit", type: "injected" },
+
 
   { walletName: "GateWallet", type: "walletConnect" },
   { walletName: "MetaMask", type: "walletConnect" },
   { walletName: "imToken", type: "walletConnect" },
   { walletName: "OKX", type: "walletConnect" },
+  { walletName: "Bybit", type: "walletConnect" },
+
 
   { walletName: "Binance DeFi", type: "walletConnect" },
   { walletName: "Binance Web3", type: "walletConnect" },

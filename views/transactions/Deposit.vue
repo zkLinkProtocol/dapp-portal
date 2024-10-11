@@ -274,12 +274,11 @@
                   href="https://gov.optimism.io/t/upgrade-proposal-10-granite-network-upgrade/8733"
                   target="_blank"
                   >upgrade</a
-                >. They will resume once the upgrade is complete.Deposits from Optimism are temporarily paused due to
-                the upcoming Optimism Network upgrade. They will resume once the upgrade is complete.
+                >.
               </template>
               <template #image>
                 <div class="aspect-square h-full w-full rounded-full bg-warning-400 p-3 text-black">
-                  <LockClosedIcon aria-hidden="true" />
+                  <ExclamationTriangleIcon aria-hidden="true" />
                 </div>
               </template>
             </DestinationItem>
