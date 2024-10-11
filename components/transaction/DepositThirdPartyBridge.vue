@@ -75,8 +75,9 @@ const ThirdPartyBridges = [
   {
     name: "Interport",
     logo: "/img/Interport.svg",
-    url: "https://app.interport.fi/bridge/1/42161/ETH/ETH",
+    url: "https://app.interport.fi/bridge/1/810180/USDT/USDT",
     desc: "Bridge more than $200 USDC to Nova to earn Nova Points.",
+    noTooltip: true
   },
 ];
 const bridgePoints = ref(ThirdPartyBridges.map((item) => ({ ...item, points: 0 })));
