@@ -72,6 +72,13 @@ const ThirdPartyBridges = [
     logo: "/img/Symbiosys.svg",
     url: "https://app.symbiosis.finance/swap?chainIn=Ethereum&chainOut=ZkLink&tokenIn=ETH&tokenOut=ETH",
   },
+  {
+    name: "Interport",
+    logo: "/img/Interport.svg",
+    url: "https://app.interport.fi/bridge/1/810180/USDT/USDT",
+    desc: "Bridge more than $200 USDC to Nova to earn Nova Points.",
+    noTooltip: true
+  },
 ];
 const bridgePoints = ref(ThirdPartyBridges.map((item) => ({ ...item, points: 0 })));
 const API_URL = "https://app-api.zklink.io/lrt-points/cache/bridge/latest/points";
@@ -81,12 +88,14 @@ const fetchBridgePoints = async () => {
     $fetch(API_URL, { params: { name: "meson" } }),
     // $fetch(API_URL, { params: { name: "owlet" } }),
     $fetch(API_URL, { params: { name: "symbiosis" } }),
+    $fetch(API_URL, { params: { name: "interport" } }),
   ])) as any[];
   console.log(points, "points");
   const _bridgePoints = bridgePoints.value;
   _bridgePoints[1].points = points[0]?.data;
   _bridgePoints[2].points = points[1]?.data;
   _bridgePoints[3].points = points[2]?.data;
+  _bridgePoints[4].points = points[3]?.data;
 
   bridgePoints.value = _bridgePoints;
 };
