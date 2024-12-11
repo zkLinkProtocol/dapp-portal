@@ -105,9 +105,6 @@
       </span>
       <div>Note: Withdrawals will be enabled before 04/13/2024</div>
     </div> -->
-    <div className="banner" v-if="route.query.s !== 'okx' && route.query.s !== 'binance'">
-      <banner />
-    </div>
   </div>
 </template>
 

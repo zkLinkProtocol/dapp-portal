@@ -31,12 +31,6 @@
         <div class="time">Usually takes under 20 mins</div>
       </div>
     </div>
-    <div class="warnBox flex" v-if="!route.query.s || route.query.s !== 'okx'">
-      <div>
-        Note: All LRT points will continue to be calculated after you request a withdrawal. They will appear in the next
-        few days in dashboard due to the data synchronization process.
-      </div>
-    </div>
 
     <div v-if="showBridge">
       <NetworkSelectModal
