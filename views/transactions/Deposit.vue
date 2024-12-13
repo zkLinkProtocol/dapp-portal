@@ -35,11 +35,13 @@
     >
       Confirm transaction
     </PageTitle>
+
     <p class="mpc-tips-desc">
-      Please note that if you are using an <span>MPC</span> wallet (e.g., <span>Rainmaker, Bybit Wallet</span>, etc.)
-      that currently does not support zkLink Nova, you may not be able to move your funds after depositing your assets
-      to Nova.
+      Please note that if you are using an <span>MPC & AA</span> wallet (e.g., <span>Rainmaker, Bybit Wallet</span>,
+      etc.) that currently does not support zkLink Nova, you may not be able to move your funds after depositing your
+      assets to Nova.
     </p>
+
     <NetworkSelectModal
       v-model:opened="fromNetworkModalOpened"
       title="From"
@@ -270,7 +272,7 @@
               <template #underline>
                 Deposits from Optimism are temporarily paused due to the upcoming Optimism Network
                 <a
-                  class="text-[#1755f4] underline underline-offset-2 cursor-pointer"
+                  class="cursor-pointer text-[#1755f4] underline underline-offset-2"
                   href="https://gov.optimism.io/t/upgrade-proposal-10-granite-network-upgrade/8733"
                   target="_blank"
                   >upgrade</a
@@ -405,7 +407,7 @@
               >
                 Continue
               </CommonButton>
-              <CommonButton v-if="fromLink" variant="light" class="w-full mt-5" @click="handleGoBack()">
+              <CommonButton v-if="fromLink" variant="light" class="mt-5 w-full" @click="handleGoBack()">
                 Go Back
               </CommonButton>
             </template>
@@ -445,7 +447,7 @@
                   <span v-else>Deposit now</span>
                 </transition>
               </CommonButton>
-              <CommonButton v-if="fromLink" variant="light" class="w-full mt-5" @click="handleGoBack()">
+              <CommonButton v-if="fromLink" variant="light" class="mt-5 w-full" @click="handleGoBack()">
                 Go Back
               </CommonButton>
               <TransactionButtonUnderlineConfirmTransaction :opened="transactionStatus === 'waiting-for-signature'" />
