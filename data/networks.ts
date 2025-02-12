@@ -64,7 +64,7 @@ export const l1Networks = {
     network: "mainnet",
     rpcUrls: {
       default: {
-        http: ["https://rpc.ankr.com/eth", "https://cloudflare-eth.com"],
+        http: ["https://eth.merkle.io", "https://cloudflare-eth.com", "https://rpc.ankr.com/eth"],
       },
     },
   },
