@@ -24,10 +24,7 @@
               :icon="group.key === selectedNetworkKey ? CheckIcon : undefined"
               variant="light"
               size="sm"
-              @click="
-                buttonClicked(zkSyncNetwork.find(item => item.key === group.key)!);
-                selectedNetworkKey = group.key!;
-              "
+              @click="handleClick(group)"
             />
           </div>
         </div>
@@ -36,10 +33,25 @@
       </div>
     </Combobox>
   </CommonModal>
+
+  <CommonModal
+    v-model:opened="isPausedNetworkModalOpen"
+    title="Network Deposit Paused"
+    closable
+    @close="isPausedNetworkModalOpen = false"
+  >
+    <div class="p-4">
+      <p class="mb-4">Deposit paused for {{ selectedPausedNetwork?.label }} chain, Withdrawals still available.</p>
+      <div class="flex justify-end gap-4">
+        <CommonButton variant="secondary" @click="isPausedNetworkModalOpen = false"> Ok </CommonButton>
+      </div>
+    </div>
+  </CommonModal>
 </template>
 
 <script lang="ts" setup>
 import { computed, ref } from "vue";
+import { useRouter } from "vue-router";
 
 import { Combobox } from "@headlessui/vue";
 import { CheckIcon } from "@heroicons/vue/24/outline";
@@ -54,6 +66,7 @@ import { useNetworkStore } from "@/store/network";
 import { getNetworkUrl } from "@/utils/helpers";
 
 const route = useRoute();
+const router = useRouter();
 const props = defineProps({
   title: {
     type: String,
@@ -75,10 +88,10 @@ const emit = defineEmits<{
 }>();
 
 const { zkSyncNetworks } = useNetworks();
-const zkSyncNetwork = zkSyncNetworks.filter((e) => !e.hidden)
-let arr : any[] = [];
-zkSyncNetwork.map((i)=> {
-  if (route.path === '/' && i.key === "blast") return; // hide blast on deposit
+const zkSyncNetwork = zkSyncNetworks.filter((e) => !e.hidden);
+let arr: any[] = [];
+zkSyncNetwork.map((i) => {
+  if (route.path === "/" && i.key === "blast") return; // hide blast on deposit
   const obj = {
     iconUrl: i.logoUrl,
     key: i.key,
@@ -86,6 +99,15 @@ zkSyncNetwork.map((i)=> {
   };
   arr.push(obj);
 });
+
+const isPausedNetworkModalOpen = ref(false);
+const selectedPausedNetwork = ref<{ key: string; label: string } | null>(null);
+
+const showPausedNetworkWarning = (network: { key: string; label: string }) => {
+  selectedPausedNetwork.value = network;
+  isPausedNetworkModalOpen.value = true;
+  closeModal();
+};
 
 const { selectedNetwork } = storeToRefs(useNetworkStore());
 const isNetworkSelected = (network: ZkSyncNetwork) => selectedNetwork.value.key === network.key;
@@ -132,6 +154,13 @@ const isModalOpened = computed({
 });
 const closeModal = () => {
   isModalOpened.value = false;
+};
+const handleClick = (group: any) => {
+  if (route.path === "/" && ["optimism", "arbitrum", "base", "mantle", "manta"].includes(group.key)) {
+    showPausedNetworkWarning(group);
+    return;
+  }
+  buttonClicked(zkSyncNetwork.find((item) => item.key === group.key)!);
 };
 </script>
 

@@ -21,18 +21,44 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
 import { ExclamationTriangleIcon } from "@heroicons/vue/24/outline";
 import { storeToRefs } from "pinia";
 
 import { useDestinationsStore } from "@/store/destinations";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
+import { useNetworkStore } from "@/store/network";
 import DepositView from "@/views/transactions/Deposit.vue";
 
+const emit = defineEmits<{
+  (eventName: "update:networkKey", networkKey?: string): void;
+}>();
+const route = useRoute();
+const router = useRouter();
 const { destinations } = storeToRefs(useDestinationsStore());
 const { eraNetwork } = storeToRefs(useZkSyncProviderStore());
+const networkStore = useNetworkStore();
 const depositDisabled = computed(() => eraNetwork.value.key === "scrollsepolia");
+
+// stop deposit for ops network.
+onMounted(() => {
+  const opsNetworks = ["optimism", "arbitrum", "base", "mantle", "manta"];
+  const networkParam = route.query.network;
+
+  if (opsNetworks.includes(networkParam as string)) {
+    const newQuery = { ...route.query, network: "ethereum" };
+
+    networkStore.selectedNetworkKey = "ethereum";
+    emit("update:networkKey", "ethereum");
+
+    router.replace({
+      path: route.path,
+      query: newQuery,
+    });
+  }
+});
 </script>
 
 <style lang="scss" scoped></style>
