@@ -515,6 +515,7 @@ import DepositSubmitted from "@/views/transactions/DepositSubmitted.vue";
 import { ETH_ADDRESS, WMNT_CONTRACT, isSameAddress, fetchErc20 } from "@/zksync-web3-nova/src/utils";
 
 import DepositThirdPartyBridge from "@/components/transaction/DepositThirdPartyBridge.vue";
+import { getNetworkUrl } from "@/utils/helpers";
 
 const props = defineProps({
   isIntegrate: {
@@ -1061,8 +1062,16 @@ onboardStore.subscribeOnNetworkChange((newchainId) => {
 });
 
 onMounted(() => {
+  const opsNetworks = ["optimism", "arbitrum", "base", "mantle", "manta"];
+
   if (selectedNetworkKey.value === "blast") {
     selectedNetworkKey.value = zkSyncNetworks[0].key;
+  }
+
+  if (opsNetworks.includes(selectedNetworkKey.value)) {
+    selectedNetworkKey.value = "ethereum";
+
+    window.location.href = getNetworkUrl(zkSyncNetworks[0], route.fullPath);
   }
 });
 </script>
