@@ -31,6 +31,10 @@ import { useDestinationsStore } from "@/store/destinations";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useNetworkStore } from "@/store/network";
 import DepositView from "@/views/transactions/Deposit.vue";
+import useNetworks from "@/composables/useNetworks";
+import { getNetworkUrl } from "@/utils/helpers";
+
+const { zkSyncNetworks } = useNetworks();
 
 const emit = defineEmits<{
   (eventName: "update:networkKey", networkKey?: string): void;
@@ -50,13 +54,9 @@ onMounted(() => {
   if (opsNetworks.includes(networkParam as string)) {
     const newQuery = { ...route.query, network: "ethereum" };
 
-    networkStore.selectedNetworkKey = "ethereum";
+    // networkStore.selectedNetworkKey = "ethereum";
     emit("update:networkKey", "ethereum");
-
-    router.replace({
-      path: route.path,
-      query: newQuery,
-    });
+    window.location.href = getNetworkUrl(zkSyncNetworks[0], route.fullPath);
   }
 });
 </script>
