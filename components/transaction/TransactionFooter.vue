@@ -38,11 +38,11 @@
       </CommonButton>
       <template v-if="connectorName === 'WalletConnect'">
         <CommonButtonUnderlineText :opened="!!walletName?.includes('Binance')"
-          >If you're using the Binance Web3 Wallet, please update it to the newest version.</CommonButtonUnderlineText
+          >If you're using the Binance Wallet, please update it to the newest version.</CommonButtonUnderlineText
         >
       </template>
 
-      <CommonButton v-else-if="walletName === 'Binance Web3'" disabled variant="primary" class="w-full">
+      <CommonButton v-else-if="walletName?.includes('Binance')" disabled variant="primary" class="w-full">
         The current version of your {{ walletName }} wallet may not support {{ eraNetwork.name }}
       </CommonButton>
     </div>
