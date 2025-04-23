@@ -3,7 +3,7 @@ type WalletEntry = { walletName: string; type: "injected" | "metaMask" | "wallet
 export const confirmedSupportedWallets: WalletEntry[] = [
   { walletName: "MetaMask", type: "metaMask" },
 
-  { walletName: "Binance Web3", type: "injected" },
+  { walletName: "Binance Wallet", type: "injected" },
   { walletName: "Injected", type: "injected" },
   { walletName: "OKX", type: "injected" },
   { walletName: "GateWallet", type: "injected" },
@@ -24,7 +24,7 @@ export const confirmedSupportedWallets: WalletEntry[] = [
 
 
   { walletName: "Binance DeFi", type: "walletConnect" },
-  { walletName: "Binance Web3", type: "walletConnect" },
+  { walletName: "Binance Wallet", type: "walletConnect" },
   { walletName: "Bitget", type: "walletConnect" },
   { walletName: "Trust", type: "walletConnect" },
   { walletName: "TokenPocket", type: "walletConnect" },

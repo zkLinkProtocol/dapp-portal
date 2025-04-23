@@ -104,8 +104,8 @@ export const useOnboardStore = defineStore("onboard", () => {
       injected({
         target() {
           return {
-            id: "Binance Web3 Wallet",
-            name: "Binance Web3 Wallet",
+            id: "Binance Wallet",
+            name: "Binance Wallet",
             provider: window.ethereum,
             icon: "/img-binance-web3-wallet.png",
           };
@@ -169,7 +169,7 @@ export const useOnboardStore = defineStore("onboard", () => {
     }
 
     if (walletName.value?.includes("Binance")) {
-      walletName.value = "Binance Web3 Wallet";
+      walletName.value = "Binance Wallet";
     }
 
     if (walletName.value && connector) {
