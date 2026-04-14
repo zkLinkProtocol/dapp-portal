@@ -6,6 +6,7 @@
       </CommonButtonLabel>
     </div>
     <div class="links-container">
+      <span v-if="isHomePage" class="deploy-badge" aria-label="Test deployment marker">TEST DEPLOY</span>
       <!-- <CommonButtonLabel as="a" href="https://zksync.io/terms" target="_blank" class="footer-link">
         Terms of Service
       </CommonButtonLabel>
@@ -18,6 +19,7 @@
 
 <script lang="ts" setup>
 import { computed } from "vue";
+import { useRoute } from "vue-router";
 
 import { storeToRefs } from "pinia";
 
@@ -25,6 +27,7 @@ import { useOnboardStore } from "@/store/onboard";
 import { useZkSyncProviderStore } from "@/store/zksync/provider";
 import { useZkSyncWalletStore } from "@/store/zksync/wallet";
 
+const route = useRoute();
 const eraWalletStore = useZkSyncWalletStore();
 const { isCorrectNetworkSet } = storeToRefs(eraWalletStore);
 const { isConnected, connectorName } = storeToRefs(useOnboardStore());
@@ -36,6 +39,8 @@ const addNetworkToWallet = async () => {
 const showAddNetworkButton = computed(() => {
   return isConnected.value && !isCorrectNetworkSet.value && connectorName.value !== "WalletConnect";
 });
+
+const isHomePage = computed(() => route.path === "/");
 </script>
 
 <style lang="scss" scoped>
@@ -44,6 +49,12 @@ const showAddNetworkButton = computed(() => {
 
   .links-container {
     @apply flex w-max flex-wrap items-center justify-center gap-x-8 gap-y-4 whitespace-nowrap;
+  }
+
+  .deploy-badge {
+    @apply rounded-full border border-neutral-700/40 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-neutral-500;
+    pointer-events: none;
+    user-select: none;
   }
 }
 </style>
